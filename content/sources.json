@@ -1,0 +1,9 @@
+{
+    "sources": [
+        "https://raw.githubusercontent.com/kraftink-cms/Market/master/catalogue.json"
+    ],
+    "repository": "kraftink-cms/Kraftink",
+    "releasesUrl": "https://github.com/kraftink-cms/Kraftink/releases",
+    "releasesApi": "https://api.github.com/repos/kraftink-cms/Kraftink/releases",
+    "schemaVersion": 1
+}

@@ -1,0 +1,104 @@
+{
+  "marque": "KraftInk",
+  "espace": "sRGB",
+  "couleurs": {
+    "orange": {
+      "hex": "#FFB38B",
+      "rgb": [
+        255,
+        179,
+        139
+      ]
+    },
+    "orange_sur_clair": {
+      "hex": "#C04F1C",
+      "rgb": [
+        192,
+        79,
+        28
+      ]
+    },
+    "nuit": {
+      "hex": "#151C28",
+      "rgb": [
+        21,
+        28,
+        40
+      ]
+    },
+    "papier": {
+      "hex": "#F3F5F8",
+      "rgb": [
+        243,
+        245,
+        248
+      ]
+    },
+    "encre": {
+      "hex": "#293446",
+      "rgb": [
+        41,
+        52,
+        70
+      ]
+    },
+    "blanc": {
+      "hex": "#FFFFFF",
+      "rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    "secondaire": {
+      "hex": "#657185",
+      "rgb": [
+        101,
+        113,
+        133
+      ]
+    },
+    "bordure": {
+      "hex": "#DFE4EB",
+      "rgb": [
+        223,
+        228,
+        235
+      ]
+    },
+    "orange_doux": {
+      "hex": "#FBEFE8",
+      "rgb": [
+        251,
+        239,
+        232
+      ]
+    },
+    "encre_sombre": {
+      "hex": "#E5EAF2",
+      "rgb": [
+        229,
+        234,
+        242
+      ]
+    }
+  },
+  "construction": {
+    "logo_viewbox": [
+      0,
+      0,
+      772,
+      256
+    ],
+    "hauteur_k": 192,
+    "hauteur_lettres": 130.5,
+    "rapport_k_lettres": 1.4713,
+    "ecart_k_r": 8,
+    "protection": 24
+  },
+  "icones": {
+    "fond": "#F3F5F8",
+    "signe": "#C04F1C",
+    "variante": "claire"
+  }
+}

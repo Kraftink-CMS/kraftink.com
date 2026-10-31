@@ -1,0 +1,133 @@
+name: Build the KraftInk website
+description: Validate and build the website for the shared release pipeline.
+inputs:
+  version:
+    description: Committed source version to build
+    required: true
+  output-directory:
+    description: Empty release asset directory outside the source checkout
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Validate the source and release paths
+      id: source
+      shell: bash
+      env:
+        BUILD_ACTION_PATH: ${{ github.action_path }}
+        RELEASE_VERSION: ${{ inputs.version }}
+        RELEASE_OUTPUT: ${{ inputs.output-directory }}
+      run: |
+        node --input-type=module <<'NODE'
+        import { appendFile, lstat, mkdir, readFile, readdir, realpath } from 'node:fs/promises';
+        import { isAbsolute, join, relative, resolve, sep } from 'node:path';
+        const source = await realpath(resolve(process.env.BUILD_ACTION_PATH, '../../..'));
+        const workspace = await realpath(process.env.GITHUB_WORKSPACE);
+        const version = process.env.RELEASE_VERSION;
+        if (Number(process.versions.node.split('.')[0]) < 24 || typeof version !== 'string' || version.length > 100 || !/^(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-dev)?$/.test(version) || !version.replace(/-dev$/, '').split('.').every((part) => Number.isSafeInteger(Number(part)))) {
+          throw new Error('Use Node.js 24 or newer and a stable or development source version.');
+        }
+        const packagePath = join(source, 'package.json');
+        const packageStat = await lstat(packagePath);
+        if (!packageStat.isFile() || packageStat.isSymbolicLink() || packageStat.size > 1048576) {
+          throw new Error('The source package.json must be a bounded regular file.');
+        }
+        const metadata = JSON.parse((await readFile(packagePath, 'utf8')).replace(/^\uFEFF/, ''));
+        if (metadata.version !== version || typeof metadata.packageManager !== 'string' || !/^pnpm@11\.[0-9]+\.[0-9]+$/.test(metadata.packageManager)) {
+          throw new Error('The requested version and pnpm configuration must match package.json.');
+        }
+        const packageFile = relative(workspace, packagePath);
+        const outputInput = process.env.RELEASE_OUTPUT;
+        if (isAbsolute(packageFile) || packageFile === '..' || packageFile.startsWith('..' + sep) || typeof outputInput !== 'string' || !isAbsolute(outputInput) || /[\x00-\x1f\x7f]/.test(source + packageFile + outputInput)) {
+          throw new Error('Use a source inside the workspace and an absolute release output path.');
+        }
+        if (resolve(outputInput) === source || resolve(outputInput).startsWith(source + sep)) {
+          throw new Error('The release output must stay outside the source.');
+        }
+        await mkdir(outputInput, { recursive: true });
+        const output = await realpath(outputInput);
+        const outputStat = await lstat(outputInput);
+        if (!outputStat.isDirectory() || outputStat.isSymbolicLink() || output === source || output.startsWith(source + sep) || (await readdir(output)).length !== 0) {
+          throw new Error('The release output must be an empty regular directory outside the source.');
+        }
+        await appendFile(process.env.GITHUB_OUTPUT, `root=${source}\npackage-file=${packageFile.split(sep).join('/')}\noutput-directory=${output}\nversion=${version}\n`);
+        NODE
+    - name: Install the declared pnpm version
+      uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+      with:
+        package_json_file: ${{ steps.source.outputs.package-file }}
+        run_install: false
+    - name: Install locked dependencies
+      shell: bash
+      working-directory: ${{ steps.source.outputs.root }}
+      run: pnpm install --frozen-lockfile
+    - name: Check TypeScript
+      shell: bash
+      working-directory: ${{ steps.source.outputs.root }}
+      run: pnpm check
+    - name: Lint the source
+      shell: bash
+      working-directory: ${{ steps.source.outputs.root }}
+      run: pnpm lint
+    - name: Check source formatting
+      shell: bash
+      working-directory: ${{ steps.source.outputs.root }}
+      run: pnpm format:check
+    - name: Run available tests
+      shell: bash
+      working-directory: ${{ steps.source.outputs.root }}
+      run: pnpm test
+    - name: Build the Worker and static assets
+      shell: bash
+      working-directory: ${{ steps.source.outputs.root }}
+      run: pnpm build
+    - name: Package the validated build
+      shell: bash
+      env:
+        SOURCE_ROOT: ${{ steps.source.outputs.root }}
+        RELEASE_OUTPUT: ${{ steps.source.outputs.output-directory }}
+        RELEASE_VERSION: ${{ steps.source.outputs.version }}
+      run: |
+        node --input-type=module <<'NODE'
+        import { execFileSync } from 'node:child_process';
+        import { lstat, readdir, realpath } from 'node:fs/promises';
+        import { join, sep } from 'node:path';
+        const source = await realpath(process.env.SOURCE_ROOT);
+        const output = await realpath(process.env.RELEASE_OUTPUT);
+        const outputStat = await lstat(process.env.RELEASE_OUTPUT);
+        if (!outputStat.isDirectory() || outputStat.isSymbolicLink() || output === source || output.startsWith(source + sep) || (await readdir(output)).length !== 0) {
+          throw new Error('The release output changed while building the website.');
+        }
+        async function regularTree(directory) {
+          const stat = await lstat(directory);
+          if (!stat.isDirectory() || stat.isSymbolicLink()) {
+            throw new Error('Compiled assets must contain only regular directories and files.');
+          }
+          for (const entry of await readdir(directory, { withFileTypes: true })) {
+            const path = join(directory, entry.name);
+            if (entry.isDirectory()) {
+              await regularTree(path);
+            } else if (!entry.isFile() || entry.isSymbolicLink()) {
+              throw new Error('Compiled assets must contain only regular directories and files.');
+            }
+          }
+        }
+        const directory = join(source, 'dist');
+        await regularTree(join(directory, 'client'));
+        await regularTree(join(directory, 'kraftink'));
+        for (const path of ['client/index.html', 'kraftink/wrangler.json', 'kraftink/index.js']) {
+          if (!(await lstat(join(directory, path))).isFile()) {
+            throw new Error('The compiled website or Worker entry point is missing.');
+          }
+        }
+        const archive = join(output, `kraftink-site-${process.env.RELEASE_VERSION}.tar.gz`);
+        execFileSync('tar', ['--create', '--gzip', '--file', archive, '--directory', directory, '--exclude=.env*', '--exclude=.dev.vars*', 'client', 'kraftink'], { stdio: 'inherit', timeout: 60000 });
+        const archiveStat = await lstat(archive);
+        if (!archiveStat.isFile() || archiveStat.size < 1 || archiveStat.size > 536870912) {
+          throw new Error('The website archive exceeds the shared release asset limit.');
+        }
+        const entries = execFileSync('tar', ['--list', '--gzip', '--file', archive], { encoding: 'utf8', timeout: 60000 });
+        if (entries.split(/\r?\n/).some((entry) => /(?:^|\/)\.(?:env|dev\.vars)/.test(entry))) {
+          throw new Error('Local environment files must never enter a website release.');
+        }
+        NODE
