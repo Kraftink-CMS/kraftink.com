@@ -118,13 +118,13 @@ export default {
                     'Pending two-step verification setup expires after ten minutes. A verification challenge and its temporary cookie expire after five minutes. The authenticator secret is kept while this protection is enabled. Recovery-code records, including used codes, are kept until codes are regenerated or two-step verification is disabled.',
                     'Temporary sign-in and security data is deleted after expiry. Email verification, email change and password reset tokens are kept for about twenty-four additional hours after expiry, without remaining usable.',
                     'Account information, purchase history, access rights and moderation or security records are kept while needed to provide the account and purchased rights, meet legal obligations, investigate incidents or handle disputes. A request to erase or restrict data is reviewed in light of those purposes and the applicable rights and obligations. Withdrawing a resource does not erase its purchase history.',
-                    'The language preference stored in your browser remains until it is changed or you clear the website’s local storage. Our providers apply their own storage periods to the data they process for their services.',
+                    'While signed out, your language preference is kept in a cookie for one year. When signed in, it is kept in your account until you change it or delete your account. Our providers apply their own storage periods to the data they process for their services.',
                 ],
             },
             {
                 title: 'Cookies and local storage',
                 paragraphs: [
-                    'KraftInk uses a session cookie for sign-in and temporary cookies to secure GitHub sign-in and two-step verification. Your language preference is saved in local storage. These features support the service and your choices. The site does not add audience analytics or advertising trackers.',
+                    'KraftInk uses a session cookie for sign-in and temporary cookies to secure GitHub sign-in and two-step verification. While signed out, a cookie saves your language choice. When signed in, this choice is saved in your account. These features support the service and your choices. The site does not add audience analytics or advertising trackers.',
                 ],
             },
             {

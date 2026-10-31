@@ -6,7 +6,7 @@ import { pageMetadata, localizedPagePath } from '../src/lib/metadata';
 import type { PageData, PublicPageData } from '../src/lib/rendering';
 import type { Guide } from '../src/lib/documentation';
 import { isLocale, localeRegistry, localizedPathname } from '../shared/locales';
-import { fail, requestLocale, sessionCookieName, type AppContext } from './http';
+import { fail, sessionCookieName, type AppContext } from './http';
 import { getCookie } from 'hono/cookie';
 import { resolveSession, sessionData } from './middleware/authentication';
 import { hasRole } from '../shared/auth';
@@ -123,7 +123,7 @@ function responseHeaders(indexable: boolean, status: number, personalized: boole
         'Cache-Control':
             !personalized && indexable && status === 200 ? 'public, max-age=0, must-revalidate' : 'private, no-store',
         'CDN-Cache-Control': 'no-store',
-        'Vary': 'Cookie',
+        'Vary': 'Cookie, Accept-Language',
         'X-Content-Type-Options': 'nosniff',
         'Referrer-Policy': 'same-origin',
         ...(status === 503 ? { 'Retry-After': '30' } : {}),
@@ -151,7 +151,9 @@ function responseHeaders(indexable: boolean, status: number, personalized: boole
 
 export async function renderPage(c: AppContext): Promise<Response> {
     const url = new URL(c.req.url);
-    const localePath = localizedPathname(url.pathname === '/index.html' ? '/' : url.pathname, requestLocale(c))
+    await resolveSession(c);
+    const session = sessionData(c);
+    const localePath = localizedPathname(url.pathname === '/index.html' ? '/' : url.pathname, session.preferredLocale)
         .replace(/\/{2,}/g, '/')
         .replace(/\/$/, '');
     if (url.pathname !== localePath) {
@@ -159,7 +161,7 @@ export async function renderPage(c: AppContext): Promise<Response> {
             status: 302,
             headers: {
                 Location: new URL(`${localePath}${url.search}`, c.env.APP_ORIGIN).href,
-                Vary: 'Accept-Language',
+                Vary: 'Cookie, Accept-Language',
                 'Cache-Control': 'private, no-store',
             },
         });
@@ -169,8 +171,6 @@ export async function renderPage(c: AppContext): Promise<Response> {
         return new Response(null, { status: 404 });
     }
     const relative = localePath.split('/').slice(2).join('/');
-    await resolveSession(c);
-    const session = sessionData(c);
     const personalized = Boolean(session.user || getCookie(c, sessionCookieName(c)) || c.req.header('Authorization'));
     const protectedPage = Object.hasOwn(protectedPages, relative);
     if (protectedPage && !session.user) {

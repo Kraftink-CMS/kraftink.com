@@ -1,36 +1,24 @@
 import { createContext, useCallback, useContext, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { fallbackLocale, localizedPathname, selectLocale } from '../../shared/locales';
+import { fallbackLocale, localizedPathname } from '../../shared/locales';
 import { siteMessages, type SiteCopy } from './translations';
 
 export type Locale = string;
 
-export function preferredLocale(): Locale {
-    if (typeof window === 'undefined') {
-        return fallbackLocale;
-    }
-    let saved: string | null = null;
-    try {
-        saved = localStorage.getItem('kraftink.locale');
-    } catch {
-        saved = null;
-    }
-    return selectLocale([...(saved ? [saved] : []), ...navigator.languages, navigator.language]);
-}
-
-const LocaleContext = createContext<{ locale: Locale; path: (to: string) => string }>({
+const LocaleContext = createContext<{ locale: Locale; preferred: Locale; path: (to: string) => string }>({
     locale: fallbackLocale,
+    preferred: fallbackLocale,
     path: (to) => `/${fallbackLocale}${to === '/' ? '' : to.startsWith('/') ? to : `/${to}`}`,
 });
 
-export function LocaleProvider({ children }: { children: ReactNode }): ReactNode {
+export function LocaleProvider({ preferred, children }: { preferred: Locale; children: ReactNode }): ReactNode {
     const location = useLocation();
-    const locale = localizedPathname(location.pathname, preferredLocale()).split('/')[1];
+    const locale = localizedPathname(location.pathname, preferred).split('/')[1];
     const path = useCallback(
         (to: string) => `/${locale}${to === '/' ? '' : to.startsWith('/') ? to : `/${to}`}`,
         [locale],
     );
-    return <LocaleContext.Provider value={{ locale, path }}>{children}</LocaleContext.Provider>;
+    return <LocaleContext.Provider value={{ locale, preferred, path }}>{children}</LocaleContext.Provider>;
 }
 
 export function useLocale() {

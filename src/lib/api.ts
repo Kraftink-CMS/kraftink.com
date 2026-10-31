@@ -1,4 +1,4 @@
-import { resolveLocale } from '../../shared/locales';
+import { selectLocale } from '../../shared/locales';
 
 let csrfToken = '';
 
@@ -29,7 +29,7 @@ export async function api<T = Record<string, unknown>>(path: string, options: Ap
     const headers: Record<string, string> = {
         ...options.headers,
         Accept: 'application/json',
-        'Accept-Language': resolveLocale(document.documentElement.lang),
+        'Accept-Language': selectLocale([window.location.pathname.split('/')[1], document.documentElement.lang]),
     };
     if (csrfToken) {
         headers['X-CSRF-Token'] = csrfToken;

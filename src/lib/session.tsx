@@ -7,6 +7,8 @@ import {
     useState,
     type ReactNode,
     type FormEvent,
+    type Dispatch,
+    type SetStateAction,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { SessionData } from '../../shared/auth';
@@ -22,14 +24,22 @@ interface SessionContextValue extends SessionData {
     confirming: boolean;
     sessionError: unknown;
     refresh: () => Promise<void>;
+    changeLocale: (locale: string) => Promise<void>;
     logout: () => Promise<void>;
     sensitive: (purpose: string) => Promise<string>;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
-export function SessionProvider({ initial, children }: { initial: SessionData; children: ReactNode }) {
-    const [session, setSession] = useState(initial);
+export function SessionProvider({
+    session,
+    onSessionChange: setSession,
+    children,
+}: {
+    session: SessionData;
+    onSessionChange: Dispatch<SetStateAction<SessionData>>;
+    children: ReactNode;
+}) {
     const [sessionError, setSessionError] = useState<unknown>(null);
     const [pending, setPending] = useState<{
         purpose: string;
@@ -59,7 +69,14 @@ export function SessionProvider({ initial, children }: { initial: SessionData; c
             setSessionError(failure);
             throw failure;
         }
-    }, []);
+    }, [setSession]);
+
+    const changeLocale = async (locale: string) => {
+        const data = await api<SessionData>('/api/locale', { method: 'PUT', json: { locale } });
+        setCsrfToken(data.csrfToken ?? '');
+        setSession(data);
+        setSessionError(null);
+    };
 
     useEffect(() => {
         function restore(event: PageTransitionEvent) {
@@ -164,7 +181,7 @@ export function SessionProvider({ initial, children }: { initial: SessionData; c
 
     return (
         <SessionContext.Provider
-            value={{ ...session, sessionError, confirming: Boolean(pending), refresh, logout, sensitive }}
+            value={{ ...session, sessionError, confirming: Boolean(pending), refresh, changeLocale, logout, sensitive }}
         >
             {children}
             <Modal

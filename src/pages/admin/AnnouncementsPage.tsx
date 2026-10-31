@@ -5,7 +5,7 @@ import { localized, useLocale } from '../../lib/i18n';
 import { useSession } from '../../lib/session';
 import { announcementMessages } from '../../lib/translations';
 import { fallbackLocale, localeRegistry } from '../../../shared/locales';
-import { Card, Empty, ErrorNotice, Loading, PageTitle } from '../../components/UI';
+import { Card, Empty, ErrorNotice, Loading, Skeleton, PageTitle } from '../../components/UI';
 import { SensitiveButton } from '../../components/auth/SensitiveButton';
 import { externalLinkRel } from '../../../shared/links';
 
@@ -295,7 +295,13 @@ export function AnnouncementsPage() {
                 </form>
             )}
             {!announcements ? (
-                <Loading />
+                <div className="vstack gap-4">
+                    {[0, 1].map((index) => (
+                        <Card key={index} title={<Skeleton width="45%" height="1.25rem" />}>
+                            <Loading />
+                        </Card>
+                    ))}
+                </div>
             ) : announcements.length === 0 ? (
                 <Card>
                     <Empty>{text.empty}</Empty>

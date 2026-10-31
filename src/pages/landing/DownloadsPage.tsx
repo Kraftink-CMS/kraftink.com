@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Select } from '../../components/Select';
-import { ErrorNotice, PageTitle } from '../../components/UI';
+import { ErrorNotice, FormLoading, Loading, Skeleton, PageTitle } from '../../components/UI';
 import { api } from '../../lib/api';
 import { useLocale, useSiteCopy } from '../../lib/i18n';
-import { commonMessages, publicMessages } from '../../lib/translations';
+import { publicMessages } from '../../lib/translations';
 import { usePublicPageData } from '../../lib/rendering';
 import {
     installationReleases,
@@ -180,13 +180,19 @@ export function DownloadsPage() {
                                         </div>
                                     </div>
                                 </>
+                            ) : releases === null ? (
+                                <Loading>
+                                    <div className="vstack gap-4">
+                                        <FormLoading fields={2} />
+                                        <Skeleton width="60%" height="2rem" />
+                                        <Skeleton />
+                                        <Skeleton width="75%" />
+                                        <Skeleton width="12rem" height="2.75rem" />
+                                    </div>
+                                </Loading>
                             ) : (
                                 <>
-                                    <p className="text-body-secondary">
-                                        {releases === null
-                                            ? commonMessages[locale].loading
-                                            : publicMessages[locale].noReleases}
-                                    </p>
+                                    <p className="text-body-secondary">{publicMessages[locale].noReleases}</p>
                                     <p>{copy.downloads.includes}</p>
                                     <p className="download-meta">{copy.downloads.platform}</p>
                                 </>

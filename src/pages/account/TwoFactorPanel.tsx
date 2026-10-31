@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Card, ErrorNotice, Loading } from '../../components/UI';
+import { Card, ErrorNotice, Loading, Skeleton } from '../../components/UI';
 import { SensitiveButton } from '../../components/auth/SensitiveButton';
 import { api } from '../../lib/api';
 import { useLocale } from '../../lib/i18n';
@@ -176,7 +176,7 @@ export function TwoFactorPanel() {
 
     if (loading) {
         return (
-            <Card title={copy.title}>
+            <Card title={copy.title} footer={<Skeleton width="11rem" height="2.625rem" />}>
                 <Loading />
             </Card>
         );
@@ -274,7 +274,9 @@ export function TwoFactorPanel() {
                             ) : qrFailed ? (
                                 <p className="text-body-secondary small mb-0">{copy.qrUnavailable}</p>
                             ) : (
-                                <Loading />
+                                <Loading>
+                                    <Skeleton width={224} height={224} />
+                                </Loading>
                             )}
                         </div>
                         <div className="col-md">

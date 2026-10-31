@@ -8,6 +8,8 @@ import { normalizeIp } from '../../shared/ip';
 import { audit, requireRole, requireSensitive, requireUser, requireVerifiedUser } from '../security/authorization';
 import { rateLimit } from '../security/abuse';
 import { defaultUploadLimit } from '../upload-limits';
+import { isLocale, localeCookieName } from '../../shared/locales';
+import { sessionData } from '../middleware/authentication';
 import {
     browserCookieName,
     normalizeEmail,
@@ -33,9 +35,31 @@ import {
     listUsers,
     prepareUserUpdate,
     applyUserUpdate,
+    setUserLocale,
 } from '../services/identity/accounts';
 
 const routes = new Hono<AppEnv>();
+
+routes.put('/locale', async (c) => {
+    const body = await jsonBody(c);
+    if (!isLocale(body.locale) || Object.keys(body).some((key) => key !== 'locale')) {
+        fail(422, 'invalid_input');
+    }
+    const user = c.get('user');
+    if (user) {
+        await setUserLocale(c.env.DB, user.id, body.locale);
+        c.set('user', { ...user, locale: body.locale });
+    } else {
+        setCookie(c, localeCookieName, body.locale, {
+            path: '/',
+            maxAge: 365 * 86400,
+            httpOnly: true,
+            secure: new URL(c.env.APP_ORIGIN).protocol === 'https:',
+            sameSite: 'Lax',
+        });
+    }
+    return c.json({ ...sessionData(c), preferredLocale: body.locale });
+});
 
 async function authenticationChanged(c: AppContext, userId: string, revision: string | null) {
     const result = await rotateSession(c.env, userId, c.get('session')!.id, revision);

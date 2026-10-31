@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { useLocale } from '../../lib/i18n';
-import { Card, Empty, ErrorNotice, Loading, StatusBadge } from '../../components/UI';
+import { Card, Empty, ErrorNotice, Loading, Skeleton, TableLoading, StatusBadge } from '../../components/UI';
 import { workspace } from '../../lib/translations';
 
 import { ArchiveSubmission } from './ArchiveSubmission';
@@ -58,7 +58,31 @@ export function ResourceEditor({
     }
 
     if (loading) {
-        return <Loading />;
+        return (
+            <div className="vstack gap-4">
+                <Card title={t.publishVersion} footer={<Skeleton width="12rem" height="2.625rem" />}>
+                    <p>{t.manifestOnlyHint}</p>
+                    <Loading>
+                        <div className="row g-3 mb-3">
+                            {[
+                                [t.zip, 'col-md-8'],
+                                [t.price, 'col-md-4'],
+                            ].map(([label, className]) => (
+                                <div className={className} key={label}>
+                                    <div className="form-label">{label}</div>
+                                    <Skeleton height="2.625rem" className="mb-2" />
+                                    <Skeleton width="85%" height="0.875rem" />
+                                </div>
+                            ))}
+                        </div>
+                    </Loading>
+                    <p className="small text-body-secondary mb-0">{t.localPreviewHint}</p>
+                </Card>
+                <Card title={t.versionHistory}>
+                    <TableLoading columns={[t.version, t.status, t.submittedAt, t.reviewNote, t.actions]} />
+                </Card>
+            </div>
+        );
     }
     const pending = versions.some((version) => version.status === 'pending');
     const available = resource && ['draft', 'published'].includes(resource.status);

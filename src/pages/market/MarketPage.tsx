@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Select } from '../../components/Select';
 import { ResourceCard } from '../../components/market/ResourceCard';
-import { Empty, ErrorNotice, Loading, PageTitle } from '../../components/UI';
+import { CardsLoading, Empty, ErrorNotice, PageTitle } from '../../components/UI';
 import { useCatalogue } from '../../hooks/useCatalogue';
 import { localized, useLocale } from '../../lib/i18n';
 import { commonMessages, publicMessages } from '../../lib/translations';
@@ -77,7 +77,7 @@ export function MarketPage() {
             <ErrorNotice error={error} />
             {data?.state !== 'fresh' && data && <div className="alert alert-warning">{text.stale}</div>}
             {!data && !error ? (
-                <Loading />
+                <CardsLoading image />
             ) : resources.length ? (
                 <div className="row g-4">
                     {resources.map((resource) => (

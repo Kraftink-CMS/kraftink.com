@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { Card, Empty, ErrorNotice, Loading, PageTitle } from '../../components/UI';
+import { Card, Empty, ErrorNotice, Loading, Skeleton, PageTitle } from '../../components/UI';
 import { useCatalogue } from '../../hooks/useCatalogue';
 import { api } from '../../lib/api';
 import { localized, useLocale } from '../../lib/i18n';
@@ -40,7 +40,36 @@ export function ResourcePage() {
         }
     }
     if (!data) {
-        return error ? <ErrorNotice error={error} /> : <Loading />;
+        return error ? (
+            <ErrorNotice error={error} />
+        ) : (
+            <Loading>
+                <Skeleton width="10rem" className="mb-4" />
+                <Skeleton width="50%" height="2rem" className="mb-3" />
+                <Skeleton width="75%" className="mb-4" />
+                <div className="row g-4">
+                    <div className="col-lg-8">
+                        <Card title={text.compatibility}>
+                            <dl className="metadata-list">
+                                {[common.author, common.version, text.cms, text.php].map((label) => (
+                                    <div key={label}>
+                                        <dt>{label}</dt>
+                                        <dd>
+                                            <Skeleton height="1.5rem" width="65%" />
+                                        </dd>
+                                    </div>
+                                ))}
+                            </dl>
+                        </Card>
+                    </div>
+                    <div className="col-lg-4">
+                        <Card title={<Skeleton width="40%" height="1.25rem" />}>
+                            <Skeleton height="2.75rem" />
+                        </Card>
+                    </div>
+                </div>
+            </Loading>
+        );
     }
     if (!resource) {
         return (

@@ -16,12 +16,14 @@ export interface SessionData {
     csrfToken: string | null;
     oauthProviders: OAuthProvider[];
     turnstileSiteKey: string | null;
+    preferredLocale: string;
 }
 
 export interface User {
     id: string;
     email: string;
     username: string;
+    locale: string | null;
     role: Role | null;
     emailVerified: boolean;
     banned: boolean;

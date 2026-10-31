@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ErrorNotice } from '../../components/UI';
+import { CardsLoading, ErrorNotice } from '../../components/UI';
 import { Screenshot } from '../../components/landing/Screenshot';
 import { Compatibility } from '../../components/landing/Compatibility';
 import { ResourceCard } from '../../components/market/ResourceCard';
@@ -106,7 +106,7 @@ export function HomePage() {
                 </div>
                 <div data-catalogue-state aria-live="polite">
                     <ErrorNotice error={error} />
-                    {!data && !error && <p className="text-body-secondary">{copy.market.loading}</p>}
+                    {!data && !error && <CardsLoading image />}
                     {data && resources.length === 0 && (
                         <p className="text-body-secondary">{copy.market.catalogueEmpty}</p>
                     )}

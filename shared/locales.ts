@@ -5,6 +5,7 @@ export interface LocaleDefinition {
 }
 
 export const fallbackLocale = 'en';
+export const localeCookieName = 'kraftink_locale';
 export const localeRegistry: Record<string, LocaleDefinition> = {
     fr: { name: 'French', nativeName: 'Français', direction: 'ltr' },
     en: { name: 'English', nativeName: 'English', direction: 'ltr' },
@@ -30,7 +31,7 @@ export function resolveLocale(value: string): string {
     return matchLocale(value) ?? fallbackLocale;
 }
 
-export function selectLocale(values: readonly string[]): string {
+export function selectLocale(values: readonly unknown[]): string {
     for (const value of values) {
         const locale = matchLocale(value);
         if (locale !== null) {
@@ -45,7 +46,7 @@ export function localizedPathname(pathname: string, preferred: string): string {
     const locale = matchLocale(requested);
     const suffix = pathname.slice(requested.length + 1);
     if (locale !== null || (suffix.split('/').some(Boolean) && /^[a-z]{2,3}(?:[-_][a-z0-9]{2,8})*$/i.test(requested))) {
-        return `/${locale ?? fallbackLocale}${suffix}`;
+        return `/${locale ?? resolveLocale(preferred)}${suffix}`;
     }
     return `/${resolveLocale(preferred)}${pathname === '/' ? '' : pathname}`;
 }

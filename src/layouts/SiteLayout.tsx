@@ -9,16 +9,19 @@ import { LocaleRedirect } from '../routing/LocaleRedirect';
 import { hasRole } from '../../shared/auth';
 import { PageMetadata } from '../components/PageMetadata';
 import { SocialLinks } from '../components/SocialLinks';
+import { ErrorNotice } from '../components/UI';
 
 export function SiteLayout() {
     const { locale, path } = useLocale();
-    const { user, sessionError, logout } = useSession();
+    const { user, sessionError, logout, changeLocale } = useSession();
     const text = commonMessages[locale];
     const legal = legalMessages[locale];
     const copy = useSiteCopy();
     const location = useLocation();
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [localeSaving, setLocaleSaving] = useState(false);
+    const [localeError, setLocaleError] = useState<unknown>(null);
     const route = useParams();
     const relative = location.pathname.split('/').slice(2).join('/');
     const workspace = /^(account|creator|moderation|admin)(\/|$)/.test(relative);
@@ -27,9 +30,6 @@ export function SiteLayout() {
     useEffect(() => {
         document.documentElement.lang = locale;
         document.documentElement.dir = localeRegistry[locale]?.direction ?? 'ltr';
-        try {
-            localStorage.setItem('kraftink.locale', locale);
-        } catch {}
     }, [locale]);
 
     useEffect(() => {
@@ -109,12 +109,20 @@ export function SiteLayout() {
                                     id="site-language"
                                     className="form-select site-language-select"
                                     value={locale}
+                                    disabled={localeSaving}
                                     onChange={(event) => {
                                         const next = event.target.value;
-                                        if (isLocale(next)) {
-                                            navigate(
-                                                `/${next}${relative ? '/' + relative : ''}${location.search}${location.hash}`,
-                                            );
+                                        if (isLocale(next) && next !== locale) {
+                                            setLocaleSaving(true);
+                                            setLocaleError(null);
+                                            void changeLocale(next)
+                                                .then(() =>
+                                                    navigate(
+                                                        `/${next}${relative ? '/' + relative : ''}${location.search}${location.hash}`,
+                                                    ),
+                                                )
+                                                .catch(setLocaleError)
+                                                .finally(() => setLocaleSaving(false));
                                         }
                                     }}
                                 >
@@ -158,6 +166,11 @@ export function SiteLayout() {
                         </div>
                     </div>
                 </nav>
+                {Boolean(localeError) && (
+                    <div className="container">
+                        <ErrorNotice error={localeError} />
+                    </div>
+                )}
             </header>
             <main
                 id="main-content"

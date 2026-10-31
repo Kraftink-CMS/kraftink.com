@@ -119,13 +119,13 @@ export default {
                     'Une configuration de double authentification en attente expire après dix minutes. Un contrôle de vérification et son cookie temporaire expirent après cinq minutes. Le secret de l’application est conservé tant que cette protection est activée. Les informations des codes de secours, y compris ceux déjà utilisés, sont conservées jusqu’à leur régénération ou à la désactivation de la double authentification.',
                     'Les données temporaires de connexion et de sécurité sont effacées après leur expiration. Les jetons des liens de vérification, de changement d’adresse email et de réinitialisation du mot de passe sont conservés environ vingt-quatre heures supplémentaires après leur expiration, sans pouvoir être réutilisés.',
                     'Les informations de compte, l’historique des achats, les droits d’accès et les traces de modération ou de sécurité sont conservés tant qu’ils sont nécessaires pour fournir le compte et les droits achetés, respecter des obligations légales, étudier un incident ou traiter un litige. Une demande d’effacement ou de limitation est examinée selon ces finalités et les droits et obligations applicables. Le retrait d’une ressource n’efface pas son historique d’achat.',
-                    'La préférence de langue enregistrée dans votre navigateur reste présente jusqu’à sa modification ou à l’effacement du stockage local du site. Les prestataires appliquent leurs propres durées aux données traitées pour leurs services.',
+                    'Sans connexion, la préférence de langue est conservée un an dans un cookie. Lorsque vous êtes connecté, elle est conservée dans votre compte jusqu’à sa modification ou à la suppression du compte. Les prestataires appliquent leurs propres durées aux données traitées pour leurs services.',
                 ],
             },
             {
                 title: 'Cookies et stockage local',
                 paragraphs: [
-                    'KraftInk utilise un cookie de session pour la connexion et des cookies temporaires pour sécuriser la connexion GitHub et la double authentification. La préférence de langue est enregistrée dans le stockage local. Ces fonctions servent au fonctionnement du service et à vos choix. Le site n’ajoute pas de mesure d’audience ni de traceur publicitaire.',
+                    'KraftInk utilise un cookie de session pour la connexion et des cookies temporaires pour sécuriser la connexion GitHub et la double authentification. Sans connexion, un cookie conserve votre choix de langue. Lorsque vous êtes connecté, ce choix est enregistré dans votre compte. Ces fonctions servent au fonctionnement du service et à vos choix. Le site n’ajoute pas de mesure d’audience ni de traceur publicitaire.',
                 ],
             },
             {
