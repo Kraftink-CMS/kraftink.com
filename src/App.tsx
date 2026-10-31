@@ -19,6 +19,18 @@ import { ModerationPage } from './pages/moderation/ModerationPage';
 import { AnnouncementsPage } from './pages/admin/AnnouncementsPage';
 import { StatisticsPage } from './pages/admin/StatisticsPage';
 import { LegalPage } from './pages/legal/LegalPage';
+import { protectedPages } from '../shared/routes';
+import type { ReactNode } from 'react';
+
+const privatePages = {
+    'account': <AccountPage />,
+    'creator': <CreatorPage />,
+    'moderation': <ModerationPage />,
+    'admin/users': <AdminUsersPage />,
+    'admin/statistics': <StatisticsPage />,
+    'admin/announcements': <AnnouncementsPage />,
+    'checkout/success': <CheckoutReturnPage />,
+} satisfies Record<keyof typeof protectedPages, ReactNode>;
 
 export function App() {
     return (
@@ -39,62 +51,17 @@ export function App() {
                 <Route path="forgot-password" element={<AuthPage mode="forgot" />} />
                 <Route path="reset-password" element={<AuthPage mode="reset" />} />
                 <Route path="verify-email" element={<AuthPage mode="verify" />} />
-                <Route
-                    path="account"
-                    element={
-                        <RequireUser>
-                            <AccountPage />
-                        </RequireUser>
-                    }
-                />
-                <Route
-                    path="creator"
-                    element={
-                        <RequireUser role="creator">
-                            <CreatorPage />
-                        </RequireUser>
-                    }
-                />
-                <Route
-                    path="moderation"
-                    element={
-                        <RequireUser role="moderator">
-                            <ModerationPage />
-                        </RequireUser>
-                    }
-                />
-                <Route
-                    path="admin/statistics"
-                    element={
-                        <RequireUser role="admin">
-                            <StatisticsPage />
-                        </RequireUser>
-                    }
-                />
-                <Route
-                    path="admin/users"
-                    element={
-                        <RequireUser role="admin">
-                            <AdminUsersPage />
-                        </RequireUser>
-                    }
-                />
-                <Route
-                    path="admin/announcements"
-                    element={
-                        <RequireUser role="admin">
-                            <AnnouncementsPage />
-                        </RequireUser>
-                    }
-                />
-                <Route
-                    path="checkout/success"
-                    element={
-                        <RequireUser>
-                            <CheckoutReturnPage />
-                        </RequireUser>
-                    }
-                />
+                {Object.entries(protectedPages).map(([route, role]) => (
+                    <Route
+                        key={route}
+                        path={route}
+                        element={
+                            <RequireUser role={role ?? undefined}>
+                                {privatePages[route as keyof typeof privatePages]}
+                            </RequireUser>
+                        }
+                    />
+                ))}
                 <Route path="*" element={<NotFoundPage />} />
             </Route>
             <Route path="*" element={<LocaleRedirect />} />

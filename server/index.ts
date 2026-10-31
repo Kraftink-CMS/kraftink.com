@@ -47,6 +47,8 @@ app.get('*', (c) => {
 
 app.notFound((c) => c.json({ error: { code: 'not_found' } }, 404));
 app.onError((error, c) => {
+    c.header('Cache-Control', 'private, no-store');
+    c.header('CDN-Cache-Control', 'no-store');
     if (error instanceof HTTPException) {
         const response = error.getResponse();
         if (response.headers.get('Content-Type')?.includes('application/json')) {

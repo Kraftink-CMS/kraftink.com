@@ -53,7 +53,7 @@ function proposal(review: Review): Proposal {
 export function ModerationPage() {
     const { locale } = useLocale();
     const t = workspace[locale];
-    const { user, loading: sessionLoading, sensitive } = useSession();
+    const { user, sensitive } = useSession();
     const [reviews, setReviews] = useState<Review[]>([]);
     const [resources, setResources] = useState<ManagedResource[]>([]);
     const [reviewCursor, setReviewCursor] = useState<string | null>(null);
@@ -98,12 +98,12 @@ export function ModerationPage() {
     }, [submittedQuery]);
 
     useEffect(() => {
-        if (!sessionLoading && allowed) {
+        if (allowed) {
             void reload();
-        } else if (!sessionLoading) {
+        } else {
             setLoading(false);
         }
-    }, [sessionLoading, user?.id, allowed, reload]);
+    }, [user?.id, allowed, reload]);
 
     async function loadMore(kind: 'reviews' | 'resources') {
         const cursor = kind === 'reviews' ? reviewCursor : resourceCursor;
@@ -228,9 +228,6 @@ export function ModerationPage() {
         }
     }
 
-    if (sessionLoading) {
-        return <Loading />;
-    }
     const payload = selected ? proposal(selected) : null;
     return (
         <>

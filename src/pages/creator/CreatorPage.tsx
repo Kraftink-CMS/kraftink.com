@@ -15,7 +15,7 @@ import { hasRole } from '../../../shared/auth';
 export function CreatorPage() {
     const { locale } = useLocale();
     const t = workspace[locale];
-    const { user, loading: sessionLoading, sensitive } = useSession();
+    const { user, sensitive } = useSession();
     const [tab, setTab] = useState<'resources' | 'payments' | 'sales'>('resources');
     const [resources, setResources] = useState<Resource[]>([]);
     const [sales, setSales] = useState<Sale[]>([]);
@@ -84,12 +84,12 @@ export function CreatorPage() {
     }, [reloadResources, administrator]);
 
     useEffect(() => {
-        if (!sessionLoading && allowed) {
+        if (allowed) {
             void reload();
-        } else if (!sessionLoading) {
+        } else {
             setLoading(false);
         }
-    }, [sessionLoading, user?.id, allowed, reload]);
+    }, [user?.id, allowed, reload]);
 
     useEffect(() => {
         function restore(event: PageTransitionEvent) {
@@ -141,9 +141,6 @@ export function CreatorPage() {
         }
     }
 
-    if (sessionLoading) {
-        return <Loading />;
-    }
     return (
         <>
             <PageTitle title={t.creatorTitle} description={t.creatorDescription}>

@@ -1,7 +1,9 @@
 import type { MiddlewareHandler } from 'hono';
 import { getCookie } from 'hono/cookie';
 import type { AppEnv, Session } from '../types';
-import { fail, sessionCookieName } from '../http';
+import { fail, sessionCookieName, type AppContext } from '../http';
+import type { SessionData } from '../../shared/auth';
+import { availableOAuthProviders } from '../services/identity/authentication';
 import { now } from '../lib/time';
 import { constantTimeEqual, sha256 } from '../security/crypto';
 import { findSession, loadUser } from '../services/identity/sessions';
@@ -9,7 +11,7 @@ import { database } from '../database';
 import { users } from '../models';
 import { eq } from 'drizzle-orm';
 
-export const authMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
+export async function resolveSession(c: AppContext): Promise<void> {
     if (c.env.ENVIRONMENT === 'production' && new URL(c.env.APP_ORIGIN).protocol !== 'https:') {
         fail(503, 'secure_origin_required');
     }
@@ -43,6 +45,19 @@ export const authMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
             }
         }
     }
+}
+
+export function sessionData(c: AppContext): SessionData {
+    return {
+        user: c.get('user'),
+        csrfToken: c.get('session')?.csrfToken ?? null,
+        oauthProviders: availableOAuthProviders(c.env),
+        turnstileSiteKey: c.env.TURNSTILE_SITE_KEY ?? null,
+    };
+}
+
+export const authMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
+    await resolveSession(c);
     if (
         !['GET', 'HEAD', 'OPTIONS'].includes(c.req.method) &&
         !['/api/stripe/webhook', '/api/internal/market/refresh'].includes(c.req.path)

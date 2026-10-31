@@ -3,10 +3,14 @@ import { StaticRouter } from 'react-router-dom';
 import { AppProviders } from '../src/AppProviders';
 import { MetadataTags } from '../src/components/PageMetadata';
 import { pageMetadata, localizedPagePath } from '../src/lib/metadata';
-import type { PublicPageData } from '../src/lib/rendering';
+import type { PageData, PublicPageData } from '../src/lib/rendering';
 import type { Guide } from '../src/lib/documentation';
 import { isLocale, localeRegistry, localizedPathname } from '../shared/locales';
-import { requestLocale, type AppContext } from './http';
+import { fail, requestLocale, sessionCookieName, type AppContext } from './http';
+import { getCookie } from 'hono/cookie';
+import { resolveSession, sessionData } from './middleware/authentication';
+import { hasRole } from '../shared/auth';
+import { protectedPages } from '../shared/routes';
 import type { Env } from './types';
 import { cachedMetadata, mergedCatalogue } from './services/market/catalogue';
 
@@ -76,14 +80,20 @@ async function guides(env: Env, locale: string, signal: AbortSignal): Promise<Gu
     return value;
 }
 
-async function publicData(env: Env, locale: string, relative: string): Promise<PublicPageData> {
+async function publicData(env: Env, locale: string, relative: string, userId: string | null): Promise<PublicPageData> {
     const data: PublicPageData = { locale, origin: new URL(env.APP_ORIGIN).origin };
     if (relative === 'documentation' || relative.startsWith('documentation/')) {
         data.guides = await bounded((signal) => guides(env, locale, signal));
-    } else if (relative === 'market' || relative === 'market/resource' || relative.startsWith('market/resource/')) {
+    } else if (
+        relative === '' ||
+        relative === 'market' ||
+        relative === 'market/resource' ||
+        relative.startsWith('market/resource/')
+    ) {
         data.catalogue = await bounded((signal) =>
-            mergedCatalogue(env, null, false, { persistMetadata: false, signal }),
+            mergedCatalogue(env, userId, false, { persistMetadata: false, signal }),
         );
+        data.catalogueIdentity = userId ?? 'public';
     } else if (relative === 'downloads') {
         const result = await bounded(async (signal) => {
             const [sources, metadata] = await Promise.all([
@@ -100,18 +110,20 @@ async function publicData(env: Env, locale: string, relative: string): Promise<P
     return data;
 }
 
-function serializedData(data: PublicPageData): string {
+function serializedData(data: PageData): string {
     return JSON.stringify(data)
         .replaceAll('<', '\\u003c')
         .replaceAll('\u2028', '\\u2028')
         .replaceAll('\u2029', '\\u2029');
 }
 
-function responseHeaders(indexable: boolean, status: number, template?: Headers): Headers {
+function responseHeaders(indexable: boolean, status: number, personalized: boolean, template?: Headers): Headers {
     const headers = new Headers({
         'Content-Type': 'text/html; charset=UTF-8',
-        'Cache-Control': indexable && status === 200 ? 'public, max-age=0, must-revalidate' : 'private, no-store',
+        'Cache-Control':
+            !personalized && indexable && status === 200 ? 'public, max-age=0, must-revalidate' : 'private, no-store',
         'CDN-Cache-Control': 'no-store',
+        'Vary': 'Cookie',
         'X-Content-Type-Options': 'nosniff',
         'Referrer-Policy': 'same-origin',
         ...(status === 503 ? { 'Retry-After': '30' } : {}),
@@ -157,20 +169,39 @@ export async function renderPage(c: AppContext): Promise<Response> {
         return new Response(null, { status: 404 });
     }
     const relative = localePath.split('/').slice(2).join('/');
-    const data = await publicData(c.env, locale, relative);
+    await resolveSession(c);
+    const session = sessionData(c);
+    const personalized = Boolean(session.user || getCookie(c, sessionCookieName(c)) || c.req.header('Authorization'));
+    const protectedPage = Object.hasOwn(protectedPages, relative);
+    if (protectedPage && !session.user) {
+        return new Response(null, {
+            status: 302,
+            headers: {
+                Location: new URL(
+                    `/${locale}/login?next=${encodeURIComponent(localePath + url.search)}`,
+                    c.env.APP_ORIGIN,
+                ).href,
+                'Cache-Control': 'private, no-store',
+                'CDN-Cache-Control': 'no-store',
+            },
+        });
+    }
+    const data: PageData = { ...(await publicData(c.env, locale, relative, session.user?.id ?? null)), session };
     let metadata = pageMetadata(localePath, url.search, locale, data, new URL(c.env.APP_ORIGIN).origin);
-    let content = '';
-    if (metadata.render) {
-        try {
-            content = renderToString(
-                <StaticRouter location={`${localePath}${url.search}`}>
-                    <AppProviders initial={data} />
-                </StaticRouter>,
-            );
-        } catch (error) {
-            console.error('page_render_failed', error instanceof Error ? error.name : 'Error');
-            metadata = { ...metadata, render: false, indexable: false, status: 503 };
-        }
+    const requiredRole = protectedPage ? protectedPages[relative as keyof typeof protectedPages] : null;
+    if (requiredRole && !hasRole(session.user, requiredRole)) {
+        metadata = { ...metadata, status: 403 };
+    }
+    let content: string;
+    try {
+        content = renderToString(
+            <StaticRouter location={`${localePath}${url.search}`}>
+                <AppProviders initial={data} />
+            </StaticRouter>,
+        );
+    } catch (error) {
+        console.error('page_render_failed', error instanceof Error ? error.name : 'Error');
+        fail(503, 'page_render_failed');
     }
     const template = await c.env.ASSETS.fetch(
         new Request(new URL('/index.html', c.env.APP_ORIGIN), {
@@ -178,12 +209,15 @@ export async function renderPage(c: AppContext): Promise<Response> {
         }),
     );
     if (!template.ok) {
-        return new Response(null, { status: 503, headers: responseHeaders(false, 503, template.headers) });
+        return new Response(null, {
+            status: 503,
+            headers: responseHeaders(false, 503, personalized, template.headers),
+        });
     }
     const head = renderToStaticMarkup(<MetadataTags metadata={metadata} />);
     const response = new Response(template.body, {
         status: metadata.status,
-        headers: responseHeaders(metadata.indexable, metadata.status, template.headers),
+        headers: responseHeaders(metadata.indexable, metadata.status, personalized, template.headers),
     });
     return new HTMLRewriter()
         .on('html', {
@@ -223,7 +257,6 @@ export async function renderPage(c: AppContext): Promise<Response> {
         })
         .on('#root', {
             element(element) {
-                element.setAttribute('data-ssr', metadata.render ? 'true' : 'false');
                 element.setInnerContent(content, { html: true });
             },
         })

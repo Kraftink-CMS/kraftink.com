@@ -12,7 +12,11 @@ export function useCatalogue() {
         identity: string;
         data: { resources: CatalogueResource[]; state: string } | null;
         error: unknown;
-    } | null>(() => (initial.catalogue ? { identity: 'public', data: initial.catalogue, error: null } : null));
+    } | null>(() =>
+        initial.catalogue && initial.catalogueIdentity === identity
+            ? { identity, data: initial.catalogue, error: null }
+            : null,
+    );
     useEffect(() => {
         const controller = new AbortController();
         setResult((current) => ({ identity, data: current?.identity === identity ? current.data : null, error: null }));
@@ -20,9 +24,7 @@ export function useCatalogue() {
             .then((data) => {
                 if (!controller.signal.aborted) {
                     setResult({ identity, data, error: null });
-                    if (identity === 'public') {
-                        update({ catalogue: data });
-                    }
+                    update({ catalogue: data, catalogueIdentity: identity });
                 }
             })
             .catch((error) => {

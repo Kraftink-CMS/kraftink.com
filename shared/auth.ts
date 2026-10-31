@@ -11,6 +11,13 @@ export interface OAuthProvider {
     name: string;
 }
 
+export interface SessionData {
+    user: User | null;
+    csrfToken: string | null;
+    oauthProviders: OAuthProvider[];
+    turnstileSiteKey: string | null;
+}
+
 export interface User {
     id: string;
     email: string;

@@ -17,8 +17,7 @@ export interface PageMetadata {
     canonical: string;
     alternates: Array<{ locale: string; href: string }>;
     indexable: boolean;
-    render: boolean;
-    status: 200 | 404 | 503;
+    status: 200 | 403 | 404 | 503;
 }
 
 export function localizedPagePath(locale: string, relative: string): string {
@@ -69,7 +68,6 @@ export function pageMetadata(
     let title = page?.title ?? text.notFound;
     let description = page?.description ?? text.notFoundText;
     let indexable = page?.public ?? false;
-    let render = page?.public ?? true;
     let status: PageMetadata['status'] = page ? 200 : 404;
     let canonicalLocale = locale;
     let canonicalRelative = relative;
@@ -86,7 +84,6 @@ export function pageMetadata(
         title = guide?.title ?? text.docsTitle;
         description = guide?.description ?? text.docsIntro;
         indexable = Boolean(guide && !guide.hidden);
-        render = true;
         status = guide ? 200 : guides ? 404 : 503;
         canonicalLocale = guide?.contentLocale ?? locale;
         languages = guide?.availableLocales ?? languages;
@@ -105,7 +102,6 @@ export function pageMetadata(
         title = resource ? localized(resource.name, locale) : common.resource;
         description = resource ? localized(resource.description, locale) : text.marketText;
         indexable = Boolean(resource);
-        render = true;
         status = resource ? 200 : data.catalogue?.state === 'fresh' ? 404 : 503;
         canonicalRelative = resource
             ? `market/resource/${encodeURIComponent(resource.resourceId ?? resource.id)}`
@@ -129,7 +125,6 @@ export function pageMetadata(
               }))
             : [],
         indexable,
-        render,
         status,
     };
 }
