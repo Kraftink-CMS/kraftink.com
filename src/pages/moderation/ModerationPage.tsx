@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { api } from '../../lib/api';
 import { useSession } from '../../lib/session';
 import { localized, useLocale } from '../../lib/i18n';
-import { Card, Empty, ErrorNotice, Loading, PageTitle, StatusBadge } from '../../components/UI';
+import { Card, Empty, ErrorNotice, TableLoading, PageTitle, StatusBadge } from '../../components/UI';
 import { workspace } from '../../lib/translations';
 import { SensitiveButton } from '../../components/auth/SensitiveButton';
 import { hasRole } from '../../../shared/auth';
@@ -61,6 +61,7 @@ export function ModerationPage() {
     const [query, setQuery] = useState('');
     const [submittedQuery, setSubmittedQuery] = useState('');
     const [loading, setLoading] = useState(true);
+    const [loaded, setLoaded] = useState(false);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<unknown>(null);
     const [success, setSuccess] = useState(false);
@@ -94,6 +95,7 @@ export function ModerationPage() {
             setError(cause);
         } finally {
             setLoading(false);
+            setLoaded(true);
         }
     }, [submittedQuery]);
 
@@ -313,8 +315,16 @@ export function ModerationPage() {
                             {t.success}
                         </p>
                     )}
-                    {loading ? (
-                        <Loading />
+                    {loading && !loaded ? (
+                        <Card title={tab === 'reviews' ? t.reviews : t.allResources}>
+                            <TableLoading
+                                columns={
+                                    tab === 'reviews'
+                                        ? [t.name, t.author, t.type, t.version, t.submittedAt, t.actions]
+                                        : [t.name, t.author, t.type, t.publishedVersion, t.status, t.actions]
+                                }
+                            />
+                        </Card>
                     ) : (
                         <>
                             {tab === 'reviews' && (

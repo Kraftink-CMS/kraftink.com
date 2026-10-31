@@ -13,6 +13,10 @@ export const ipChangeInterval = 3 * 86400;
 export const identityChangeInterval = 7 * 86400;
 export const validRoles = new Set<Role>(['creator', 'moderator', 'admin']);
 
+export async function setUserLocale(binding: D1Database, userId: string, locale: string): Promise<void> {
+    await database(binding).update(users).set({ locale, updated_at: now() }).where(eq(users.id, userId));
+}
+
 const authenticationChangeFrom = `FROM users u JOIN sessions s ON s.user_id = u.id
     JOIN sensitive_actions p ON p.user_id = u.id AND p.session_id = s.id`;
 const authenticationChangeCondition = `u.id = ? AND u.banned_at IS NULL AND s.id = ? AND s.expires_at > ?

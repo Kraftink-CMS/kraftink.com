@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Empty, ErrorNotice, Loading, PageTitle } from '../../components/UI';
+import { Empty, ErrorNotice, Loading, Skeleton, PageTitle } from '../../components/UI';
 import { useLocale } from '../../lib/i18n';
 import { publicMessages } from '../../lib/translations';
 import { usePublicPageData } from '../../lib/rendering';
@@ -110,7 +110,33 @@ export function DocumentationPage() {
         return () => cleanups.forEach((cleanup) => cleanup());
     }, [html]);
     if (!activeGuides) {
-        return error ? <ErrorNotice error={error} /> : <Loading />;
+        return error ? (
+            <ErrorNotice error={error} />
+        ) : (
+            <>
+                <PageTitle title={text.docsTitle} description={text.docsIntro} />
+                <Loading>
+                    <div className="docs-layout">
+                        <aside className="docs-sidebar vstack gap-3">
+                            <Skeleton height="2.75rem" className="mb-3" />
+                            {Array.from({ length: 7 }, (_, index) => (
+                                <Skeleton key={index} width={index % 2 ? '75%' : '90%'} />
+                            ))}
+                        </aside>
+                        <article className="card card-body p-4 p-lg-5 vstack gap-4">
+                            <Skeleton width="60%" height="2rem" />
+                            {[0, 1, 2].map((index) => (
+                                <div className="vstack gap-3" key={index}>
+                                    <Skeleton />
+                                    <Skeleton />
+                                    <Skeleton width="75%" />
+                                </div>
+                            ))}
+                        </article>
+                    </div>
+                </Loading>
+            </>
+        );
     }
     return (
         <>

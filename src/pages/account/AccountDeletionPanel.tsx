@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, ErrorNotice, Loading } from '../../components/UI';
+import { Card, ErrorNotice, Loading, Skeleton } from '../../components/UI';
 import { SensitiveButton } from '../../components/auth/SensitiveButton';
 import { api } from '../../lib/api';
 import { useLocale } from '../../lib/i18n';
@@ -121,7 +121,10 @@ export function AccountDeletionPanel() {
             <ErrorNotice error={error} />
             <p>{copy.deletionDescription}</p>
             {loading ? (
-                <Loading />
+                <Loading>
+                    <Skeleton width="85%" className="mb-2" />
+                    <Skeleton width="60%" />
+                </Loading>
             ) : eligibility && !eligibility.eligible ? (
                 <div className="alert alert-warning mb-0" role="status">
                     <p className={eligibility.reasons.length > 0 ? 'mb-2' : 'mb-0'}>{copy.deletionBlocked}</p>

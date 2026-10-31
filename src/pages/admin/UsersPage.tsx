@@ -4,7 +4,7 @@ import { accountCopy } from '../../lib/translations';
 import { api, ApiError } from '../../lib/api';
 import { useLocale } from '../../lib/i18n';
 import { useSession } from '../../lib/session';
-import { Card, Empty, ErrorNotice, Loading, PageTitle } from '../../components/UI';
+import { Card, Empty, ErrorNotice, TableLoading, PageTitle } from '../../components/UI';
 import { Select } from '../../components/Select';
 import { Modal } from '../../components/Modal';
 import { SensitiveButton } from '../../components/auth/SensitiveButton';
@@ -204,8 +204,8 @@ export function AdminUsersPage() {
                         </button>
                     </div>
                 </form>
-                {loading ? (
-                    <Loading />
+                {loading && users.length === 0 ? (
+                    <TableLoading columns={[copy.user, copy.role, copy.ipTitle, copy.status, copy.manage]} />
                 ) : users.length === 0 ? (
                     <Empty>{copy.noUsers}</Empty>
                 ) : (

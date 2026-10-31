@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '../../lib/api';
 import { useSession } from '../../lib/session';
 import { useLocale } from '../../lib/i18n';
-import { Card, Empty, ErrorNotice, Loading, PageTitle, StatusBadge } from '../../components/UI';
+import { Card, Empty, ErrorNotice, Loading, Skeleton, TableLoading, PageTitle, StatusBadge } from '../../components/UI';
 import { workspace } from '../../lib/translations';
 
 import { ArchiveSubmission } from './ArchiveSubmission';
@@ -29,6 +29,7 @@ export function CreatorPage() {
         reason: 'seller_not_ready',
     });
     const [loading, setLoading] = useState(true);
+    const [loaded, setLoaded] = useState(false);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<unknown>(null);
     const [success, setSuccess] = useState(false);
@@ -81,6 +82,7 @@ export function CreatorPage() {
             setError(results[2].reason);
         }
         setLoading(false);
+        setLoaded(true);
     }, [reloadResources, administrator]);
 
     useEffect(() => {
@@ -178,29 +180,37 @@ export function CreatorPage() {
                             {t.success}
                         </p>
                     )}
-                    {loading ? (
-                        <Loading />
+                    {loading && !loaded ? (
+                        tab === 'resources' ? (
+                            <Card
+                                title={t.resources}
+                                footer={
+                                    <button className="btn btn-primary" type="button" disabled>
+                                        {t.create}
+                                    </button>
+                                }
+                            >
+                                <TableLoading
+                                    columns={[t.name, t.type, t.price, t.status, t.actions]}
+                                    tableClassName="creator-resources-table"
+                                />
+                            </Card>
+                        ) : tab === 'sales' ? (
+                            <Card title={t.sales}>
+                                <TableLoading columns={[t.order, t.name, t.date, t.amount, t.status]} />
+                            </Card>
+                        ) : (
+                            <Card title={t.stripeTitle}>
+                                <Loading>
+                                    <Skeleton height="3.5rem" className="mb-3" />
+                                    <Skeleton width="75%" />
+                                </Loading>
+                            </Card>
+                        )
                     ) : (
                         <>
                             {tab === 'resources' && (
                                 <div className="vstack gap-4">
-                                    {!ready && (
-                                        <div className="alert alert-warning mb-0" role="alert">
-                                            <p>
-                                                {managedByPlatform || reason === 'payments_unavailable'
-                                                    ? t.publicationUnavailable
-                                                    : t.publicationSetupRequired}
-                                            </p>
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline-secondary"
-                                                disabled={busy}
-                                                onClick={() => setTab('payments')}
-                                            >
-                                                {t.payments}
-                                            </button>
-                                        </div>
-                                    )}
                                     {!creating && (
                                         <Card
                                             title={t.resources}
@@ -219,7 +229,7 @@ export function CreatorPage() {
                                                 <Empty>{t.noResources}</Empty>
                                             ) : (
                                                 <div className="table-responsive">
-                                                    <table className="table align-middle mb-0">
+                                                    <table className="table align-middle mb-0 creator-resources-table">
                                                         <thead className="text-nowrap">
                                                             <tr>
                                                                 <th scope="col">{t.name}</th>
@@ -272,6 +282,23 @@ export function CreatorPage() {
                                                 </div>
                                             )}
                                         </Card>
+                                    )}
+                                    {!ready && (
+                                        <div className="alert alert-warning mb-0" role="alert">
+                                            <p>
+                                                {managedByPlatform || reason === 'payments_unavailable'
+                                                    ? t.publicationUnavailable
+                                                    : t.publicationSetupRequired}
+                                            </p>
+                                            <button
+                                                type="button"
+                                                className="btn btn-outline-secondary"
+                                                disabled={busy}
+                                                onClick={() => setTab('payments')}
+                                            >
+                                                {t.payments}
+                                            </button>
+                                        </div>
                                     )}
                                     {creating && ready && (
                                         <ArchiveSubmission

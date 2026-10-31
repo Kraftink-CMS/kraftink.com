@@ -4,7 +4,7 @@ import { accountCopy } from '../../lib/translations';
 import { api } from '../../lib/api';
 import { useLocale } from '../../lib/i18n';
 import { useSession } from '../../lib/session';
-import { ErrorNotice, Loading, PageTitle } from '../../components/UI';
+import { ErrorNotice, PageTitle } from '../../components/UI';
 import type { SiteKeyState, AccountProfile, Order } from './types';
 import { useAccountCommerce } from './useAccountCommerce';
 import { PurchasesPanel } from './PurchasesPanel';
@@ -13,6 +13,7 @@ import { SiteConnectionPanel, useSiteConnection } from './SiteConnectionPanel';
 import { ProfilePanel } from './ProfilePanel';
 import { TwoFactorPanel } from './TwoFactorPanel';
 import { AccountDeletionPanel } from './AccountDeletionPanel';
+import { AccountLoading } from './AccountLoading';
 
 export function AccountPage() {
     const { locale, path } = useLocale();
@@ -295,8 +296,8 @@ export function AccountPage() {
                     </button>
                 ))}
             </nav>
-            {loading ? (
-                <Loading />
+            {loading && !profile ? (
+                <AccountLoading tab={tab} />
             ) : (
                 <>
                     {tab === 'purchases' && (
@@ -305,13 +306,15 @@ export function AccountPage() {
                     {tab === 'orders' && <OrdersPanel commerce={commerce} actions={actions} />}
                     {tab === 'site' && <SiteConnectionPanel connection={connection} actions={actions} reload={load} />}
                     {tab === 'profile' && (
-                        <div className="vstack gap-4">
-                            <ProfilePanel profile={profile} onProfileChanged={setProfile} actions={actions} />
-                            <TwoFactorPanel key={user.id} />
-                            <AccountDeletionPanel key={`deletion-${user.id}`} />
-                        </div>
+                        <ProfilePanel profile={profile} onProfileChanged={setProfile} actions={actions} />
                     )}
                 </>
+            )}
+            {tab === 'profile' && (
+                <div className="vstack gap-4 mt-4">
+                    <TwoFactorPanel key={user.id} />
+                    <AccountDeletionPanel key={`deletion-${user.id}`} />
+                </div>
             )}
         </>
     );

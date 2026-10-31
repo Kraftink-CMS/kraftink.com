@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { api, ApiError } from '../../lib/api';
 import { useLocale } from '../../lib/i18n';
 import { statisticsMessages } from '../../lib/translations';
-import { Card, Empty, ErrorNotice, Loading, PageTitle } from '../../components/UI';
+import { Card, Empty, ErrorNotice, Loading, Skeleton, PageTitle } from '../../components/UI';
 import { Select } from '../../components/Select';
 import { SalesBreakdown } from './statistics/SalesBreakdown';
 import type { SalesStatistics } from './statistics/types';
@@ -179,8 +179,40 @@ export function StatisticsPage() {
                 ) : (
                     <ErrorNotice error={error} />
                 )}
-                {loading ? (
-                    <Loading />
+                {loading && !statistics ? (
+                    <Loading>
+                        <div className="vstack gap-4">
+                            <section>
+                                <h2 className="h5 mb-3">{t.periodSummary}</h2>
+                                <div className="row g-3">
+                                    {[t.salesVolume, t.paidOrders, t.averageOrder, t.buyers].map((label) => (
+                                        <div className="col-sm-6 col-xl-3" key={label}>
+                                            <Card>
+                                                <p className="small text-body-secondary mb-2">{label}</p>
+                                                <Skeleton width="60%" height="2rem" />
+                                            </Card>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                            <div className="row g-4">
+                                {[0, 1].map((index) => (
+                                    <div className="col-xl-6" key={index}>
+                                        <Card title={<Skeleton width="50%" height="1.25rem" />}>
+                                            <div className="row g-3">
+                                                {[0, 1, 2].map((item) => (
+                                                    <div className="col-sm-4" key={item}>
+                                                        <Skeleton className="mb-3" />
+                                                        <Skeleton width="60%" height="1.5rem" />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </Card>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </Loading>
                 ) : statistics ? (
                     <>
                         <section aria-labelledby="statistics-summary-title">

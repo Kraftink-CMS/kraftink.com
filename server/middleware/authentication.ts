@@ -1,7 +1,8 @@
 import type { MiddlewareHandler } from 'hono';
 import { getCookie } from 'hono/cookie';
 import type { AppEnv, Session } from '../types';
-import { fail, sessionCookieName, type AppContext } from '../http';
+import { fail, requestLocale, sessionCookieName, type AppContext } from '../http';
+import { localeCookieName, selectLocale } from '../../shared/locales';
 import type { SessionData } from '../../shared/auth';
 import { availableOAuthProviders } from '../services/identity/authentication';
 import { now } from '../lib/time';
@@ -53,6 +54,7 @@ export function sessionData(c: AppContext): SessionData {
         csrfToken: c.get('session')?.csrfToken ?? null,
         oauthProviders: availableOAuthProviders(c.env),
         turnstileSiteKey: c.env.TURNSTILE_SITE_KEY ?? null,
+        preferredLocale: selectLocale([c.get('user')?.locale, getCookie(c, localeCookieName), requestLocale(c)]),
     };
 }
 

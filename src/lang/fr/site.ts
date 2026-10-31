@@ -360,7 +360,7 @@ export default {
             'Le noyau gère les comptes, les permissions et les contenus. Les plugins ajoutent les fonctionnalités de votre communauté. Les thèmes en définissent la présentation.',
         'privacyTitle': 'Confidentialité',
         'privacy':
-            'Un compte permet de conserver vos achats et de relier votre CMS. Un cookie de session protège votre connexion. Stripe traite les paiements et les documents du vendeur. Votre adresse email sert à la confirmation du compte et à la récupération du mot de passe. Votre clé de site et l’adresse IP autorisée contrôlent les téléchargements. La langue choisie est conservée dans votre navigateur. Aucun outil de mesure d’audience n’est ajouté.',
+            'Un compte permet de conserver vos achats et de relier votre CMS. Un cookie de session protège votre connexion. Stripe traite les paiements et les documents du vendeur. Votre adresse email sert à la confirmation du compte et à la récupération du mot de passe. Votre clé de site et l’adresse IP autorisée contrôlent les téléchargements. La langue choisie est conservée dans votre compte si vous êtes connecté, sinon dans un cookie. Aucun outil de mesure d’audience n’est ajouté.',
         'creditsTitle': 'Crédits et licences',
         'bootstrap': 'Le site public utilise Bootstrap, distribué sous licence MIT.',
         'marked': 'La documentation est mise en page avec Marked, distribué sous licence MIT.',
