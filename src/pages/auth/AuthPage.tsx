@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { OAuthProvider } from '../../../shared/auth';
 import { accountCopy, twoFactorMessages } from '../../lib/translations';
 import { api } from '../../lib/api';
@@ -10,12 +10,17 @@ import { Card, ErrorNotice, PageTitle } from '../../components/UI';
 import { Turnstile } from '../../components/Turnstile';
 import { OAuthButton } from '../../components/auth/OAuthButton';
 import { TwoFactorCodeField } from '../../components/auth/TwoFactorCodeField';
+import { usePublicPageData } from '../../lib/rendering';
 
 export function AuthPage({ mode }: { mode: 'login' | 'register' | 'forgot' | 'reset' | 'verify' }) {
     const { locale, path } = useLocale();
     const copy = accountCopy[locale];
     const { user, refresh, oauthProviders, turnstileSiteKey } = useSession();
     const location = useLocation();
+    const navigate = useNavigate();
+    const { data } = usePublicPageData();
+    const origin = data.origin;
+    const [fragment, setFragment] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<unknown>(null);
     const [notice, setNotice] = useState('');
@@ -23,17 +28,12 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' | 'forgot' | 're
     const [challengeKey, setChallengeKey] = useState(0);
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [remember, setRemember] = useState(false);
-    const [factorChallenge, setFactorChallenge] = useState(
-        () => new URLSearchParams(window.location.hash.slice(1)).get('two_factor') ?? '',
-    );
-    const [factorNext, setFactorNext] = useState(
-        () => new URLSearchParams(window.location.hash.slice(1)).get('next') ?? '',
-    );
+    const [factorChallenge, setFactorChallenge] = useState('');
+    const [factorNext, setFactorNext] = useState('');
     const [factorCode, setFactorCode] = useState('');
     const factorCopy = twoFactorMessages[locale];
-    const token = new URLSearchParams(location.hash.slice(1)).get('token') ?? '';
-    const emailChange =
-        mode === 'verify' && new URLSearchParams(location.hash.slice(1)).get('purpose') === 'email-change';
+    const token = new URLSearchParams(fragment?.slice(1)).get('token') ?? '';
+    const emailChange = mode === 'verify' && new URLSearchParams(fragment?.slice(1)).get('purpose') === 'email-change';
     const requestedNext = new URLSearchParams(location.search).get('next') ?? factorNext;
     let next = path('/account');
     if (
@@ -42,9 +42,9 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' | 'forgot' | 're
         !requestedNext.startsWith('//') &&
         !/[\\\u0000-\u0020\u007f]/.test(requestedNext)
     ) {
-        const destination = new URL(requestedNext, window.location.origin);
+        const destination = new URL(requestedNext, origin);
         if (
-            destination.origin === window.location.origin &&
+            destination.origin === origin &&
             /^\/[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*\/(?:market|account|creator|moderation|admin)(?:[/?#]|$)/.test(
                 destination.pathname,
             )
@@ -86,13 +86,23 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' | 'forgot' | 're
     }, [mode]);
 
     useEffect(() => {
-        if (new URLSearchParams(location.hash.slice(1)).has('two_factor')) {
+        const parameters = new URLSearchParams(location.hash.slice(1));
+        setFragment(location.hash);
+        if (parameters.has('two_factor')) {
+            setFactorChallenge(parameters.get('two_factor') ?? '');
+            setFactorNext(parameters.get('next') ?? '');
             history.replaceState(null, '', window.location.pathname + window.location.search);
         }
     }, [location.hash]);
 
+    useEffect(() => {
+        if (fragment !== null && user && !factorChallenge && (mode === 'login' || mode === 'register')) {
+            navigate(next, { replace: true });
+        }
+    }, [user, factorChallenge, fragment, mode, navigate, next]);
+
     if (user && !factorChallenge && (mode === 'login' || mode === 'register')) {
-        return <Navigate replace to={next} />;
+        return null;
     }
 
     async function submit(event: FormEvent<HTMLFormElement>) {

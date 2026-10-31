@@ -9,7 +9,7 @@ import {
     type FormEvent,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { OAuthProvider, User } from '../../shared/auth';
+import type { SessionData } from '../../shared/auth';
 import { api, ApiError, setCsrfToken } from './api';
 import { useLocale } from './i18n';
 import { commonMessages, twoFactorMessages } from './translations';
@@ -18,15 +18,7 @@ import { OAuthButton } from '../components/auth/OAuthButton';
 import { TwoFactorCodeField } from '../components/auth/TwoFactorCodeField';
 import { Modal } from '../components/Modal';
 
-interface SessionData {
-    user: User | null;
-    csrfToken: string | null;
-    oauthProviders: OAuthProvider[];
-    turnstileSiteKey: string | null;
-}
-
 interface SessionContextValue extends SessionData {
-    loading: boolean;
     confirming: boolean;
     sessionError: unknown;
     refresh: () => Promise<void>;
@@ -36,14 +28,8 @@ interface SessionContextValue extends SessionData {
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
-export function SessionProvider({ children }: { children: ReactNode }) {
-    const [session, setSession] = useState<SessionData>({
-        user: null,
-        csrfToken: null,
-        oauthProviders: [],
-        turnstileSiteKey: null,
-    });
-    const [loading, setLoading] = useState(true);
+export function SessionProvider({ initial, children }: { initial: SessionData; children: ReactNode }) {
+    const [session, setSession] = useState(initial);
     const [sessionError, setSessionError] = useState<unknown>(null);
     const [pending, setPending] = useState<{
         purpose: string;
@@ -72,13 +58,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         } catch (failure) {
             setSessionError(failure);
             throw failure;
-        } finally {
-            setLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        refresh().catch(() => undefined);
+        function restore(event: PageTransitionEvent) {
+            if (event.persisted) {
+                void refresh().catch(() => undefined);
+            }
+        }
+        window.addEventListener('pageshow', restore);
+        return () => window.removeEventListener('pageshow', restore);
     }, [refresh]);
     useEffect(() => {
         const fragment = new URLSearchParams(window.location.hash.slice(1));
@@ -174,7 +164,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
     return (
         <SessionContext.Provider
-            value={{ ...session, loading, sessionError, confirming: Boolean(pending), refresh, logout, sensitive }}
+            value={{ ...session, sessionError, confirming: Boolean(pending), refresh, logout, sensitive }}
         >
             {children}
             <Modal

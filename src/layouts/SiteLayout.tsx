@@ -12,7 +12,7 @@ import { SocialLinks } from '../components/SocialLinks';
 
 export function SiteLayout() {
     const { locale, path } = useLocale();
-    const { user, loading, sessionError, logout } = useSession();
+    const { user, sessionError, logout } = useSession();
     const text = commonMessages[locale];
     const legal = legalMessages[locale];
     const copy = useSiteCopy();
@@ -127,11 +127,7 @@ export function SiteLayout() {
                                 <Link to={path('/downloads')} className="btn btn-primary btn-sm">
                                     {copy.download}
                                 </Link>
-                                {loading ? (
-                                    <span className="account-loading" role="status" aria-label={text.loading}>
-                                        <span className="placeholder w-100 rounded-pill" aria-hidden="true" />
-                                    </span>
-                                ) : user ? (
+                                {user ? (
                                     <details className="account-menu" key={location.pathname}>
                                         <summary>
                                             <span className="user-avatar">

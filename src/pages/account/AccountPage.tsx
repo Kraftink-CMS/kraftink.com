@@ -25,7 +25,7 @@ export function AccountPage() {
             ? requestedOrder
             : null;
     const copy = accountCopy[locale];
-    const { user, loading: sessionLoading } = useSession();
+    const { user } = useSession();
     const userId = user?.id;
     const [tab, setTab] = useState<'purchases' | 'orders' | 'site' | 'profile'>(
         location.state?.accountTab === 'profile' ? 'profile' : 'purchases',
@@ -200,9 +200,6 @@ export function AccountPage() {
         }
     }
 
-    if (sessionLoading) {
-        return <Loading />;
-    }
     if (!user) {
         return <Navigate replace to={path('/login')} />;
     }

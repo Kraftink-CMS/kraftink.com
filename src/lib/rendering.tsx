@@ -1,21 +1,26 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import type { CatalogueResource } from '../../shared/catalogue';
-import { fallbackLocale } from '../../shared/locales';
 import type { Guide } from './documentation';
+import type { SessionData } from '../../shared/auth';
 
 export interface PublicPageData {
     locale: string;
-    origin?: string;
+    origin: string;
     guides?: Guide[];
     catalogue?: { resources: CatalogueResource[]; state: string };
+    catalogueIdentity?: string;
     sources?: unknown;
     releases?: unknown;
+}
+
+export interface PageData extends PublicPageData {
+    session: SessionData;
 }
 
 const PublicPageContext = createContext<{
     data: PublicPageData;
     update: (values: Partial<PublicPageData>) => void;
-}>({ data: { locale: fallbackLocale }, update: () => undefined });
+} | null>(null);
 
 export function PublicPageProvider({ initial, children }: { initial: PublicPageData; children: ReactNode }) {
     const [data, setData] = useState(initial);
@@ -31,5 +36,9 @@ export function PublicPageProvider({ initial, children }: { initial: PublicPageD
 }
 
 export function usePublicPageData() {
-    return useContext(PublicPageContext);
+    const context = useContext(PublicPageContext);
+    if (!context) {
+        throw new Error('PublicPageProvider required');
+    }
+    return context;
 }

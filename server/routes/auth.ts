@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { sessionData } from '../middleware/authentication';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import type { AppEnv } from '../types';
 import type { AppContext } from '../http';
@@ -24,7 +25,6 @@ import {
 } from '../services/identity/two-factor';
 
 import {
-    availableOAuthProviders,
     normalizeEmail,
     passwordField,
     validateUsername,
@@ -131,14 +131,7 @@ async function deliverVerification(c: AppContext, userId: string, email: string)
     }
 }
 
-routes.get('/auth/session', (c) =>
-    c.json({
-        user: c.get('user'),
-        csrfToken: c.get('session')?.csrfToken ?? null,
-        oauthProviders: availableOAuthProviders(c.env),
-        turnstileSiteKey: c.env.TURNSTILE_SITE_KEY ?? null,
-    }),
-);
+routes.get('/auth/session', (c) => c.json(sessionData(c)));
 
 routes.post('/auth/register', async (c) => {
     await rateLimit(c, 'register.ip', 5, 3600);

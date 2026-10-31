@@ -57,7 +57,7 @@ export function PageMetadata() {
     const { locale } = useLocale();
     const location = useLocation();
     const { data } = usePublicPageData();
-    const origin = data.origin ?? (typeof window === 'undefined' ? 'https://kraftink.com' : window.location.origin);
+    const origin = data.origin;
     const metadata = useMemo(
         () => pageMetadata(location.pathname, location.search, locale, data, origin),
         [location.pathname, location.search, locale, data, origin],

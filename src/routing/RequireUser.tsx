@@ -4,16 +4,13 @@ import { hasRole, type Role } from '../../shared/auth';
 import { useLocale } from '../lib/i18n';
 import { useSession } from '../lib/session';
 import { commonMessages } from '../lib/translations';
-import { ErrorNotice, Loading } from '../components/UI';
+import { ErrorNotice } from '../components/UI';
 
 export function RequireUser({ role, children }: { role?: Role; children: ReactNode }) {
-    const { user, loading, sessionError, refresh } = useSession();
+    const { user, sessionError, refresh } = useSession();
     const [retrying, setRetrying] = useState(false);
     const { locale, path } = useLocale();
     const location = useLocation();
-    if (loading) {
-        return <Loading />;
-    }
     if (sessionError) {
         return (
             <>
