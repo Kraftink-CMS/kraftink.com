@@ -83,7 +83,7 @@ export function OrdersPanel({ commerce, actions }: { commerce: AccountCommerce; 
                                                     <a
                                                         href={documents[order.id].invoiceUrl!}
                                                         target="_blank"
-                                                        rel="noopener noreferrer"
+                                                        rel="noopener noreferrer nofollow"
                                                     >
                                                         {copy.invoice}
                                                     </a>

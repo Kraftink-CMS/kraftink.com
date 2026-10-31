@@ -8,10 +8,11 @@ import { commonMessages, legalMessages, statisticsMessages } from '../lib/transl
 import { LocaleRedirect } from '../routing/LocaleRedirect';
 import { hasRole } from '../../shared/auth';
 import { PageMetadata } from '../components/PageMetadata';
+import { SocialLinks } from '../components/SocialLinks';
 
 export function SiteLayout() {
     const { locale, path } = useLocale();
-    const { user, logout } = useSession();
+    const { user, loading, sessionError, logout } = useSession();
     const text = commonMessages[locale];
     const legal = legalMessages[locale];
     const copy = useSiteCopy();
@@ -62,10 +63,11 @@ export function SiteLayout() {
             </a>
             <header className="site-header">
                 <nav className="navbar navbar-expand-xl" aria-label={copy.navLabel}>
-                    <div className="container header-inner gap-3">
+                    <div className="container header-inner">
                         <Link className="navbar-brand brand" to={path('/')} aria-label={`KraftInk - ${copy.home}`}>
                             <img src="/assets/brand/logo.svg" width="154" height="51" alt="KraftInk" />
                         </Link>
+                        <SocialLinks className="header-social-links" />
                         <button
                             className="navbar-toggler"
                             type="button"
@@ -125,7 +127,11 @@ export function SiteLayout() {
                                 <Link to={path('/downloads')} className="btn btn-primary btn-sm">
                                     {copy.download}
                                 </Link>
-                                {user ? (
+                                {loading ? (
+                                    <span className="account-loading" role="status" aria-label={text.loading}>
+                                        <span className="placeholder w-100 rounded-pill" aria-hidden="true" />
+                                    </span>
+                                ) : user ? (
                                     <details className="account-menu" key={location.pathname}>
                                         <summary>
                                             <span className="user-avatar">
@@ -145,8 +151,11 @@ export function SiteLayout() {
                                         </div>
                                     </details>
                                 ) : (
-                                    <Link className="btn btn-outline-secondary btn-sm" to={path('/login')}>
-                                        {text.login}
+                                    <Link
+                                        className="btn btn-outline-secondary btn-sm"
+                                        to={path(sessionError ? '/account' : '/login')}
+                                    >
+                                        {sessionError ? text.account : text.login}
                                     </Link>
                                 )}
                             </div>
@@ -178,7 +187,7 @@ export function SiteLayout() {
             <footer className="site-footer border-top py-4">
                 <div className="container">
                     <div className="row g-4 justify-content-between align-items-start">
-                        <div className="col-lg-6">
+                        <div className="col-lg-4">
                             <Link to={path('/')} className="footer-brand">
                                 KraftInk
                             </Link>
@@ -198,19 +207,12 @@ export function SiteLayout() {
                                 <Link to={path('/privacy')} className="link-secondary">
                                     {legal.privacy.title}
                                 </Link>
-                                <a
-                                    href="https://github.com/kraftink-cms"
-                                    className="link-secondary"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    GitHub
-                                </a>
                             </nav>
                         </div>
                     </div>
                     <div className="footer-bottom">
                         <small className="text-body-secondary">© {new Date().getFullYear()} KraftInk</small>
+                        <SocialLinks />
                     </div>
                 </div>
             </footer>

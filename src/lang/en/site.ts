@@ -331,6 +331,12 @@ export default {
             ['5 languages', 'French, English, Spanish, German and Portuguese'],
         ],
     },
+    'community': {
+        'socials': 'The KraftInk community',
+        'title': 'Let’s talk about KraftInk',
+        'description': 'Ask questions, share your website and discuss the CMS with the community on Discord.',
+        'join': 'Join our Discord',
+    },
     'footer': {
         'description': 'A website for your game server.<br>A home for your players.',
         'product': 'KraftInk',

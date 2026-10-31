@@ -2,6 +2,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import sanitizeHtml from 'sanitize-html';
 import { documentationHref, documentationImages, renderDocumentation } from '../src/lib/documentation.ts';
+import { externalLinkRel } from '../shared/links.ts';
 
 const sections = [
     {
@@ -298,7 +299,7 @@ export function prepareDocumentation(documents, locale) {
                         attribs: {
                             ...attributes,
                             href,
-                            ...(/^https?:/i.test(href) ? { rel: 'noopener noreferrer' } : {}),
+                            ...(/^https?:/i.test(href) ? { rel: externalLinkRel(href) } : {}),
                         },
                     };
                 },

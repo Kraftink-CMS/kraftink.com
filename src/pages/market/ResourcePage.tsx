@@ -8,6 +8,7 @@ import { useSession } from '../../lib/session';
 import { commonMessages, publicMessages } from '../../lib/translations';
 import { resourcePrice } from '../../lib/catalogue';
 import { LegalNotice } from '../../components/legal/LegalNotice';
+import { externalLinkRel } from '../../../shared/links';
 
 export function ResourcePage() {
     const { locale, path } = useLocale();
@@ -81,7 +82,7 @@ export function ResourcePage() {
                             ))}
                         </dl>
                         {resource.repository && (
-                            <a href={resource.repository} target="_blank" rel="noreferrer">
+                            <a href={resource.repository} target="_blank" rel={externalLinkRel(resource.repository)}>
                                 {text.source} ↗
                             </a>
                         )}
@@ -103,7 +104,7 @@ export function ResourcePage() {
                                 className="btn btn-primary w-100"
                                 href={version?.download?.url ?? resource.repository}
                                 target="_blank"
-                                rel="noreferrer"
+                                rel={externalLinkRel(version?.download?.url ?? resource.repository)}
                             >
                                 {common.download}
                             </a>
@@ -112,7 +113,7 @@ export function ResourcePage() {
                                 className="btn btn-primary w-100"
                                 href={resource.commercial.url ?? resource.repository}
                                 target="_blank"
-                                rel="noreferrer"
+                                rel={externalLinkRel(resource.commercial.url ?? resource.repository)}
                             >
                                 {text.external}
                             </a>
