@@ -27,7 +27,7 @@ Use a stable identifier, also returned by `id()`. An identifier already assigned
 
 ## Implement checkout
 
-Shop's built-in gateways are the classes in `Services/Payments/Gateways`, such as `StripeGateway` and `PayPalGateway`. Shared contracts live under `Contracts/Payments`, and result objects under `Data/Payments`. An additional plugin keeps its implementation in its own services.
+Keep the implementation in your plugin’s services. Interfaces are under `KraftInk\Plugins\Shop\Contracts\Payments`, with results under `Data\Payments`.
 
 The class implements `KraftInk\Plugins\Shop\Contracts\Payments\PaymentGateway`:
 
@@ -89,7 +89,7 @@ All contracts below are in `KraftInk\Plugins\Shop\Contracts\Payments`. Implement
 
 | Contract | Usage |
 | --- | --- |
-| `SupportsCurrencies` | `supportsCurrency(Currency $currency): bool`, see [currencies](api-plugins.md#declare-a-currency) |
+| `SupportsCurrencies` | `supportsCurrency(Currency $currency): bool`, see [currencies](developpement-soldes.md#amounts-and-currency) |
 | `DefaultAvailability` | `defaultEnabled(): bool` for initial availability |
 | `ProvidesInstructions` | `instructions(): string`, saved with the order |
 | `ReservationPolicy` | `reservationSeconds(): int`, bounded between 60 seconds and 7 days |
@@ -100,5 +100,7 @@ All contracts below are in `KraftInk\Plugins\Shop\Contracts\Payments`. Implement
 `Currency` is `App\Kraft\Currencies\Currency`. `PaymentReference` and `RefundResult` come from `KraftInk\Plugins\Shop\Data\Payments`. Their constructors are `PaymentReference(string $id, string $kind, int $amount, string $currency)` and `RefundResult(string $id, string $paymentReference, int $amount, string $currency, string $status, ?string $requestKey = null)`.
 
 Refunds must preserve idempotency, reconciliation and recovery of uncertain results. Use Shop’s financial services to preserve the split between the provider, wallet and gift card.
+
+Without `SupportsCurrencies`, the gateway accepts EUR, USD, GBP, CAD and CHF. Implement this contract to declare its actual currencies.
 
 Before release, test in the provider’s sandbox: invalid signatures, incorrect amount or currency, repeated events and interruption before saving. Also check secrets and every optional function you advertise.

@@ -1,6 +1,6 @@
 # Read public data
 
-Use this API to display news or server status in an external application. Requests use GET and require no token. Send `Accept: application/json`.
+Use these GET routes to show news or server status in an application. `/api/public/` routes do not require a token. Send `Accept: application/json`.
 
 ## News
 
@@ -32,3 +32,14 @@ Internal hosts, secrets and named player lists are not exposed.
 Routes allow 120 requests per minute and respect site maintenance: JSON 503 responses ask clients to retry later. Unknown languages return 404, and invalid pagination parameters return 422. Handle 429 responses too.
 
 For member authentication, use the [launcher API](auth-api.md). For server accounts and commands, use the [server APIs](developpement-serveurs.md).
+
+## Authenticated access
+
+The same data is available with a personal or [service account](service-accounts.md) token:
+
+| Routes | Scope | Account permission |
+| --- | --- | --- |
+| `/api/site/news`, `/api/site/news/{id}` | `site:news:read` | `content.manage` |
+| `/api/site/servers` | `site:servers:read` | `servers.manage` |
+
+These scopes do not expand content visibility. Token behaviour is covered in [authentication](auth-api.md).

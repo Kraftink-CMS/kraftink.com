@@ -1,6 +1,6 @@
 # Use the wallet
 
-An extension credits, debits or transfers money through `App\Kraft\Wallet\Wallet`. Do not write directly to balance tables.
+Use `App\Kraft\Wallet\Wallet` to credit, debit or transfer an amount. It keeps the balance and history in the same operation.
 
 ## Amounts and currency
 
@@ -16,6 +16,8 @@ app(\App\Kraft\Currencies\CurrencyRegistry::class)
 ```
 
 Codes contain three uppercase letters. Only exponent `2` is supported. Identical registration can be repeated, but conflicting definitions are rejected. Adding a currency does not make payment gateways support it.
+
+The registry provides `get($code)`, `find($code)`, `all()` and `codes()`. `get()` rejects unknown codes, while `find()` returns `null`.
 
 ## Atomic operations
 

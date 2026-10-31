@@ -1,38 +1,43 @@
-# Configure external sign-in
+# External sign-in and Discord
 
-To offer Google, Discord or another sign-in service, first create an application with that provider. KraftInk shows the console links and callback URL to use under **External connections**.
+To offer Google, Discord or another sign-in service, create an application with that provider. **External connections** displays its console link and the callback address to register.
 
-## Connect an application
+## Connecting an application
 
-1. Open the service configuration in KraftInk and copy its callback URL.
-2. Create a Web application in the provider’s console and register that exact address, including its domain, protocol and any subdirectory.
-3. Enter the client identifier and secret in KraftInk, then enable the service.
-4. Test sign-in in a private window before changing the site’s sign-in mode.
+1. Copy the callback address shown in KraftInk.
+2. Create a web application with the provider and register that exact address.
+3. Enter the client ID and secret in KraftInk, then enable the service.
+4. Test registration and linking to an existing account in a private browser window.
 
-| Service | Prepare with the provider |
+| Service | Setup required |
 | --- | --- |
-| Google | Google Cloud Web application and consent screen |
-| Discord | Discord application, OAuth2 section. Sign-in does not need a bot |
-| Microsoft | Entra Web application, secret value and supported account types |
+| Google | Google Cloud web application and consent screen |
+| Discord | Discord application, OAuth2 section. Sign-in alone does not require a bot |
+| Microsoft | Entra web application, secret and allowed account types |
 | Facebook | Meta application with Facebook Login for the Web |
 | Twitch | Application in the Twitch developer console |
-| X | Web OAuth 2.0 application and its corresponding credentials |
-| Steam, for compatible games | OpenID sign-in without a key to verify identity. The optional Web API key serves public profiles |
+| X | OAuth 2.0 web application |
+| Steam, depending on the game | OpenID sign-in. An optional Web API key provides public profiles |
 
-For Microsoft, match the tenant to the account types allowed in Entra: `common` for personal and work accounts, `consumers` for personal accounts, `organizations` for work accounts, or your organization’s identifier. For Minecraft ownership checks, also read the [game settings](games.md).
+For Microsoft, match the directory to the allowed accounts: `common`, `consumers`, `organizations` or your organisation identifier. [Minecraft verification](games.md#verifying-identities) also requires linking the game profile.
 
-Fix callback errors with the provider or in the [site address](configuration.md). Do not replace the secret of an application already in use to solve a simple URL error. Leaving a secret field empty preserves the saved value.
+An existing member signs into the site first, then links the provider from their account. Matching email addresses do not merge accounts. If the provider does not supply a usable address, the member enters and verifies it in KraftInk.
 
-## Check member access
+## Removing a sign-in method
 
-Keep your owner session open during testing. Check registration for a new member and linking for an existing account. An existing member must first sign in to KraftInk, then link the service from their account: matching email addresses do not automatically merge accounts.
+Before disabling a service, review affected members in the preview and check that [email delivery](configuration.md#email) works for account recovery. The panel tracks these requests. [Cron](operations.md#scheduler) handles deferred sends and retries.
 
-If the provider does not return a usable email address, the member enters and verifies one on the website. Test [email delivery](configuration.md) before requiring external sign-in.
+Keep your owner session open during testing and check your own recovery option before changing the sign-in mode.
 
-## Disable or replace a service
+## Discord linked roles
 
-Before removing a sign-in method, review the affected members and check that they can recover access. Links to choose a password require working email. All requests are stored before the first delivery. With `QUEUE_CONNECTION=sync`, a small batch is attempted after the change commits without cron. Remaining requests, failures and explicitly deferred sending need [scheduled tasks](operations.md).
+Linked roles assign a Discord role based on KraftInk account criteria. They require member consent separate from site sign-in.
 
-The panel preserves links and tracks recovery requests. Check delivery failures before retrying. To replace an application already in use, add the new one, have accounts linked, then disable the old one. KraftInk blocks a change that would remove an administrator’s last access without a recovery option.
+1. In **External connections → Discord linked roles**, select the Discord application and enter its bot token.
+2. Register the callback address in OAuth2 and the verification address in the application’s linked-role settings.
+3. Choose the criteria, enable the service and click **Publish criteria**.
+4. In your Discord server, create a linked role with this application and its conditions.
 
-[Discord linked roles](discord-linked-roles.md) use authorization separate from website sign-in.
+The panel provides `role_id` for the main rank and `role_power` for its priority. A larger value means a higher rank. Registration date and email verification can also be criteria without sharing the address. Discord accepts up to five criteria.
+
+Members consent in **My account → Connections → Discord linked roles**, using the same Discord account if already linked. Scheduled tasks refresh the criteria. If roles do not update, check cron, role conditions and consent status.

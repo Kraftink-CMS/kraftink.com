@@ -1,10 +1,8 @@
-# Authenticate a launcher
+# Authenticating an application
 
-This API signs a member into a launcher or application. The site owner must enable it in **Application sign-in** (`/admin/settings/api`).
+This API signs a member into a launcher or application. The owner enables **Application connections** in `/admin/settings/api`. Use HTTPS, JSON and `Authorization: Bearer <token>` for authenticated requests.
 
-Use HTTPS, JSON and secure token storage. Credentials and tokens must stay out of URLs and logs.
-
-## Obtain a token
+## Obtaining a personal token
 
 Send `POST /api/auth/authenticate`:
 
@@ -18,41 +16,33 @@ Send `POST /api/auth/authenticate`:
 }
 ```
 
-`login` accepts a username or email. `email` is an alias. `name`, `scopes` and `lifetime` are optional. Lifetime is in minutes, from 15 to 43,200. Account sign-in modes and site login protections also apply to this API.
+`login` accepts a username or email. `name`, `scopes` and `lifetime` are optional. Duration is 15 to 43,200 minutes within the site’s chosen limit. If sign-in requires a CAPTCHA, send its proof in `captcha_response` or the provider field.
 
-When login is CAPTCHA-protected, include its proof in `captcha_response` or the provider-specific field. Applications must handle this flow before submitting credentials.
+A 200 response contains `data.access_token`, `token_type: "Bearer"`, `expires_at`, `scopes` and `user`, with `success: true` and `data.status: "success"`. Store the secret privately, it is shown only at creation or rotation.
 
-JSON responses use `success` to indicate success and `data` for the result. A 200 response contains `data.status: "success"`, `data.access_token`, `data.token_type: "Bearer"`, `data.expires_at`, `data.scopes` and `data.user`. The secret is shown only upon creation or rotation.
+With 2FA, the first response is 202 with `data.status: "pending"`, `reason: "2fa"`, `challenge` and `expires_in: 300`. Send the challenge and `code` to `POST /api/auth/challenge`. The code can be a TOTP or recovery code. The challenge lasts five minutes with up to five attempts.
 
-With 2FA, the initial response is 202 with `success: true`, `data.status: "pending"`, `data.reason: "2fa"`, `data.challenge` and `data.expires_in: 300`. No token is created yet. Send `POST /api/auth/challenge` with:
+## Using and revoking
 
-```json
-{
-    "challenge": "received-opaque-value",
-    "code": "123456"
-}
-```
-
-The code can be TOTP or a recovery code. Challenges are single-use, last five minutes and allow at most five attempts. A client can also send `code` with credentials to `/authenticate`.
-
-## Use and revoke a token
-
-Add `Authorization: Bearer <access_token>`.
-
-| Request | Scope | Result |
+| Request | Permission | Result |
 | --- | --- | --- |
 | `GET /api/auth/me` | `profile:read` | Profile and expiry |
+| `GET /api/auth/token` | Valid token | Identity, effective scopes and expiry |
 | `POST /api/auth/verify` | `profile:read` | Server-side verification |
 | `GET /api/auth/games` | `games:read` | Game identities |
-| `POST /api/auth/rotate` | Valid token | New secret, old token revoked |
+| `POST /api/auth/rotate` | Personal token | New secret, previous one revoked |
 | `POST /api/auth/logout` | Valid token | Revocation, 204 response |
 
-Verification, rotation and revocation POST requests also accept `access_token` in JSON. Rotation preserves the expiry and scopes.
+`email:read` adds the email address to the profile. Plugins can declare additional [scopes](plugin-api-scopes.md). Each call rechecks current account and resource permissions. Game servers must verify the token with the CMS before trusting the launcher.
 
-Available scopes are `profile:read`, `games:read` and `email:read`. The first two are requested by default. Email requires the third. Game servers must verify tokens with the CMS before trusting identities supplied by a launcher.
+Members can also create tokens in `/account/tokens`. These accesses require local sign-in to be allowed. OAuth-only sign-in cannot create them. Rotation keeps the expiry and only scopes still authorised.
 
-## Expiry and errors
+## Service tokens
 
-Suspensions, revocation and account/game requirements are checked on every use. Credential or 2FA changes invalidate previous access. Members can revoke tokens at `/account/tokens`.
+[Service accounts](service-accounts.md) use tokens issued by administration. They call neither `/authenticate` nor `/challenge`. `GET /api/auth/token` describes their identity without requiring `profile:read`. Rotation is managed in the panel.
 
-Handle 401 for invalid access, 403 for disabled APIs or missing scopes, 422 for invalid input or codes, 426 for unencrypted remote connections and 429 for rate limits. Never turn a CMS refusal into local validation.
+For news and server status with a service token, see the [site data routes](api-publique.md#authenticated-access).
+
+## Errors
+
+Handle 401 for invalid tokens, 403 for a disabled API or missing permission, 422 for invalid input, 426 for remote connections without HTTPS and 429 for rate limiting. Revocation, expiry and account security changes invalidate the affected accesses.

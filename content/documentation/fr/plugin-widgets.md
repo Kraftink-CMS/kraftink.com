@@ -1,12 +1,10 @@
-# Ajouter des widgets configurables
+# Widgets configurables
 
-Les widgets sont des blocs d’extension que le propriétaire ajoute, configure et déplace depuis **Présentation → Widgets**. Une instance possède un emplacement, une largeur et éventuellement une liste de langues. Une liste vide de langues autorise toutes les langues du site. Plusieurs instances d’un même widget peuvent avoir des configurations différentes.
+Un widget est un bloc que le propriétaire place et configure dans **Présentation → Widgets**. L’accueil natif propose la zone `home`. Plusieurs instances du même widget peuvent avoir des réglages différents.
 
-L’accueil natif affiche l’emplacement `home`. Un thème peut intégrer cet emplacement à sa propre présentation. Le site ne crée aucun widget automatiquement : le propriétaire choisit ses blocs. Les données de disposition sont enregistrées dans les réglages du CMS, indépendamment des données métier du plugin.
+## Définir le widget
 
-## Enregistrer une définition
-
-Le fournisseur enregistre les widgets depuis `boot()`. Une méthode privée `registerWidgets()` peut regrouper leurs définitions. L’enregistrement décrit le widget sans interroger les tables du plugin, qui peuvent ne pas exister lors de son installation. Les requêtes et les contrôles d’accès sont exécutés par le callback de rendu.
+Depuis `boot()` du fournisseur :
 
 ```php
 app(\App\Kraft\Widgets\WidgetRegistry::class)->register(
@@ -37,28 +35,26 @@ app(\App\Kraft\Widgets\WidgetRegistry::class)->register(
 );
 ```
 
-La clé publique de cette définition est `example:latest-documents`. `owner` correspond à l’identifiant du paquet. `render` reçoit un nom de vue ou un callback. Le callback peut renvoyer une vue, du HTML ou une chaîne vide lorsqu’il n’existe aucun contenu à montrer. Les valeurs produites par les membres doivent rester échappées dans Blade.
+`owner` est l’identifiant du paquet et la clé publique devient `example:latest-documents`. `render` accepte une vue ou un callback renvoyant une vue, du HTML ou une chaîne vide. Gardez l’enregistrement sans requête SQL, les données sont lues au rendu.
 
-Le contexte fournit toujours l’utilisateur authentifié courant dans `user`, la langue courante dans `locale` et l’instance dans `instance`. Un appelant ne peut pas remplacer ces trois valeurs. Les autres valeurs de contexte appartiennent à la zone appelante. Elles ne constituent pas une preuve d’autorisation.
+Le contexte fournit `user`, `locale` et `instance`. Le callback filtre les contenus par publication, langue et droits. Les autres valeurs de contexte ne sont pas une preuve d’autorisation.
 
-## Configuration
+## Champs de configuration
 
-Le registre accepte jusqu’à vingt champs scalaires par définition. Un champ possède un identifiant stable et un `label` traduit ; `help` peut fournir une clé d’aide.
+Le registre accepte vingt champs scalaires au maximum, avec un identifiant stable et un `label` traduit. `help` fournit une clé d’aide facultative.
 
 | Type | Options |
 | --- | --- |
-| `integer` | `min`, `max`, `default` ; bornes par défaut de 1 à 100 |
-| `text` | `max`, `default` ; 255 caractères par défaut, 1 000 au maximum |
+| `integer` | `min`, `max`, `default`. Bornes initiales de 1 à 100 |
+| `text` | `max`, `default`. 255 caractères par défaut, 1 000 au maximum |
 | `boolean` | `default`, faux par défaut |
-| `choice` | `options` associant chaque valeur à une clé de traduction, `default` |
+| `choice` | `options` associant les valeurs aux clés de traduction, `default` |
 
-L’argument facultatif `defaults` fournit aussi les valeurs initiales, avec priorité sur les valeurs `default` des champs. Les données enregistrées et les anciennes configurations relues avant rendu passent par les mêmes validations. Un champ inconnu est refusé ; les champs manquants reprennent leur valeur initiale. Une évolution du plugin doit donc conserver des valeurs initiales compatibles ou prendre en charge ses anciens choix.
+L’argument `defaults` peut remplacer les valeurs initiales des champs. Les anciennes configurations sont aussi validées avant rendu. Gardez des valeurs initiales compatibles quand votre définition évolue.
 
-Les identifiants de champs acceptent lettres minuscules, chiffres et tirets bas. Les textes de configuration sont du texte, sans exécution de code ou interprétation de Blade. L’interface ne permet pas de saisir un chemin de vue, une classe PHP ou une requête SQL.
+## Ajouter une zone
 
-## Emplacements supplémentaires
-
-Un thème ou une extension peut déclarer un emplacement avant d’y enregistrer des widgets :
+Déclarez la zone avant d’y enregistrer les widgets :
 
 ```php
 app(\App\Kraft\Widgets\WidgetRegistry::class)->zone(
@@ -67,18 +63,12 @@ app(\App\Kraft\Widgets\WidgetRegistry::class)->zone(
 );
 ```
 
-Puis le rendre dans une vue :
+Puis affichez-la dans la vue :
 
 ```blade
 <x-widgets.zone name="community.sidebar" :context="['entry' => $entry]" />
 ```
 
-La sortie fournit une grille Bootstrap avec les largeurs choisies. Les déplacements d’instance restent dans leur emplacement. Une zone non déclarée ne produit aucune sortie. Les thèmes conservent aussi les slots pour leurs contributions programmatiques fixes ; les widgets servent à la composition contrôlée par le propriétaire.
+Le composant produit une grille Bootstrap selon les largeurs choisies. Utilisez les [slots](ui-contributions.md#menus-et-blocs) pour une contribution fixe qui ne doit pas être déplacée par le propriétaire.
 
-## Accès et disponibilité
-
-Le CMS vérifie la permission déclarée avant d’appeler le rendu. Le plugin doit en plus filtrer chaque requête par publication, langue, permissions propres aux catégories et visibilité de l’utilisateur. La permission d’une page ne rend pas tous ses enregistrements publics. Les tickets d’un membre ne doivent jamais être sélectionnés depuis un identifiant fourni dans le contexte.
-
-Les widgets d’une extension désactivée, absente, incompatible, mise en quarantaine ou signalée en erreur ne s’exécutent pas. Le mode sûr masque aussi les widgets. Leurs instances et paramètres sont conservés pour une éventuelle réactivation et restent supprimables depuis le panneau. Le rendu d’un bloc défaillant est ignoré, sans empêcher les blocs suivants ou le reste de la page de s’afficher ; le journal conserve uniquement l’identifiant et la classe d’erreur.
-
-L’activation d’un widget ne doit déclencher ni écriture métier, ni paiement, ni exécution de commande serveur. Ces actions gardent leurs routes, protections CSRF et autorisations dédiées.
+Un widget indisponible ne s’exécute pas et conserve sa configuration. Un rendu défaillant n’empêche pas les autres blocs de s’afficher. Les widgets restent en lecture seule, les actions utilisent leurs routes et autorisations.

@@ -1,6 +1,6 @@
 # Intégrer une interface
 
-Ce guide s’adresse aux auteurs de plugins et de thèmes qui ajoutent des menus, des blocs, des formulaires ou des tableaux. Les layouts du CMS fournissent Bootstrap, les gestionnaires de formulaires et de tableaux ainsi que TinyMCE.
+Les plugins et thèmes utilisent les points d’insertion et composants du CMS pour leurs menus, formulaires et contenus. Les layouts chargent Bootstrap, TinyMCE et les gestionnaires AJAX.
 
 ## Menus et blocs
 
@@ -38,7 +38,7 @@ app(\App\Kraft\Extensions\SlotRegistry::class)->add(
 
 Un thème peut définir un emplacement avec `<x-extensions.slot name="example.area" :context="['record' => $record]">Repli</x-extensions.slot>`. Les modes `before`, `after` et `replace` placent la contribution par rapport au repli. Les erreurs de rendu conservent le reste de la page.
 
-Les [widgets](plugin-widgets.md) permettent au propriétaire de placer, configurer et réordonner des blocs depuis le panneau. Utilisez les slots pour les contributions fixes. Le noyau fournit le registre et le rendu, chaque extension conserve ses requêtes, permissions et modèles.
+Les [widgets](plugin-widgets.md) permettent au propriétaire de placer, configurer et réordonner des blocs depuis le panneau. Utilisez les slots pour les contributions fixes.
 
 ## Formulaires AJAX
 
@@ -105,3 +105,40 @@ app(\App\Kraft\SiteDates::class)->normalize($request, ['published_at']);
 ```
 
 Le composant gère le fuseau du site et le choix `earlier/later` lors d’une heure ambiguë. Le normalisateur ne convertit que les champs déclarés accompagnés du marqueur. `format()` affiche une date locale. `iso()` conserve une valeur machine UTC. Ne convertissez pas une seconde fois une date d’API déjà en UTC.
+
+## Référencement des pages
+
+Déclarez vos destinations dans `boot()` avec `App\Events\CollectingSeoPages` pour proposer leurs modèles dans le panneau :
+
+```php
+Event::listen(CollectingSeoPages::class, function (CollectingSeoPages $event): void {
+    $event->add(
+        'plugins.example.public.products.show',
+        __('example::messages.seo.product'),
+        ['product_name' => __('example::messages.seo.product_name')],
+        defaults: ['title' => '{product_name}'],
+    );
+});
+```
+
+Importez l’événement et `Illuminate\Support\Facades\Event`. `add()` reçoit la route, son libellé, les variables, les routes alternatives éventuelles et les valeurs initiales. Déclarez séparément les listes et détails. Les routes sont publiques et acceptent GET.
+
+Fournissez les données au rendu depuis le contrôleur :
+
+```php
+return view('example::default.products.show', [
+    'product' => $product,
+    'seo' => [
+        'title' => $product->name,
+        'description' => \App\Kraft\Site\Seo::excerpt($product->description),
+    ],
+    'seoVariables' => [
+        'product_name' => $product->name,
+        'category_name' => $product->category?->name ?? '',
+    ],
+]);
+```
+
+Les sections Blade `seo_title` et `seo_description` remplacent les personnalisations du modèle de page. `canonical`, `og_type`, `og_image` et `robots` complètent les métadonnées. Un layout personnalisé conserve `default.layouts.partials.metadata`.
+
+Appliquez vos règles de visibilité au contrôleur et à `CollectingSitemapEntries`. Un contenu réservé sur une route publique doit aussi déclarer `noindex,nofollow`. Les métadonnées ne remplacent pas les contrôles d’accès.

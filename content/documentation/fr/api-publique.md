@@ -1,6 +1,6 @@
 # Lire les données publiques
 
-Cette API permet d’afficher les actualités ou l’état des serveurs dans une application externe. Les requêtes utilisent GET et ne nécessitent aucun jeton. Envoyez `Accept: application/json`.
+Affichez les actualités ou l’état des serveurs dans une application avec ces routes GET. Les routes `/api/public/` ne demandent pas de jeton. Envoyez `Accept: application/json`.
 
 ## Actualités
 
@@ -32,3 +32,14 @@ Les hôtes internes, secrets et listes nominatives des joueurs ne sont pas expos
 Les routes sont limitées à 120 requêtes par minute et respectent la maintenance du site : une réponse JSON 503 invite à réessayer plus tard. Une langue inconnue renvoie 404. Des paramètres de pagination invalides renvoient 422. Gérez aussi les réponses 429.
 
 Pour authentifier un membre, utilisez l’[API des launchers](auth-api.md). Pour les comptes et commandes d’un serveur, utilisez les [API serveur](developpement-serveurs.md).
+
+## Accès authentifié
+
+Les mêmes données sont disponibles avec un jeton personnel ou de [compte technique](service-accounts.md) :
+
+| Routes | Scope | Permission du compte |
+| --- | --- | --- |
+| `/api/site/news`, `/api/site/news/{id}` | `site:news:read` | `content.manage` |
+| `/api/site/servers` | `site:servers:read` | `servers.manage` |
+
+Ces scopes n’élargissent pas la visibilité des contenus. Le protocole des jetons est décrit dans l’[authentification](auth-api.md).

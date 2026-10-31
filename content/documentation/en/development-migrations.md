@@ -1,56 +1,16 @@
-# Create an import adapter
+# Importing plugin data
 
-This guide is for adapter and converter authors. To transfer a site from the panel, see [Import data](migration.md).
+A plugin can convert its data from a source supported by the [import wizard](migration.md). Keep converters in `src/Services/Imports/`, with a subdirectory per source format.
 
-## Declare a source
+## Declaring conversions
 
-Create an adapter under `App\Kraft\Migration\Adapters\YourSource` and register its identifier in `config/imports.php`. Extend `App\Kraft\Migration\AbstractSourceAdapter` or implement `Contracts\SourceAdapter` directly. The engine, controller, extension inventory and catalogue use this contract. They contain no selection by CMS name and require no changes when adding a source.
-
-Each source owns its reading and conversion classes. The supplied adapters live under `Adapters/KraftInk/`, `Adapters/Azuriom/` and `Adapters/MineWeb/`. Schema rules, configuration formats, restrictions and legacy URLs belong in these directories. The `Adapters/` directory contains only CMS sources. Shared tools such as `CoreMappings`, `SettingsMappings` and `NavigationMappings` live under `App\Kraft\Migration`, without identifying the CMS.
-
-| Method | Responsibility |
-| --- | --- |
-| `id()` | Identifier declared in the registry. |
-| `requirements()` | Tables and columns required for analysis. |
-| `userTable()` | Source account table, or `null` when accounts are not imported. The engine does not assume a `users` table. |
-| `user($row)` | Normalized account for identity and balance checks. |
-| `roleTable()` and `newsTable()` | Relation tables used by conversion helpers. |
-| `sourceLocale($connection, $tables)` | Language read from the source schema, or `null` for the configured fallback. |
-| `extensionNames($connection, $tables)` | Source extension names as `['plugin' => [...], 'theme' => [...]]`. The first theme is the active theme. |
-| `registerMappings($registry, $core)` | Source conversions and dependencies. |
-| `afterMapping($row, $context, $table)` | Additional work inside the row transaction, such as reporting source files to transfer. |
-
-`AbstractSourceAdapter` supplies a `users` account table, no source language, an empty inventory and a callback that performs no action. Override the values required by your source. `tests/Fixtures/SourceAdapters/ExampleAdapter.php` demonstrates a source with `members`, `teams`, `articles`, `preferences` and `packages` tables. Its test covers analysis, collisions, conversion, extension discovery and recovery without changing the engine.
-
-Core mappings handle core domains, and plugins own their business mappings. A mapping receives a source row and an `ImportContext`, writes to the destination and returns `target_table` and `target_id`:
+Call your entry point from the provider:
 
 ```php
-$registry->register(
-    'example',
-    'articles',
-    fn (array $row, ImportContext $context) => [
-        'target_table' => 'content_entries',
-        'target_id' => $context->insert('content_entries', [
-            'kind' => 'page',
-            'locale' => 'en',
-            'slug' => 'legacy-'.$row['id'],
-            'title' => $row['title'],
-            'body' => Html::clean($row['body']),
-        ]),
-    ],
-    priority: 30,
-);
+app(ImportMappings::class)->register(app(\App\Kraft\Migration\MappingRegistry::class));
 ```
 
-Priorities place parents before children. `required()` requires a mapping, while `mapped()` accepts optional relations. `metadata()` retains small, non-sensitive context. The default source identity is `id`. `identity` selects another key.
-
-`CoreMappings` helpers write native domains from normalized data. They never select rules by CMS name. The content helper requires explicit access rules supplied by the converter. Another source can write directly through `ImportContext` when the helpers do not fit its format.
-
-## Plugin converters
-
-Register mappings from the provider using `app(ImportMappings::class)->register(app(MappingRegistry::class))`. Declare recognized source prefixes in your manifest:
-
-For a plugin that provides imports, `Services/Imports/ImportMappings` is the entry point for converters. Place conversions under `Services/Imports/KraftInk/`, `Services/Imports/Azuriom/` or `Services/Imports/MineWeb/` for supported sources. Standalone imports can also call this entry point without booting the provider. Shared tools receive normalized values and never branch on the CMS identifier.
+`ImportMappings` is your plugin’s class. The manifest lists recognised source prefixes so the wizard can suggest the package:
 
 ```json
 "imports": {
@@ -59,30 +19,50 @@ For a plugin that provides imports, `Services/Imports/ImportMappings` is the ent
 }
 ```
 
-Prefixes support suggestions. Only registered conversions can be selected. Add `plugin: 'example'` and required source `dependencies` to the mapping.
+Register a mapping per convertible table:
 
-For shared source settings, register `MappingRegistry::settings($source, $handler, $plugin)`. The callback receives `['key' => ..., 'value' => ...]` and the context. Read only recognized keys and write equivalents with `$context->setting($key, $value)`. Do not copy media identifiers or secrets. Contributions from unselected or inactive plugins are not applied.
+```php
+$registry->register(
+    'azuriom',
+    'example_documents',
+    function (array $row, ImportContext $context): array {
+        return [
+            'target_table' => 'example__documents',
+            'target_id' => $context->insert('example__documents', [
+                'title' => $row['title'],
+                'body' => Html::clean($row['body']),
+            ]),
+        ];
+    },
+    priority: 30,
+    plugin: 'example',
+);
+```
 
-`$context->report($kind, $details)` retains an action with its source table, identifier, field and optional file path. Use stable reason codes and non-sensitive metadata. Media paths have URL credentials and parameters removed. Reports should explain rules without an equivalent and file transfer, never expose keys or passwords.
+Import `App\Kraft\Migration\ImportContext` and `App\Kraft\Html`. Priorities put parents before children. `dependencies` declares required source tables and `identity` replaces the default source key `id` when needed.
 
-## Replacement and recovery
+The context provides `required()` for mandatory relations, `mapped()` for optional relations and `metadata()` for a small non-sensitive context. `$context->report($kind, $details)` records outstanding items with their source reference.
 
-`replacements` declares only your target tables and rows to replace:
+## Settings and replacement
+
+`MappingRegistry::settings($source, $handler, $plugin)` registers a settings conversion. The callback receives `['key' => ..., 'value' => ...]` and the context. Write only recognised equivalents through `$context->setting($key, $value)` without copying secrets or media identifiers.
+
+To allow replacement, declare your domain’s tables and rows in the `replacements` argument:
 
 ```php
 replacements: [
-    'example__documents' => ['locale' => ['en']],
+    'example__documents' => ['locale' => ['fr']],
 ]
 ```
 
-An empty scope means the whole table. Include historical or derived tables affected by cascades, with children before parents. Without a declaration, the domain remains additive.
+An empty scope means the whole table. Include historical or derived data affected by cascades, with children before parents. Without this declaration, imports only add data. An optional `guard` checks blocking states without writing before replacement.
 
-The engine backs up before deletion and rolls back the transaction if conversion fails. Do not execute DDL or irreversible external actions in handlers. Imported history must never replay payments, mail, votes or deliveries.
+If replacement removes your notifications, add `notification_deliveries => ['owner' => ['example']]`. The engine handles associated native notifications and rejects replacement while a send is in progress.
 
-Preflight includes a checksum of each table’s values, checked when creating the archive. Recovery then uses that encrypted archive. Databases must be genuinely separate, including when a host alias or another path refers to the destination. Scope SQL table listings to the connection’s current schema.
+Handlers run in a transaction. Do not change the schema or trigger payments, email or deliveries. Report files for manual transfer without reusing source identifiers.
 
-An optional `guard` checks blocking states without writes. It runs during preview and again inside the transaction before deletion. Use the validated game from `$context->options['game']` for game-specific data.
+## Supporting another format
 
-## Verify the adapter
+For a missing source, your package can implement `App\Kraft\Migration\Contracts\SourceAdapter`, or extend `AbstractSourceAdapter`, and register its class in `imports.adapters.<id>` from its provider. The interface describes discovering accounts, extensions and mappings in the format.
 
-Use synthetic fixtures for read-only analysis, missing columns, identity collisions, dependencies, hostile HTML and missing relations. Verify repeated imports, interruption and resume, replacement rollback and absence of replayed external effects. Document supported source versions and archive-only data.
+Test missing relations, identity collisions, private content and invalid HTML, plus interruption, recovery and rollback. State supported source versions and data that is only archived.

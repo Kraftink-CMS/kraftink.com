@@ -1,6 +1,6 @@
 # Create a game module
 
-A module supplies identification rules and connections for a game. It installs as an independent extension. The core uses its contracts without knowing a concrete game.
+A game module provides identity rules, avatars and server connections. Keep its code in an independent package organised like a plugin.
 
 ## Generate and register the adapter
 
@@ -8,9 +8,9 @@ A module supplies identification rules and connections for a game. It installs a
 php artisan kraft:make game "My game" --id=my-game
 ```
 
-Complete the package under `extensions/installed/games/my-game/`. Its manifest declares `type: "game"`, namespace, provider and requirements. The provider registers an `App\Kraft\Games\Contracts\GameAdapter` in `GameRegistry` using the manifest identifier. The generated template lists methods for metadata, settings, identities and sign-in requirements.
+Complete the package under `extensions/installed/games/my-game/`. Its manifest declares `type: "game"`, namespace, provider and requirements. The adapter implements `App\Kraft\Games\Contracts\GameAdapter` using the manifest identifier. The generated template lists methods for metadata, settings, identities and sign-in requirements.
 
-The generated manifest also references the descriptions in `lang/fr/messages.php` and `lang/en/messages.php` through `market.description`, without copying their texts. Replace this initial presentation with the module’s actual features in its language files. `market.name` supports a translated public name and `market.image` an optional shared or translated image supplied under `resources/market/`. The name, type and version remain defined in the manifest. The [release template](game-release-template/README.md) describes these fields and image formats.
+Set the manifest presentation and translations as for other [distributed extensions](extensions-publication.md).
 
 The provider lives in `src/Providers/GameServiceProvider.php`, the adapter in `src/Adapters/GameAdapter.php`. Game services use `src/Services`, with `Services/Profiles` for profile resolvers when that domain is present. Transport contract implementations are grouped under `src/Transports`. Its controllers and middleware use `src/Http`, its views `resources/views`.
 
@@ -20,7 +20,7 @@ The generated provider registers the adapter from its `register()` method:
 config(['games.adapters.my-game' => GameAdapter::class]);
 ```
 
-Keep game-specific rules in the adapter and its flows in package routes and views. The provider must boot before any database is installed. See the [lifecycle](architecture-extensions.md) and [release template](game-release-template/README.md).
+Keep game-specific rules in the adapter and its flows in package routes and views. The provider must boot before any database is installed. Dependencies and migrations follow the [shared contract](architecture-extensions.md).
 
 ## Profiles, avatars and identities
 
@@ -73,6 +73,6 @@ Implement `App\Kraft\Games\Transports\Transport` and register its class under `g
 
 Optional `ProvidesOnlinePlayers::onlinePlayers(Server $server): array` returns canonical identifiers actually present, obtained through an authenticated interface. A public ping count does not satisfy this contract. Commands marked `requires_online` wait without presence evidence.
 
-External exchanges remain outside SQL transactions and under an [operation guard](architecture-extensions.md#jobs-and-external-operations). Retain identifiers, leases and durable results to prevent resending after an interruption. See [server APIs](developpement-serveurs.md) for exchanges and [KraftLink](developpement-kraftlink.md) for a connector.
+External exchanges remain outside SQL transactions and under an [operation guard](architecture-extensions.md#jobs-and-external-operations). Retain identifiers, leases and durable results to prevent resending after an interruption. The [connection protocol](developpement-kraftlink.md) supports connectors that retrieve commands from the game server.
 
 Test invalid identities, unavailable services, rejected authentication and interruptions before and after a write becomes possible.

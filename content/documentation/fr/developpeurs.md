@@ -1,38 +1,44 @@
-# Développer avec KraftInk
+# Développer une extension
 
-Ce parcours s’adresse aux auteurs d’extensions et aux personnes qui intègrent KraftInk dans une application. Pour installer ou configurer un site, suivez le [guide propriétaire](README.md).
+KraftInk propose trois types de paquets : les plugins pour ajouter des fonctionnalités, les thèmes pour personnaliser le site ou le panneau, et les modules pour prendre en charge un jeu.
 
-## Créer votre premier paquet
+## Préparer votre installation locale
 
-Préparez un [environnement local](local-development.md), puis choisissez votre point de départ :
+Installez une copie de KraftInk dédiée au développement avec les [prérequis habituels](installation.md). Le développement PHP utilise Laravel et Blade. Les commandes `kraft:*` se lancent depuis le dossier contenant `artisan`.
 
-- [Créer un plugin](developpement-plugins.md) pour ajouter une fonctionnalité.
-- [Créer un thème](developpement-themes.md) pour personnaliser le site ou le panneau.
-- [Créer un module de jeu](developpement-jeux.md) pour prendre en charge un autre jeu.
+L’archive d’installation suffit pour commencer. Si vous partez des sources du CMS, préparez-les avec Composer et Node.js 22.12 ou supérieur :
 
-Ces guides expliquent la structure du paquet et les premières étapes. Consultez le [cycle de vie des extensions](architecture-extensions.md) pour les règles d’installation, de compatibilité et de migration.
+```shell
+composer install
+npm ci
+npm run build
+```
 
-## Brancher une intégration
+Faites servir `public/` par votre serveur local puis terminez l’assistant. Utilisez cette adresse dans `APP_URL` et dans les réglages du site. Après une modification de `.env`, lancez `php artisan config:clear`.
 
-| Besoin | Référence |
+## Choisir votre paquet
+
+| Besoin | Guide |
 | --- | --- |
-| Ajouter des écrans, menus et formulaires | [Contributions à l’interface](ui-contributions.md) |
-| Créer un tableau avec pagination, filtres et tri | [Tableaux interactifs](tables.md) |
-| Utiliser les fonctions d’un autre plugin | [API des plugins](api-plugins.md) |
-| Publier ou écouter un événement métier | [Événements des plugins](plugin-events.md) |
-| Déclarer des widgets configurables | [Widgets des plugins](plugin-widgets.md) |
-| Envoyer des notifications et respecter les préférences | [Notifications des plugins](plugin-notifications.md) |
-| Déclarer les permissions d’une API | [Permissions API des plugins](plugin-api-scopes.md) |
-| Connecter un bot ou un service sans compte membre | [Comptes techniques](service-accounts.md) |
-| Afficher des actualités ou l’état des serveurs ailleurs | [API publique](api-publique.md) |
-| Authentifier les joueurs depuis un launcher | [API d’authentification](auth-api.md) |
-| Développer un connecteur serveur | [KraftLink](developpement-kraftlink.md) et [API serveur](developpement-serveurs.md) |
-| Manipuler un solde ou ajouter un paiement | [Soldes](developpement-soldes.md) et [passerelles de paiement](passerelles-paiement.md) |
+| Ajouter une fonctionnalité et ses écrans | [Créer un plugin](developpement-plugins.md) |
+| Habiller le site public ou l’administration | [Créer un thème](developpement-themes.md) |
+| Ajouter les identités et connexions d’un jeu | [Créer un module de jeu](developpement-jeux.md) |
 
-Les [imports](development-migrations.md) et la [confidentialité](privacy-extensions.md) ont leurs propres contrats : consultez-les si votre extension conserve des données de membres.
+Le générateur crée le paquet sous `extensions/installed/{plugins,themes,games}/`. Installez-le ensuite depuis le panneau. Conservez son propre dépôt et ne modifiez pas les fichiers du CMS pour l’intégrer.
 
-## Tester et distribuer
+Le [manifeste et le cycle de vie](architecture-extensions.md) sont communs aux trois types. Ils définissent les dépendances, les migrations et les données conservées lors des mises à jour.
 
-Testez votre paquet sur une installation séparée, puis suivez le [guide de publication](extensions-publication.md). Le [contrat du Market](market-contract.md) sert à fournir un catalogue compatible.
+## Références selon vos besoins
 
-Pour contribuer au noyau, les [consignes de test](contribuer-tests.md) décrivent les suites et l’isolation des données.
+| Fonction | Référence |
+| --- | --- |
+| Menus, blocs, formulaires, images et référencement | [Interface](ui-contributions.md) et [tableaux](tables.md) |
+| Blocs configurables par le propriétaire | [Widgets](plugin-widgets.md) |
+| Notifications et préférences | [Notifications](plugin-notifications.md) |
+| Intégration entre plugins | [Services des plugins](api-plugins.md) et [événements](plugin-events.md) |
+| Solde et paiements | [Portefeuille](developpement-soldes.md) et [passerelles Shop](passerelles-paiement.md) |
+| Données de membres et reprise d’un autre CMS | [Confidentialité](privacy-extensions.md) et [imports](development-migrations.md) |
+| API pour une application externe | [Données publiques](api-publique.md), [authentification](auth-api.md) et [permissions API](plugin-api-scopes.md) |
+| Échanges avec un serveur de jeu | [Protocole de liaison](developpement-kraftlink.md) et [API de comptes et soldes](developpement-serveurs.md) |
+
+Quand le paquet fonctionne, vérifiez son installation et sa mise à jour avec des données d’essai avant de le [distribuer](extensions-publication.md).

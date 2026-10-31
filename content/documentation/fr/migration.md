@@ -1,37 +1,49 @@
 # Importer un ancien site
 
-L’assistant d’**Administration → Imports** peut lire une source KraftInk, Azuriom ou MineWeb historique. Son rapport indique ce qui peut réellement être repris sur votre site. Un nom de CMS ou de plugin ne garantit pas une reprise complète.
+**Administration → Imports** reprend les données reconnues d’une source KraftInk, Azuriom ou MineWeb historique. Le rapport de l’assistant indique les conversions disponibles et ce qui restera seulement archivé.
 
-Pour connaître les conversions de chaque plugin et les emplacements des fichiers source, consultez [Migrer MineWeb ou Azuriom](migration-mineweb-azuriom.md).
+## Préparer et lancer l’import
 
-## Préparer le transfert
+1. Sauvegardez la base et les fichiers de l’ancien site. Faites un essai sur une copie avant le transfert final.
+2. Préparez un accès en lecture seule à sa base ou à son fichier SQLite, distinct de la destination. Si vous avez un export `.sql`, restaurez-le dans une base séparée.
+3. Lancez l’analyse. L’assistant peut installer les extensions KraftInk correspondantes disponibles et compatibles.
+4. Vérifiez les décomptes, les correspondances de comptes et les éléments non convertibles avant de confirmer.
 
-1. Sauvegardez la base **et les fichiers** de l’ancien site. Faites un premier essai sur une copie.
-2. Préparez un accès en lecture seule à sa base MySQL/MariaDB, PostgreSQL ou à son fichier SQLite. La source doit être distincte de la base de KraftInk.
-3. Si vous avez seulement un export `.sql`, restaurez-le dans une base source séparée. Le panneau n’accepte pas directement les dumps SQL.
-4. Laissez l’assistant installer et activer les extensions KraftInk correspondantes disponibles, ou installez-les au préalable. Les équivalents gratuits du catalogue suivent les contrôles habituels de compatibilité et d’intégrité. Un thème correspondant peut aussi être sélectionné. Les extensions indisponibles sont indiquées.
-5. Placez l’ancien site en maintenance pour le transfert final, afin d’éviter de nouveaux achats, messages ou inscriptions pendant la copie.
+**Ajouter aux contenus existants** conserve la destination. **Remplacer les contenus convertibles** sauvegarde puis remplace les domaines sélectionnés. Les comptes locaux et réglages d’installation sont conservés. Shop et Vote gardent leurs historiques en fusion.
 
-## Lire le rapport avant de confirmer
+Pour le transfert final, placez l’ancien site en maintenance afin d’éviter des inscriptions, achats ou messages pendant la copie. Recommencez l’analyse si la source a changé.
 
-L’analyse ne convertit pas encore les données. Si l’installation automatique est cochée, elle prépare aussi les extensions correspondantes. Contrôlez les décomptes, les dépendances entre données et les éléments non convertibles. Si la source change après l’analyse, recommencez celle-ci.
+## Données de MineWeb et Azuriom
 
-Après conversion, ouvrez **Consulter le rapport** dans les derniers imports. Il distingue les lignes converties des éléments uniquement archivés et liste les fichiers ou règles à reprendre avec leur table et leur identifiant source. Le rapport JSON est téléchargeable. Un convertisseur disponible ne garantit pas que chaque colonne possède un équivalent.
+Les formats de référence sont MineWeb **1.15.2** et Azuriom **1.2.13**, avec leurs plugins officiels. Les forks, extensions tierces et NewMinewebCMS peuvent nécessiter un convertisseur adapté.
 
-**Ajouter aux contenus existants** conserve les contenus de destination et ajoute les éléments convertis. **Remplacer les contenus convertibles** sauvegarde puis remplace les domaines sélectionnés dans l’aperçu. Ce remplacement conserve les comptes locaux et les réglages d’installation. Les historiques financiers de Shop et les données de Vote restent en fusion.
+| Domaine | Reprise prévue |
+| --- | --- |
+| Comptes | Pseudos, e-mails, rangs, identités, dates, soldes représentables et mots de passe bcrypt ou Argon2 |
+| Site | Réglages publics compatibles, pages, actualités, menus et liens sociaux |
+| Wiki, FAQ et Staff | Catégories, contenus, ordre et restrictions compatibles. Staff concerne MineWeb |
+| Support | Tickets, messages, catégories, affectations et états compatibles |
+| Forum | Catégories, discussions, messages et accès représentables, sondages Azuriom. Les messages privés MineWeb restent archivés |
+| Vote | Annuaires, votes, récompenses et classements représentables, sans nouvelle distribution |
+| Shop | Catalogue, coupons, cartes cadeaux et historique financier justifié. Les abonnements demandent un rapprochement avec le prestataire |
 
-En cas de compte déjà présent, vérifiez les correspondances par e-mail ou identité de jeu et choisissez la conservation de ses accès locaux. Une correspondance ambiguë doit être corrigée avant de poursuivre.
+Les contenus arrivent en brouillon, masqués ou désactivés pour vérification. Les rangs ne reçoivent pas automatiquement les anciens privilèges d’administration. Les données sans équivalent restent dans l’archive privée.
 
-## Reprendre les éléments manquants
+## Fichiers et accès à reprendre
 
-Les fichiers ne sont pas transférés par la lecture de la base. Conservez les images, avatars, fichiers vendus et pièces jointes de l’ancien hébergement. Renvoyez-les dans KraftInk et rattachez-les aux bons contenus, en utilisant les emplacements privés pour les fichiers réservés.
+La lecture de la base ne transfère pas les fichiers. Conservez notamment :
 
-Les secrets, connexions externes et protections à deux facteurs ne deviennent pas automatiquement utilisables. Certains comptes importés devront réinitialiser leur mot de passe. Un compte protégé ou verrouillé exige une vérification de son titulaire avant déverrouillage.
+| Source | Dossiers usuels |
+| --- | --- |
+| MineWeb | `app/webroot/img/uploads/`, `app/webroot/files/` et les dossiers de skins ou capes utilisés |
+| Azuriom | `storage/app/public/` et, pour les fichiers vendus, `storage/app/shop/packages/` |
 
-Les anciennes récompenses et livraisons ne sont pas rejouées. Reprenez séparément les services de paiement, abonnements, livraisons en cours et réglages non convertis.
+Incluez les stockages externes ou personnalisés. Renvoyez les images publiques dans la médiathèque et les fichiers réservés dans leur espace privé, puis rattachez-les aux contenus. Copier un ancien dossier ne recrée pas ces associations.
 
-## Vérifier et ouvrir
+Les secrets SMTP, OAuth, paiements et connexions de jeu sont à reconfigurer. Certains membres devront réinitialiser leur mot de passe. Les comptes protégés ou verrouillés demandent une vérification avant réouverture.
 
-Comparez les comptes, montants et décomptes au site d’origine. Testez les liens, images, connexions et droits avec un visiteur puis un membre. Reconfigurez les accès aux espaces privés avant de les publier.
+## Vérifier le résultat
 
-Un import interrompu se reprend depuis le panneau. Conservez `.env`, sa clé et les archives privées de `storage/app/private/imports/` jusqu’à validation. Elles peuvent contenir des données personnelles et ne doivent pas être rendues publiques. La sauvegarde complète de l’ancien site reste nécessaire, même après un import réussi.
+Ouvrez **Consulter le rapport** pour retrouver les éléments à reprendre et télécharger le bilan JSON. Contrôlez les comptes, permissions, montants, liens et images avant de publier les contenus. Les anciennes commandes, récompenses et paiements ne sont pas rejoués.
+
+Un import interrompu se reprend depuis le panneau. Conservez `.env` et les archives privées de `storage/app/private/imports/` jusqu’à validation du transfert.

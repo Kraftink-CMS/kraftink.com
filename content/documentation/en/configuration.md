@@ -1,43 +1,35 @@
-# Configure your site
+# Configuring your site
 
-After installation, these settings let the CMS communicate with your hosting and external services. Manage content, menus, roles and visual options directly in the panel.
+After installation, check the site address, email delivery and language settings before inviting members.
 
-## Domain, HTTPS and proxy
+## Domain and proxy
 
-Set up the domain and its certificate with your host before saving the public URL in the site settings. Use the full address, for example `https://community.example`. This setting does not create a domain or certificate.
+Configure the domain and its HTTPS certificate with your host, then save the full address in the site settings, such as `https://community.example`.
 
-The **Network** plugin, bundled and enabled with KraftInk, handles connections passing through a proxy. Open **Plugins**, then **Configure** on Network to choose the mode matching your hosting:
+If you use Cloudflare or another proxy, open **Plugins → Network → Configure**:
 
-- **Direct connection** when visitors connect directly to the web server.
-- **Cloudflare** when requests pass through Cloudflare. Its network list is included in the plugin and maintained through CMS updates. No download or manual refresh is needed.
-- **Custom proxy** when your host uses another relay. Ask for its IP addresses or CIDR ranges and add only those.
+| Mode | Use |
+| --- | --- |
+| Direct connection | Visitors reach the web server directly |
+| Cloudflare | The domain uses Cloudflare. Its networks are already included |
+| Custom proxy | Add only the IP addresses or CIDR networks provided by your host |
 
-When Network is disabled, the CMS uses direct connections and ignores information forwarded by proxies. In Cloudflare mode, a connection outside Cloudflare’s networks also keeps the connection’s IP address.
+Network is bundled and enabled by default. Disabling it restores direct connections. An incorrect proxy setup can affect visitor addresses and HTTPS detection.
 
-An incorrect setup can affect visitor addresses or HTTPS detection. Behind another proxy that is not trusted, the detected address belongs to the relay. Do not mark every network as trusted to work around a problem.
+When changing domains, also update the callback addresses for [external sign-in](oauth.md) and [payments](shop-administration.md).
 
-When changing domains, also update the callback URLs for [external sign-in](oauth.md), payment services and other affected integrations. Set up a redirect from the old domain with your host.
+## Email
 
-## Send email
+In **Email and operation**, enter your provider’s SMTP settings and an authorised sender address. Sendmail is also available when supported by the host.
 
-Prepare credentials for an SMTP service, separate from your administrator account. In **Email and operation**, enter the host, port, connection mode and credentials supplied by the provider, then a sender address it allows. You can use Sendmail when your host provides it.
+Save, send a test email and check that it arrives, including in spam. Add any SPF or DKIM DNS records requested by the provider. Leaving a password blank keeps its saved value.
 
-Save, send a test email and check its arrival, including the spam folder. If the provider requires SPF or DKIM DNS records, add its exact values with your domain’s DNS provider.
+If the test fails, check the credentials, allowed outbound ports and provider logs. For scheduled sends or retries after a failure, configure the [scheduler](operations.md#scheduler).
 
-SMTP accepting a message does not guarantee delivery to the recipient’s inbox. If delivery fails, check the credentials, outbound ports allowed by your host and the provider’s logs. Leaving a password field empty preserves its saved secret.
+## Language and times
 
-Regular email is sent immediately by default. For deferred messages and automatic tasks, configure the [scheduler](operations.md#scheduler).
+Choose the site time zone, such as `Europe/Paris`. Publication times are entered in this zone. Changing it changes their display without moving deadlines already saved.
 
-## Language and time
+When visitors can choose a language, forms offer optional translations for your content. A missing field falls back to English, then the site language and finally its main value. Disabling the language choice keeps saved translations.
 
-The website, installer and administration panel are available in **French, English, Spanish, German and Portuguese**. Choose the primary language in the site settings. You can also allow visitors and members to choose their language.
-
-Choose the site language and time zone in the settings, for example `Europe/Paris`. Scheduled content uses this time zone. Changing it adjusts the display without moving deadlines already saved.
-
-The interface language does not translate your content. When language choice is enabled, the relevant forms offer optional translations for titles, descriptions, labels and presentation text. You do not need to fill in all five languages. Member messages and comments are not translated automatically. After an import, also check dates and text in each language you use.
-
-## Before opening
-
-Test registration and password recovery, then check public and private content with a member account. Enable two-factor authentication for your administrator accounts and keep their recovery codes outside the site.
-
-Install the [extensions you need](extensions-catalogue.md), configure your [game](games.md) and, if needed, [KraftLink](kraftlink.md). Finally, check that you have an [external backup](operations.md#backups).
+The [SEO guide](seo.md) explains automatic page titles and descriptions and how to customise them.

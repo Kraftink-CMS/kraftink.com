@@ -1,32 +1,44 @@
-# Develop with KraftInk
+# Developing an extension
 
-This path is for extension authors and people integrating KraftInk into an application. To install or configure a website, follow the [site owner guide](README.md).
+KraftInk offers three package types: plugins add features, themes customise the site or panel, and game modules add support for a game.
 
-## Create your first package
+## Preparing a local installation
 
-Prepare a [local environment](local-development.md), then choose a starting point:
+Install a development copy of KraftInk with the [usual requirements](installation.md). PHP development uses Laravel and Blade. Run `kraft:*` commands from the directory containing `artisan`.
 
-- [Create a plugin](developpement-plugins.md) to add a feature.
-- [Create a theme](developpement-themes.md) to customise the site or administration panel.
-- [Create a game module](developpement-jeux.md) to support another game.
+The installation archive is enough to get started. If you use CMS sources, prepare them with Composer and Node.js 22.12 or later:
 
-These guides explain the package structure and first steps. Read the [extension lifecycle](architecture-extensions.md) for installation, compatibility and migration rules.
+```shell
+composer install
+npm ci
+npm run build
+```
 
-## Connect an integration
+Serve `public/` through your local web server and complete the installer. Use that address in `APP_URL` and site settings. After changing `.env`, run `php artisan config:clear`.
 
-| Need | Reference |
+## Choosing a package
+
+| Need | Guide |
 | --- | --- |
-| Add screens, menus and forms | [UI contributions](ui-contributions.md) |
-| Use another plugin’s features | [Plugin APIs](api-plugins.md) |
-| Display news or server status in another app | [Public API](api-publique.md) |
-| Authenticate players from a launcher | [Authentication API](auth-api.md) |
-| Develop a server connector | [KraftLink](developpement-kraftlink.md) and [server API](developpement-serveurs.md) |
-| Work with balances or add a payment provider | [Balances](developpement-soldes.md) and [payment gateways](passerelles-paiement.md) |
+| Add a feature and its screens | [Create a plugin](developpement-plugins.md) |
+| Customise the public site or administration | [Create a theme](developpement-themes.md) |
+| Add a game’s identities and connections | [Create a game module](developpement-jeux.md) |
 
-[Imports](development-migrations.md) and [privacy](privacy-extensions.md) have their own contracts: consult them if your extension stores member data.
+The generator creates packages under `extensions/installed/{plugins,themes,games}/`. Install the package from the panel afterwards. Keep its own repository and integrate it without editing CMS files.
 
-## Test and distribute
+The [manifest and lifecycle](architecture-extensions.md) apply to all three types. They define dependencies, migrations and data kept during updates.
 
-Test your package on a separate installation, then follow the [publishing guide](extensions-publication.md). The [Market contract](market-contract.md) describes compatible catalogues.
+## References for specific needs
 
-For core contributions, the [testing guide](contribuer-tests.md) covers the suites and data isolation.
+| Feature | Reference |
+| --- | --- |
+| Menus, blocks, forms, images and SEO | [Interface](ui-contributions.md) and [tables](tables.md) |
+| Blocks configured by the owner | [Widgets](plugin-widgets.md) |
+| Notifications and preferences | [Notifications](plugin-notifications.md) |
+| Integration between plugins | [Plugin services](api-plugins.md) and [events](plugin-events.md) |
+| Balances and payments | [Wallet](developpement-soldes.md) and [Shop gateways](passerelles-paiement.md) |
+| Member data and importing another CMS | [Privacy](privacy-extensions.md) and [imports](development-migrations.md) |
+| APIs for external applications | [Public data](api-publique.md), [authentication](auth-api.md) and [API permissions](plugin-api-scopes.md) |
+| Game server communication | [Connection protocol](developpement-kraftlink.md) and [account and balance API](developpement-serveurs.md) |
+
+When the package works, check installation and updates with test data before [distributing it](extensions-publication.md).

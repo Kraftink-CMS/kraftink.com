@@ -1,6 +1,6 @@
 # Intégrer les comptes et soldes depuis un serveur
 
-Cette API sert aux auteurs de connecteurs qui proposent des opérations de compte ou de portefeuille depuis le jeu. Pour installer KraftLink, utilisez le [guide propriétaire](kraftlink.md). Pour ses commandes et confirmations de livraison, consultez le [protocole KraftLink](developpement-kraftlink.md). Un nouveau transport relève du [module de jeu](developpement-jeux.md).
+Cette API permet à un connecteur de gérer les comptes et soldes depuis le jeu. Elle complète le [protocole de livraison](developpement-kraftlink.md) avec une clé et des permissions distinctes.
 
 ## Obtenir un accès dédié
 
@@ -24,7 +24,7 @@ Préfixe : `/api/link/accounts`. Utilisez HTTPS, `Authorization: Bearer IDENTIFI
 | `POST /players/{uuid}/balance/debit` | `wallet:debit` |
 | `POST /players/{uuid}/balance/set` | `wallet:set` |
 
-Les réponses JSON utilisent `success` pour indiquer la réussite et `data` pour le résultat. Le profil renvoie dans `data` le numéro du compte, son pseudo et son identité de jeu. Le solde renvoie `data.balance_minor` et `data.currency`. Les réponses sont privées et sans cache. Respectez `Retry-After` sur `429`, ainsi que les interruptions pendant une maintenance, une mise à jour ou un import. Sur plusieurs instances du CMS, les limites de tentatives nécessitent un cache partagé.
+Les réponses JSON utilisent `success` pour indiquer la réussite et `data` pour le résultat. Le profil renvoie dans `data` le numéro du compte, son pseudo et son identité de jeu. Le solde renvoie `data.balance_minor` et `data.currency`. Les réponses sont privées et sans cache. Respectez `Retry-After` sur `429`, ainsi que les interruptions pendant une maintenance, une mise à jour ou un import.
 
 ## Inscription et modification d’identifiants
 

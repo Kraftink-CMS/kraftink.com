@@ -1,23 +1,15 @@
-# Prepare shop payments
+# Configuring payments
 
-Install and enable Shop, then configure your merchant accounts before opening sales. Products and their options are configured directly in the panel. This guide covers payment notifications and delivery.
-
-## Prepare the website
-
-Use the final HTTPS domain, [tested email delivery](configuration.md) and working [scheduled tasks](operations.md). Complete the seller identity and invoicing settings in the panel. Back up the website before changing providers or currency.
-
-Providers must reach notification URLs without a login screen or a proxy/firewall challenge. Use the full URL displayed by KraftInk, especially when installed in a subdirectory.
+Install Shop, then configure your merchant accounts using the site’s final HTTPS address. Providers must be able to reach the notification URLs displayed in the panel.
 
 ## Stripe and PayPal
 
-| Provider | Credentials to enter in KraftInk | Notification destination |
+| Provider | Credentials | Notification URL |
 | --- | --- | --- |
 | Stripe | Secret key and webhook signing secret | `/shop/webhooks/stripe` |
-| PayPal | Client ID, secret and application webhook identifier | `/shop/webhooks/paypal` |
+| PayPal | Client ID, secret and webhook ID | `/shop/webhooks/paypal` |
 
-Match the credentials and webhook to the same test or production environment. PayPal starts in Sandbox mode. A browser return to the shop does not confirm payment: notifications must work even if the buyer closes the page.
-
-For Stripe, enable these events:
+Use credentials and webhooks from the same environment. PayPal starts in Sandbox. In Stripe, enable:
 
 ```text
 checkout.session.completed
@@ -33,7 +25,7 @@ refund.failed
 charge.dispute.*
 ```
 
-`charge.dispute.*` means every event in that family. For PayPal, enable payments, refunds, subscriptions and disputes:
+In PayPal, enable:
 
 ```text
 PAYMENT.CAPTURE.COMPLETED
@@ -50,28 +42,20 @@ CUSTOMER.DISPUTE.UPDATED
 CUSTOMER.DISPUTE.RESOLVED
 ```
 
-`BILLING.SUBSCRIPTION.*` means every subscription event. The merchant account must also permit the refund and dispute operations offered by the panel.
+`charge.dispute.*` and `BILLING.SUBSCRIPTION.*` mean all events in those families.
 
 ## Paysafecard and Paymentwall
 
-Paysafecard uses the REST merchant key starting with `psc_`. KraftInk supplies the provider with a notification address specific to each order. You do not need to invent a generic URL.
+Paysafecard uses a REST merchant key starting with `psc_`. The notification address is sent automatically for each order.
 
-For Paymentwall, prepare a **Widget API / Digital Goods** project, its project key and secret key. Configure signature version 3 and the `/shop/webhooks/paymentwall` address displayed by the website.
+For Paymentwall, prepare a **Widget API / Digital Goods** project, its project and secret keys, signature version 3 and the `/shop/webhooks/paymentwall` address displayed by the CMS.
 
-Both integrations start in test mode and support one-time purchases. They do not offer subscriptions or refunds initiated from KraftInk. Match the site’s mode to the merchant project and validate notification receipt before production.
+Both methods start in test mode and support one-time purchases. They do not offer subscriptions or refunds initiated from KraftInk.
 
-## Verify a complete purchase
+## Checking before opening
 
-1. Prepare a test product and payment method in its test environment.
-2. Complete checkout, then check confirmation in the merchant account and KraftInk.
-3. Verify the expected delivery: rank, balance, private download or [in-game command](kraftlink.md).
-4. For features you use, also test subscription renewal and refunds.
-5. Replace test credentials with production credentials and configure their own notifications before enabling real sales.
+Make a test-environment purchase, then check its confirmation and the benefit received: rank, balance, private file or [game command](kraftlink.md). Also test renewals or refunds if you use them.
 
-For in-game rewards, test the commands on the destination server and its allowlist. Upload a sold file as the product’s private file. Media-library images remain public.
+Before real sales, replace test credentials with production credentials and configure their notifications. The browser return alone does not confirm payment.
 
-## Payment received, delivery missing
-
-Check the order, its notification and the server log. If the provider has collected payment, do not ask for a second payment to repair a reward. Correct the cause and use the recovery offered by the panel. A command with an uncertain in-game effect must be checked before retrying.
-
-After a refund or dispute, check revoked benefits and operations flagged for review. Restoring the website does not reverse payments or commands already executed externally.
+If payment arrives without delivery, check the order and notifications before using the panel’s retry action. For an uncertain game command, first check its effect on the server.

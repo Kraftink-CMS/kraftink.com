@@ -1,25 +1,8 @@
 # Intégrer les API des plugins
 
-Ces contrats servent à ajouter une devise, une tarification ou un fournisseur de vote, ou à lire les données publiques du Forum. Déclarez `plugin:shop` ou `plugin:vote` dans `requires`, avec leur contrainte de version, dès que votre extension utilise leurs classes. Le registre de devises appartient au noyau.
+Ces API ajoutent une tarification Shop ou un fournisseur Vote et donnent accès aux données du Forum et du Support. Déclarez le plugin utilisé dans `requires` ou `integrations` selon que la dépendance est obligatoire ou facultative.
 
-Pour configurer les extensions existantes, consultez [les paiements](shop-administration.md), [Vote](vote.md) ou [l’installation des extensions](extensions-catalogue.md).
-
-## Déclarer une devise
-
-Dans `register()` du fournisseur de votre plugin :
-
-```php
-$this->app->make(\App\Kraft\Currencies\CurrencyRegistry::class)
-    ->register('AUD', 2, 'my-currencies::messages.aud');
-```
-
-Le code contient trois lettres majuscules. L’exposant est obligatoire : **seul `2` est pris en charge**. N’enregistrez pas une devise à zéro ou trois décimales comme une devise à deux décimales.
-
-Le libellé facultatif est une clé de traduction du plugin. Vous pouvez répéter une déclaration identique, mais pas changer le libellé d’un code déjà enregistré.
-
-Le registre fournit `get($code)`, qui retourne un objet immuable avec `code`, `decimals` et `label()`, ou refuse un code inconnu. `find($code)` retourne `null` s’il manque. `all()` et `codes()` exposent le registre.
-
-Une devise ajoutée n’étend pas automatiquement les moyens de paiement. Une [passerelle](passerelles-paiement.md) doit implémenter `KraftInk\Plugins\Shop\Contracts\Payments\SupportsCurrencies` et sa méthode `supportsCurrency(Currency $currency): bool`, avec `App\Kraft\Currencies\Currency`. Sans ce contrat, seules EUR, USD, GBP, CAD et CHF sont acceptées. Les montants restent des unités mineures entières, sans conversion implicite.
+Les devises utilisent le registre commun décrit dans le [portefeuille](developpement-soldes.md#montants-et-devise). Les prestataires de paiement suivent le [contrat des passerelles](passerelles-paiement.md).
 
 ## Ajouter une tarification Shop
 
@@ -96,3 +79,7 @@ Les routes GET suivantes nécessitent Forum actif et la permission `forum.view`.
 | `/api/forum/categories/{id}/feeds/{format}` | Flux d’une catégorie |
 
 `locale` accepte une langue du site, `page` commence à 1 et `per_page` va de 1 à 50, avec 20 par défaut. Les listes paginées retournent `data.items` et `data.pagination` (`page`, `per_page`, `total`, `last_page`). Un contenu inaccessible retourne 404. Les flux acceptent `rss` ou `atom` et fournissent ETag/Last-Modified.
+
+## Lire les tickets Support
+
+`GET /api/support/tickets` et `GET /api/support/tickets/{id}` demandent un jeton avec `support:tickets:read`, lié à `support.view`. Ils exposent les tickets du titulaire et leurs messages non internes, même si son compte est administrateur. `page` commence à 1 et `per_page` accepte de 1 à 50, avec 20 par défaut.

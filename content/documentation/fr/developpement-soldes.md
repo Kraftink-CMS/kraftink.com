@@ -1,6 +1,6 @@
 # Utiliser le portefeuille
 
-Une extension crédite, débite ou transfère des montants avec `App\Kraft\Wallet\Wallet`. N’écrivez pas directement dans les tables de solde.
+Utilisez `App\Kraft\Wallet\Wallet` pour créditer, débiter ou transférer un montant. Le service tient le solde et son historique dans la même opération.
 
 ## Montants et devise
 
@@ -16,6 +16,8 @@ app(\App\Kraft\Currencies\CurrencyRegistry::class)
 ```
 
 Le code comporte trois lettres majuscules. Seul l’exposant `2` est pris en charge. Vous pouvez répéter une inscription identique, mais une définition contradictoire est refusée. Ajouter une devise ne rend pas les passerelles de paiement compatibles avec celle-ci.
+
+Le registre fournit `get($code)`, `find($code)`, `all()` et `codes()`. `get()` refuse un code inconnu, tandis que `find()` renvoie `null`.
 
 ## Opérations atomiques
 

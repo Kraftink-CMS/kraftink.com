@@ -1,6 +1,6 @@
 # Interface integration
 
-This guide is for plugin and theme authors adding menus, blocks or forms. CMS layouts already provide Bootstrap, shared form handling and TinyMCE.
+Plugins and themes use CMS insertion points and components for menus, forms and content. Layouts load Bootstrap, TinyMCE and AJAX handlers.
 
 ## Menus and blocks
 
@@ -100,3 +100,40 @@ app(\App\Kraft\SiteDates::class)->normalize($request, ['published_at']);
 ```
 
 The component handles the site timezone and the `earlier/later` choice for ambiguous times. The normalizer only converts declared fields accompanied by its marker. `format()` displays local time, while `iso()` retains machine-readable UTC. Do not convert API dates already in UTC again.
+
+## Page metadata
+
+Register destinations in `boot()` through `App\Events\CollectingSeoPages` to offer their patterns in the panel:
+
+```php
+Event::listen(CollectingSeoPages::class, function (CollectingSeoPages $event): void {
+    $event->add(
+        'plugins.example.public.products.show',
+        __('example::messages.seo.product'),
+        ['product_name' => __('example::messages.seo.product_name')],
+        defaults: ['title' => '{product_name}'],
+    );
+});
+```
+
+Import the event and `Illuminate\Support\Facades\Event`. `add()` takes the route, label, variables, optional alternative routes and defaults. Register lists and details separately. Routes are public and accept GET.
+
+Supply rendering data from the controller:
+
+```php
+return view('example::default.products.show', [
+    'product' => $product,
+    'seo' => [
+        'title' => $product->name,
+        'description' => \App\Kraft\Site\Seo::excerpt($product->description),
+    ],
+    'seoVariables' => [
+        'product_name' => $product->name,
+        'category_name' => $product->category?->name ?? '',
+    ],
+]);
+```
+
+Blade sections `seo_title` and `seo_description` override page-pattern customisations. `canonical`, `og_type`, `og_image` and `robots` add metadata. Custom layouts keep `default.layouts.partials.metadata`.
+
+Apply visibility rules in the controller and `CollectingSitemapEntries`. Restricted content on a public route must also set `noindex,nofollow`. Metadata does not replace access checks.
