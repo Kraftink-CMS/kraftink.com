@@ -8,8 +8,7 @@ import { commonMessages, legalMessages, statisticsMessages } from '../lib/transl
 import { LocaleRedirect } from '../routing/LocaleRedirect';
 import { hasRole } from '../../shared/auth';
 import { PageMetadata } from '../components/PageMetadata';
-import { DiscordIcon } from '../components/DiscordIcon';
-import { discordUrl, externalLinkRel } from '../../shared/links';
+import { SocialLinks } from '../components/SocialLinks';
 
 export function SiteLayout() {
     const { locale, path } = useLocale();
@@ -64,10 +63,11 @@ export function SiteLayout() {
             </a>
             <header className="site-header">
                 <nav className="navbar navbar-expand-xl" aria-label={copy.navLabel}>
-                    <div className="container header-inner gap-3">
+                    <div className="container header-inner">
                         <Link className="navbar-brand brand" to={path('/')} aria-label={`KraftInk - ${copy.home}`}>
                             <img src="/assets/brand/logo.svg" width="154" height="51" alt="KraftInk" />
                         </Link>
+                        <SocialLinks className="header-social-links" />
                         <button
                             className="navbar-toggler"
                             type="button"
@@ -99,17 +99,6 @@ export function SiteLayout() {
                                     <NavLink className="nav-link" to={path('/documentation')}>
                                         {copy.docs.title}
                                     </NavLink>
-                                </li>
-                                <li className="nav-item">
-                                    <a
-                                        className="nav-link d-inline-flex align-items-center gap-2"
-                                        href={discordUrl}
-                                        target="_blank"
-                                        rel={externalLinkRel(discordUrl)}
-                                    >
-                                        <DiscordIcon />
-                                        {copy.community.name}
-                                    </a>
                                 </li>
                             </ul>
                             <div className="site-header-actions">
@@ -211,28 +200,12 @@ export function SiteLayout() {
                                 <Link to={path('/privacy')} className="link-secondary">
                                     {legal.privacy.title}
                                 </Link>
-                                <a
-                                    href="https://github.com/kraftink-cms"
-                                    className="link-secondary"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    GitHub
-                                </a>
-                                <a
-                                    href={discordUrl}
-                                    className="link-secondary d-inline-flex align-items-center gap-2"
-                                    target="_blank"
-                                    rel={externalLinkRel(discordUrl)}
-                                >
-                                    <DiscordIcon />
-                                    {copy.community.name}
-                                </a>
                             </nav>
                         </div>
                     </div>
                     <div className="footer-bottom">
                         <small className="text-body-secondary">© {new Date().getFullYear()} KraftInk</small>
+                        <SocialLinks />
                     </div>
                 </div>
             </footer>

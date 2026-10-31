@@ -338,7 +338,7 @@ export default {
         ],
     },
     'community': {
-        'name': 'Discord',
+        'socials': 'La communauté KraftInk',
         'title': 'Échangeons autour de KraftInk',
         'description': 'Posez vos questions, partagez votre site et discutez du CMS avec la communauté sur Discord.',
         'join': 'Rejoindre le Discord',
