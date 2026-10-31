@@ -41,11 +41,11 @@ $registry->register(
 
 Import `App\Kraft\Migration\ImportContext` and `App\Kraft\Html`. Priorities put parents before children. `dependencies` declares required source tables and `identity` replaces the default source key `id` when needed.
 
-The context provides `required()` for mandatory relations, `mapped()` for optional relations and `metadata()` for a small non-sensitive context. `$context->report($kind, $details)` records outstanding items with their source reference.
+The context provides `required($table, $id)` to find a mandatory relation and `mapped($table, $id)` for an optional relation. To retain non-sensitive context, add `metadata` to the mapping’s returned array. A later mapping can read it with `$context->metadata($table, $id)`. `$context->report($kind, $details)` records outstanding items with their source reference.
 
 ## Settings and replacement
 
-`MappingRegistry::settings($source, $handler, $plugin)` registers a settings conversion. The callback receives `['key' => ..., 'value' => ...]` and the context. Write only recognised equivalents through `$context->setting($key, $value)` without copying secrets or media identifiers.
+`$registry->settings($source, $handler, $plugin)` registers a settings conversion on the same `MappingRegistry` instance. The callback receives `['key' => ..., 'value' => ...]` and the context. Write only recognised equivalents through `$context->setting($key, $value)` without copying secrets or media identifiers.
 
 To allow replacement, declare your domain’s tables and rows in the `replacements` argument:
 

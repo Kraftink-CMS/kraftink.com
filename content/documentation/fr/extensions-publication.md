@@ -28,11 +28,70 @@ Pour le frontend, déclarez un script `build` produisant les fichiers sous `publ
 
 ## Présentation dans le Market
 
-Le manifeste fournit `name` et `description` sous forme de textes ou de clés de traduction du paquet. `market.name` et `market.description` permettent une présentation dédiée. Une description est nécessaire à la validation.
+`market.name` et `market.description` définissent la présentation du catalogue. Sans ces champs, la publication reprend `name` et `description` à la racine du manifeste. Une description est nécessaire à la validation.
+
+Choisissez l’une des trois formes suivantes pour chaque champ.
+
+### Réutiliser les traductions du paquet
+
+Une clé référence un texte de vos fichiers de langue. C’est le format à utiliser pour conserver les traductions dans les catalogues PHP du paquet :
+
+```json
+"market": {
+    "name": "my-theme::messages.market.name",
+    "description": "my-theme::messages.market.description",
+    "image": "preview.jpg"
+}
+```
+
+Dans `lang/fr/messages.php` :
+
+```php
+<?php
+
+return [
+    'market' => [
+        'name' => 'Mon thème',
+        'description' => 'Un thème pour votre communauté.',
+    ],
+];
+```
+
+Dans `lang/en/messages.php` :
+
+```php
+<?php
+
+return [
+    'market' => [
+        'name' => 'My theme',
+        'description' => 'A theme for your community.',
+    ],
+];
+```
+
+`my-theme` doit correspondre à l’`id` du manifeste. `messages` désigne le fichier PHP et `market.description` les clés imbriquées du tableau. La publication récupère les langues renseignées. Une clé sans aucune traduction bloque la validation.
+
+### Écrire un texte commun
+
+Pour une présentation identique dans toutes les langues, utilisez du texte direct :
 
 ```json
 "market": {
     "name": "My theme",
+    "description": "A theme for your community."
+}
+```
+
+Ce texte s’affiche tel quel, sans traduction automatique.
+
+### Renseigner les langues dans le manifeste
+
+Un dictionnaire permet aussi de fournir les textes directement par langue :
+
+```json
+"market": {
+    "name": {"fr": "Mon thème", "en": "My theme"},
     "description": {
         "fr": "Un thème pour votre communauté.",
         "en": "A theme for your community."
@@ -41,7 +100,9 @@ Le manifeste fournit `name` et `description` sous forme de textes ou de clés de
 }
 ```
 
-Placez les images dans `resources/market/`. Les formats acceptés sont PNG, JPG, JPEG, WebP, GIF et AVIF. Une image commune se déclare avec `"image": "preview.jpg"`. Les traductions présentes sont utilisées sans imposer toutes les langues.
+Les valeurs de ce dictionnaire sont des textes directs. Vous pouvez mélanger les formats entre les champs, par exemple un nom commun et une description issue d’une clé. Toutes les langues ne sont pas obligatoires.
+
+Placez les images dans `resources/market/`. `"image": "preview.jpg"` utilise une image commune, tandis que le dictionnaire de l’exemple choisit une image par langue. Les formats acceptés sont PNG, JPG, JPEG, WebP, GIF et AVIF. Une URL HTTPS publique directe est aussi acceptée.
 
 Les champs facultatifs `author.name`, `author.url`, `commercial.kind`, `commercial.url`, `commercial.price` et `manual_only` se placent aussi dans `market`. Par exemple, un prix utilise `{"amount": "9.99", "currency": "EUR"}`.
 

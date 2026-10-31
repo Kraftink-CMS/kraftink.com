@@ -20,7 +20,16 @@ Envoyez `POST /api/auth/authenticate` :
 
 Une réponse 200 contient `data.access_token`, `token_type: "Bearer"`, `expires_at`, `scopes` et `user`, avec `success: true` et `data.status: "success"`. Stockez le secret en privé, il n’est affiché qu’à sa création ou rotation.
 
-Avec la 2FA, la première réponse est 202 avec `data.status: "pending"`, `reason: "2fa"`, `challenge` et `expires_in: 300`. Envoyez le challenge et `code` à `POST /api/auth/challenge`. Le code peut être un TOTP ou un code de récupération. Le challenge dure cinq minutes, avec cinq essais au maximum.
+Avec la 2FA, la première réponse est 202 avec `data.status: "pending"`, `reason: "2fa"`, `challenge` et `expires_in: 300`. Envoyez ensuite `POST /api/auth/challenge` avec le challenge reçu et le code du membre :
+
+```json
+{
+    "challenge": "CHALLENGE_RECU",
+    "code": "123456"
+}
+```
+
+`code` accepte un TOTP ou un code de récupération. Le challenge dure cinq minutes, avec cinq essais au maximum. Une validation réussie renvoie le jeton comme lors d’une connexion sans 2FA.
 
 ## Utiliser et révoquer
 

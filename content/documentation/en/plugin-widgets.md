@@ -39,6 +39,19 @@ app(\App\Kraft\Widgets\WidgetRegistry::class)->register(
 
 Context provides `user`, `locale` and `instance`. The callback filters content by publication, language and access. Other context values are not proof of authorisation.
 
+For fixed content, use a view instead of a callback:
+
+```php
+app(\App\Kraft\Widgets\WidgetRegistry::class)->register(
+    owner: 'example',
+    id: 'welcome',
+    label: 'example::widgets.welcome',
+    render: 'example::widgets.welcome',
+);
+```
+
+The view at `resources/views/widgets/welcome.blade.php` receives `$context` and `$config`. Use the first example’s callback when data needs preparation before rendering.
+
 ## Configuration fields
 
 The registry accepts up to twenty scalar fields with stable identifiers and translated `label` values. `help` is an optional help key.

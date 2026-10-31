@@ -35,4 +35,4 @@ Le chargement défaillant d’un paquet concerné interrompt la demande. Il ne d
 
 ## Vérifier le comportement
 
-Testez un export avec droits restreints, les références vers d’autres comptes, l’absence de tables, l’extension désactivée et l’annulation complète après une erreur. Les fixtures utilisent des comptes et fichiers isolés.
+Testez un export avec droits restreints, les références vers d’autres comptes, l’absence de tables, l’extension désactivée et l’annulation complète après une erreur.

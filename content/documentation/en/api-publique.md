@@ -21,9 +21,11 @@ Only published content accessible to visitors is included. A signed-in account d
 
 ## Server status
 
-`GET /api/public/servers` returns `data`, a list of enabled servers for the active game. Each entry exposes `id`, `name`, `game`, `online`, `fresh`, `players_online`, `players_max` and `last_seen_at`.
+`GET /api/public/servers` returns `data`, a list of servers for the active game with public display enabled. Each entry exposes `id`, `name`, `game`, `online`, `fresh`, `players_online`, `players_max` and `last_seen_at`.
 
-Status received within 90 seconds gives `fresh=true`. Before the first status, `online=null` means unknown. Stale status gives `online=false` and `null` counters. Responses are cached for 15 seconds.
+For an active connection, status received within 90 seconds gives `fresh=true`. Before the first status, `online=null` means unknown. Stale status or a disabled connection gives `online=false`, `fresh=false` and `null` counters. Responses are cached for 15 seconds.
+
+The root-level `totals` object contains `players_online` and `players_max`. It sums recent status from servers with player counting enabled, independently of public display. A value without an available measurement stays `null`.
 
 Internal hosts, secrets and named player lists are not exposed.
 
@@ -42,4 +44,4 @@ The same data is available with a personal or [service account](service-accounts
 | `/api/site/news`, `/api/site/news/{id}` | `site:news:read` | `content.manage` |
 | `/api/site/servers` | `site:servers:read` | `servers.manage` |
 
-These scopes do not expand content visibility. Token behaviour is covered in [authentication](auth-api.md).
+These routes allow 90 requests per minute. Their scopes do not expand content visibility. Token behaviour is covered in [authentication](auth-api.md).

@@ -39,6 +39,19 @@ app(\App\Kraft\Widgets\WidgetRegistry::class)->register(
 
 Le contexte fournit `user`, `locale` et `instance`. Le callback filtre les contenus par publication, langue et droits. Les autres valeurs de contexte ne sont pas une preuve d’autorisation.
 
+Pour un contenu fixe, une vue suffit à la place du callback :
+
+```php
+app(\App\Kraft\Widgets\WidgetRegistry::class)->register(
+    owner: 'example',
+    id: 'welcome',
+    label: 'example::widgets.welcome',
+    render: 'example::widgets.welcome',
+);
+```
+
+La vue `resources/views/widgets/welcome.blade.php` reçoit `$context` et `$config`. Utilisez le callback du premier exemple lorsqu’il faut préparer des données avant le rendu.
+
 ## Champs de configuration
 
 Le registre accepte vingt champs scalaires au maximum, avec un identifiant stable et un `label` traduit. `help` fournit une clé d’aide facultative.

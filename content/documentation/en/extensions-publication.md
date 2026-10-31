@@ -28,11 +28,70 @@ For the frontend, declare a `build` script producing files under `public/`. Publ
 
 ## Market presentation
 
-The manifest supplies `name` and `description` as text or package translation keys. `market.name` and `market.description` allow a dedicated presentation. Validation requires a description.
+`market.name` and `market.description` define the catalogue presentation. When omitted, publication uses `name` and `description` from the manifest root. Validation requires a description.
+
+Choose one of these three formats for each field.
+
+### Reusing package translations
+
+A key references text in your language files. Use this format to keep translations in the package’s PHP catalogues:
+
+```json
+"market": {
+    "name": "my-theme::messages.market.name",
+    "description": "my-theme::messages.market.description",
+    "image": "preview.jpg"
+}
+```
+
+In `lang/fr/messages.php`:
+
+```php
+<?php
+
+return [
+    'market' => [
+        'name' => 'Mon thème',
+        'description' => 'Un thème pour votre communauté.',
+    ],
+];
+```
+
+In `lang/en/messages.php`:
+
+```php
+<?php
+
+return [
+    'market' => [
+        'name' => 'My theme',
+        'description' => 'A theme for your community.',
+    ],
+];
+```
+
+`my-theme` must match the manifest `id`. `messages` identifies the PHP file and `market.description` its nested array keys. Publication collects the languages you have filled in. A key without any translated value fails validation.
+
+### Writing shared text
+
+For the same presentation in every language, use literal text:
 
 ```json
 "market": {
     "name": "My theme",
+    "description": "A theme for your community."
+}
+```
+
+This text is displayed as written without automatic translation.
+
+### Providing languages in the manifest
+
+A dictionary also lets you supply text directly per language:
+
+```json
+"market": {
+    "name": {"fr": "Mon thème", "en": "My theme"},
     "description": {
         "fr": "Un thème pour votre communauté.",
         "en": "A theme for your community."
@@ -41,7 +100,9 @@ The manifest supplies `name` and `description` as text or package translation ke
 }
 ```
 
-Place images in `resources/market/`. Supported formats are PNG, JPG, JPEG, WebP, GIF and AVIF. A shared image uses `"image": "preview.jpg"`. Available translations are used without requiring every language.
+Dictionary values are literal text. You can mix formats between fields, such as a shared name and a description from a translation key. Not every language is required.
+
+Place images in `resources/market/`. `"image": "preview.jpg"` uses a shared image, while the example dictionary selects an image per language. Supported formats are PNG, JPG, JPEG, WebP, GIF and AVIF. A direct public HTTPS URL is also accepted.
 
 Optional `author.name`, `author.url`, `commercial.kind`, `commercial.url`, `commercial.price` and `manual_only` also belong in `market`. For example, a price uses `{"amount": "9.99", "currency": "EUR"}`.
 

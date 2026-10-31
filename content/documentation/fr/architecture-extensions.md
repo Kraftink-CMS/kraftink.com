@@ -66,7 +66,7 @@ use App\Kraft\Trash\TrashSource;
 use App\Models\Accounts\User;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-use KraftInk\Plugins\Example\Services\DocumentTrash;
+use MyStudio\Example\Services\DocumentTrash;
 
 app(TrashRegistry::class)->register(new TrashSource(
     key: 'example.documents',
@@ -89,13 +89,13 @@ app(TrashRegistry::class)->register(new TrashSource(
 ));
 ```
 
-`key` est stable et préfixée par votre identifiant. `query` renvoie un `Illuminate\Database\Query\Builder` sélectionnant `id`, `title`, `deleted_at` et `restore_reason`, filtré selon les droits de l’opérateur. `restore_reason` contient une clé de traduction si la restauration est bloquée, sinon `null`.
+`key` est stable et préfixée par votre identifiant. `query` renvoie un builder de requête Laravel ou Eloquent sélectionnant `id`, `title`, `deleted_at` et `restore_reason`, filtré selon les droits de l’opérateur. `restore_reason` contient une clé de traduction si la restauration est bloquée, sinon `null`.
 
 `permissions` protège la consultation, `restorePermissions` la restauration et `purgePermissions` la purge. Les droits de chaque liste sont tous exigés. `authorize` accepte un callback facultatif `(User $actor): bool` pour une règle complémentaire. `keyType` vaut `integer` ou `string` pour un identifiant opaque.
 
 Les callbacks revérifient l’état, les parents et les droits dans une transaction. `purge` est facultatif et ne doit accepter que des éléments supprimés. Retirez les enfants et références possédés, puis les fichiers après commit. Les sources d’un plugin désactivé deviennent indisponibles en conservant leurs données.
 
-Pour reprendre un effacement de fichier en échec, utilisez `FileDeletionQueue::schedule($path, $prefix, $references)` sur une instance de `App\Kraft\Media\FileDeletionQueue`, dans la transaction supprimant ses métadonnées. `$references` associe vos tables aux colonnes de chemin. Pour les images d’éditeur, fournissez aussi les usages des anciennes versions via le callback `history` d’`EditorImageScope`.
+Pour reprendre un effacement de fichier en échec, appelez `app(App\Kraft\Media\FileDeletionQueue::class)->schedule($path, $prefix, $references)` dans la transaction supprimant ses métadonnées. `$references` associe vos tables aux colonnes de chemin. Pour les images d’éditeur, fournissez aussi les usages des anciennes versions via le callback `history` d’`EditorImageScope`.
 
 ## Conservation et confidentialité
 

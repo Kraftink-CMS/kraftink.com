@@ -66,7 +66,7 @@ use App\Kraft\Trash\TrashSource;
 use App\Models\Accounts\User;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-use KraftInk\Plugins\Example\Services\DocumentTrash;
+use MyStudio\Example\Services\DocumentTrash;
 
 app(TrashRegistry::class)->register(new TrashSource(
     key: 'example.documents',
@@ -89,13 +89,13 @@ app(TrashRegistry::class)->register(new TrashSource(
 ));
 ```
 
-`key` is stable and prefixed by your identifier. `query` returns an `Illuminate\Database\Query\Builder` selecting `id`, `title`, `deleted_at` and `restore_reason`, filtered by the operator’s access. `restore_reason` is a translation key when restoration is blocked, otherwise `null`.
+`key` is stable and prefixed by your identifier. `query` returns a Laravel query builder or Eloquent builder selecting `id`, `title`, `deleted_at` and `restore_reason`, filtered by the operator’s access. `restore_reason` is a translation key when restoration is blocked, otherwise `null`.
 
 `permissions` protects reading, `restorePermissions` restoration and `purgePermissions` purging. Every permission in each list is required. Optional `authorize` accepts `(User $actor): bool` for an additional rule. `keyType` is `integer`, or `string` for an opaque identifier.
 
 Callbacks recheck state, parents and permissions in a transaction. Optional `purge` must accept only deleted items. Remove owned children and references, then files after commit. A disabled plugin’s sources become unavailable with their data kept.
 
-To retry failed file deletion, call `FileDeletionQueue::schedule($path, $prefix, $references)` on an `App\Kraft\Media\FileDeletionQueue` instance in the transaction removing its metadata. `$references` maps your tables to path columns. For editor images, also provide revision usages through the `history` callback of `EditorImageScope`.
+To retry failed file deletion, call `app(App\Kraft\Media\FileDeletionQueue::class)->schedule($path, $prefix, $references)` in the transaction removing its metadata. `$references` maps your tables to path columns. For editor images, also provide revision usages through the `history` callback of `EditorImageScope`.
 
 ## Retention and privacy
 

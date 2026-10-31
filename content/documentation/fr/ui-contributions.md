@@ -17,9 +17,21 @@ Déclarez les liens dans `manifest.navigation.public`, `admin` ou `footer`. Une 
 }
 ```
 
-`permissions` accepte plusieurs permissions alternatives à la place de `permission`. `children` regroupe des entrées. `parent` vise un groupe du panneau : `content` pour les contenus, `presentation` pour l’apparence, `members` pour les membres, `servers` pour les jeux et serveurs, ou `settings`, `security`, `integrations`, `operations` et `deployment` pour l’administration. Sans champ `parent`, le lien rejoint les outils des extensions.
+Dans le menu du panneau, remplacez `permission` par `permissions` pour afficher le lien avec l’une ou l’autre de deux permissions déclarées par votre plugin :
 
-Avec `parent: null`, le lien apparaît directement dans la section choisie par `section` : `site`, `community` ou `administration`. `position` fixe son ordre dans le groupe ou la section. Les entrées natives sont espacées de 100, ce qui permet d’insérer une contribution entre deux liens. Protégez aussi la route.
+```json
+{
+    "label": "example::messages.title",
+    "route": "plugins.example.admin.documents.index",
+    "permissions": ["example.manage", "example.moderate"]
+}
+```
+
+Cette liste utilise une condition **OU**, sans demander les deux droits. Elle contrôle l’affichage du lien. Les routes et actions conservent leurs propres contrôles d’accès.
+
+`children` regroupe des entrées. `parent` vise un groupe du panneau : `content` pour les contenus, `presentation` pour l’apparence, `members` pour les membres, `servers` pour les jeux et serveurs, ou `settings`, `security`, `integrations`, `operations` et `deployment` pour l’administration. Sans champ `parent`, le lien rejoint les outils des extensions.
+
+Avec `parent: null`, le lien apparaît directement dans la section choisie par `section` : `site`, `community` ou `administration`. `position` fixe son ordre dans le groupe ou la section. Les entrées natives sont espacées de 100, ce qui permet d’insérer une contribution entre deux liens.
 
 Pour ajouter un bloc sans remplacer une vue, inscrivez un slot depuis le fournisseur :
 
@@ -49,7 +61,7 @@ Ajoutez `data-ajax="true"` à un formulaire POST conservant son action Laravel e
     @csrf
     <div data-ajax-messages hidden></div>
     <input class="form-control" name="title" required>
-    <button class="btn btn-primary" type="submit">{{ __('common.save') }}</button>
+    <button class="btn btn-primary" type="submit">{{ __('common.actions.save') }}</button>
 </form>
 ```
 
@@ -79,7 +91,7 @@ Utilisez `App\Kraft\System\TableQuery`, `<x-tables.controls>` et une région `da
 
 `data-editor="tinymce"` active l’éditeur riche. Nettoyez son HTML avec `App\Kraft\Html::clean`. Un contenu réservé doit utiliser une route d’upload privée dans `data-editor-upload-url`. La médiathèque commune produit des fichiers publics.
 
-`App\Kraft\Media\PrivateEditorImages` gère les images privées avec un `EditorImageScope` défini par le code du paquet : identifiant fixe, tables d’images/usages/ressources, route de lecture, permission de gestion et requête des ressources accessibles au membre.
+`App\Kraft\Media\PrivateEditorImages` reçoit un `EditorImageScope` défini par votre paquet. Fournissez `id`, les classes Eloquent `imageModel`, `usageModel` et `resourceModel`, puis `route`, `permission` et le callback `visible`. Le scope déduit les tables depuis les modèles. `visible` renvoie une requête Eloquent des ressources accessibles au membre.
 
 Le paquet possède les tables et leurs migrations. Les images conservent `id` UUID, `uploader_id` nullable, `path`, `hash`, `original_name`, `mime`, `size`, `width`, `height` et les dates. Les usages associent `resource_id`, `image_id` et `active`, avec unicité du couple et clés étrangères. La requête de visibilité doit inclure vos règles de langue, publication et permissions.
 
@@ -134,7 +146,6 @@ return view('example::default.products.show', [
     ],
     'seoVariables' => [
         'product_name' => $product->name,
-        'category_name' => $product->category?->name ?? '',
     ],
 ]);
 ```

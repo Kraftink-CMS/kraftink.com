@@ -21,9 +21,11 @@ Seuls les contenus publiés accessibles aux visiteurs sont présents. Un compte 
 
 ## État des serveurs
 
-`GET /api/public/servers` renvoie `data`, une liste des serveurs activés du jeu actif. Chaque entrée expose `id`, `name`, `game`, `online`, `fresh`, `players_online`, `players_max` et `last_seen_at`.
+`GET /api/public/servers` renvoie `data`, une liste des serveurs du jeu actif dont l’affichage public est activé. Chaque entrée expose `id`, `name`, `game`, `online`, `fresh`, `players_online`, `players_max` et `last_seen_at`.
 
-Un état reçu depuis 90 secondes au plus donne `fresh=true`. Avant le premier état, `online=null` signifie inconnu. Un état ancien donne `online=false` et des compteurs `null`. La réponse est mise en cache pendant 15 secondes.
+Pour une liaison active, un état reçu depuis 90 secondes au plus donne `fresh=true`. Avant le premier état, `online=null` signifie inconnu. Un état ancien ou une liaison désactivée donne `online=false`, `fresh=false` et des compteurs `null`. La réponse est mise en cache pendant 15 secondes.
+
+L’objet `totals`, à la racine de la réponse, contient `players_online` et `players_max`. Il additionne les états récents des serveurs dont le comptage est activé, indépendamment de leur affichage public. Une valeur sans mesure disponible reste `null`.
 
 Les hôtes internes, secrets et listes nominatives des joueurs ne sont pas exposés.
 
@@ -42,4 +44,4 @@ Les mêmes données sont disponibles avec un jeton personnel ou de [compte techn
 | `/api/site/news`, `/api/site/news/{id}` | `site:news:read` | `content.manage` |
 | `/api/site/servers` | `site:servers:read` | `servers.manage` |
 
-Ces scopes n’élargissent pas la visibilité des contenus. Le protocole des jetons est décrit dans l’[authentification](auth-api.md).
+Ces routes sont limitées à 90 requêtes par minute. Leurs scopes n’élargissent pas la visibilité des contenus. Le protocole des jetons est décrit dans l’[authentification](auth-api.md).

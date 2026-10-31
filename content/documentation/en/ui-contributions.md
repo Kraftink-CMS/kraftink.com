@@ -17,7 +17,21 @@ Declare links in `manifest.navigation.public`, `admin` or `footer`. An entry pro
 }
 ```
 
-`permissions` accepts alternative permissions instead of `permission`. `children` groups entries. `parent` targets a panel group such as `content` or `presentation`. Without a parent, entries join the extension tools. Protect the route as well.
+In the panel menu, replace `permission` with `permissions` to show the link with either of two permissions declared by your plugin:
+
+```json
+{
+    "label": "example::messages.title",
+    "route": "plugins.example.admin.documents.index",
+    "permissions": ["example.manage", "example.moderate"]
+}
+```
+
+This list uses an **OR** condition without requiring both permissions. It controls link visibility. Routes and actions retain their own access checks.
+
+`children` groups entries. `parent` targets a panel group: `content` for content, `presentation` for appearance, `members` for members, `servers` for games and servers, or `settings`, `security`, `integrations`, `operations` and `deployment` for administration. Without a `parent` field, entries join the extension tools.
+
+With `parent: null`, the link appears directly in the section chosen by `section`: `site`, `community` or `administration`. `position` sets its order in the group or section. Native entries are spaced by 100, allowing a contribution between two links.
 
 To add a block without overriding a view, register a slot from the provider:
 
@@ -36,7 +50,7 @@ app(\App\Kraft\Extensions\SlotRegistry::class)->add(
 
 A theme can define a slot with `<x-extensions.slot name="example.area" :context="['record' => $record]">Fallback</x-extensions.slot>`. Modes `before`, `after` and `replace` position contributions relative to the fallback. Rendering failures preserve the rest of the page.
 
-Use [widgets](plugin-widgets.md) for blocks the owner can place, configure and reorder in the panel. Use slots for fixed contributions. The core supplies the registry and rendering, while each extension owns its queries, permissions and templates.
+Use [widgets](plugin-widgets.md) for blocks the owner can place, configure and reorder in the panel. Use slots for fixed contributions.
 
 ## AJAX forms
 
@@ -47,7 +61,7 @@ Add `data-ajax="true"` to a POST form while retaining its Laravel action and CSR
     @csrf
     <div data-ajax-messages hidden></div>
     <input class="form-control" name="title" required>
-    <button class="btn btn-primary" type="submit">{{ __('common.save') }}</button>
+    <button class="btn btn-primary" type="submit">{{ __('common.actions.save') }}</button>
 </form>
 ```
 
@@ -61,6 +75,9 @@ The handler synchronizes editors, sends files using `FormData` and displays vali
 | `data-success-callback="example.saved"` | Call a global function after success |
 | `data-reset="true"` | Reset fields and editors |
 | `data-message-target="#feedback"` | Choose a feedback container |
+| `data-success-message="false"` | Hide success messages, including after a redirect, while keeping errors and warnings |
+
+Use `data-success-message="false"` when the new state already confirms the result, such as a read notification, reaction, follow or move. Success events, callbacks and navigation remain active.
 
 Middleware adapts ordinary Laravel redirects and flash messages. Explicit JSON uses `{"success": true, "data": {"message": "...", "redirect_url": "..."}}`. Failures retain their HTTP status and include `data.errors`. A callback receives `(data, form, submitter)` and can return `false` to cancel navigation. Events `ajax:success`, `ajax:error` and `ajax:complete` are available.
 
@@ -74,7 +91,7 @@ Use `App\Kraft\System\TableQuery`, `<x-tables.controls>` and a `data-ajax-pagina
 
 `data-editor="tinymce"` enables the rich editor. Clean HTML with `App\Kraft\Html::clean`. Restricted content must supply a private upload route through `data-editor-upload-url`. The shared media library creates public files.
 
-`App\Kraft\Media\PrivateEditorImages` manages private images using an `EditorImageScope` defined by package code: a fixed identifier, image/usage/resource tables, read route, management permission and a query selecting resources accessible to the user.
+`App\Kraft\Media\PrivateEditorImages` receives an `EditorImageScope` defined by your package. Supply `id`, Eloquent classes `imageModel`, `usageModel` and `resourceModel`, then `route`, `permission` and the `visible` callback. The scope derives tables from the models. `visible` returns an Eloquent query for resources accessible to the member.
 
 The package owns these tables and migrations. Images retain UUID `id`, nullable `uploader_id`, `path`, `hash`, `original_name`, `mime`, `size`, `width`, `height` and timestamps. Usages associate `resource_id`, `image_id` and `active`, with a unique pair and foreign keys. The visibility query must apply your language, publication and permission rules.
 
@@ -129,7 +146,6 @@ return view('example::default.products.show', [
     ],
     'seoVariables' => [
         'product_name' => $product->name,
-        'category_name' => $product->category?->name ?? '',
     ],
 ]);
 ```
