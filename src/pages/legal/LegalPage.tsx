@@ -1,6 +1,7 @@
 import { PageTitle } from '../../components/UI';
 import { useLocale } from '../../lib/i18n';
 import { legalMessages } from '../../lib/translations';
+import { externalLinkRel } from '../../../shared/links';
 
 export function LegalPage({ kind }: { kind: 'terms' | 'privacy' }) {
     const { locale } = useLocale();
@@ -25,7 +26,7 @@ export function LegalPage({ kind }: { kind: 'terms' | 'privacy' }) {
                         <ul className="mb-0">
                             {copy.references.map(([label, url]) => (
                                 <li key={url}>
-                                    <a href={url} target="_blank" rel="noreferrer">
+                                    <a href={url} target="_blank" rel={externalLinkRel(url)}>
                                         {label}
                                     </a>
                                 </li>

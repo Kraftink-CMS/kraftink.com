@@ -7,6 +7,7 @@ import { announcementMessages } from '../../lib/translations';
 import { fallbackLocale, localeRegistry } from '../../../shared/locales';
 import { Card, Empty, ErrorNotice, Loading, PageTitle } from '../../components/UI';
 import { SensitiveButton } from '../../components/auth/SensitiveButton';
+import { externalLinkRel } from '../../../shared/links';
 
 interface Announcement {
     id: string;
@@ -337,7 +338,7 @@ export function AnnouncementsPage() {
                                 {new Date(announcement.expires_at * 1000).toLocaleString(locale)}
                             </p>
                             {announcement.url && (
-                                <a href={announcement.url} target="_blank" rel="noreferrer">
+                                <a href={announcement.url} target="_blank" rel={externalLinkRel(announcement.url)}>
                                     {announcement.url}
                                 </a>
                             )}

@@ -337,6 +337,12 @@ export default {
             ['5 langues', 'Français, anglais, espagnol, allemand et portugais'],
         ],
     },
+    'community': {
+        'name': 'Discord',
+        'title': 'Échangeons autour de KraftInk',
+        'description': 'Posez vos questions, partagez votre site et discutez du CMS avec la communauté sur Discord.',
+        'join': 'Rejoindre le Discord',
+    },
     'footer': {
         'description': 'Un site pour votre serveur.<br>Un point de ralliement pour vos joueurs.',
         'product': 'KraftInk',

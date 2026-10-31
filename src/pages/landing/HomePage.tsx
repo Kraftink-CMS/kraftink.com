@@ -6,6 +6,8 @@ import { Compatibility } from '../../components/landing/Compatibility';
 import { ResourceCard } from '../../components/market/ResourceCard';
 import { useCatalogue } from '../../hooks/useCatalogue';
 import { useLocale, useSiteCopy, localized } from '../../lib/i18n';
+import { DiscordIcon } from '../../components/DiscordIcon';
+import { discordUrl, externalLinkRel } from '../../../shared/links';
 
 export function HomePage() {
     const copy = useSiteCopy();
@@ -108,6 +110,24 @@ export function HomePage() {
                     {data && resources.length === 0 && (
                         <p className="text-body-secondary">{copy.market.catalogueEmpty}</p>
                     )}
+                </div>
+            </section>
+
+            <section className="home-community card" aria-labelledby="community-title">
+                <div className="card-body p-4 p-lg-5 d-flex flex-wrap align-items-center justify-content-between gap-4">
+                    <div className="home-community-copy">
+                        <h2 id="community-title">{copy.community.title}</h2>
+                        <p className="text-body-secondary mb-0">{copy.community.description}</p>
+                    </div>
+                    <a
+                        className="btn btn-outline-primary d-inline-flex align-items-center gap-2"
+                        href={discordUrl}
+                        target="_blank"
+                        rel={externalLinkRel(discordUrl)}
+                    >
+                        <DiscordIcon />
+                        {copy.community.join}
+                    </a>
                 </div>
             </section>
         </div>

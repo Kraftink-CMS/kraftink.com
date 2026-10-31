@@ -8,6 +8,8 @@ import { commonMessages, legalMessages, statisticsMessages } from '../lib/transl
 import { LocaleRedirect } from '../routing/LocaleRedirect';
 import { hasRole } from '../../shared/auth';
 import { PageMetadata } from '../components/PageMetadata';
+import { DiscordIcon } from '../components/DiscordIcon';
+import { discordUrl, externalLinkRel } from '../../shared/links';
 
 export function SiteLayout() {
     const { locale, path } = useLocale();
@@ -98,6 +100,17 @@ export function SiteLayout() {
                                         {copy.docs.title}
                                     </NavLink>
                                 </li>
+                                <li className="nav-item">
+                                    <a
+                                        className="nav-link d-inline-flex align-items-center gap-2"
+                                        href={discordUrl}
+                                        target="_blank"
+                                        rel={externalLinkRel(discordUrl)}
+                                    >
+                                        <DiscordIcon />
+                                        {copy.community.name}
+                                    </a>
+                                </li>
                             </ul>
                             <div className="site-header-actions">
                                 <label htmlFor="site-language" className="visually-hidden">
@@ -178,7 +191,7 @@ export function SiteLayout() {
             <footer className="site-footer border-top py-4">
                 <div className="container">
                     <div className="row g-4 justify-content-between align-items-start">
-                        <div className="col-lg-6">
+                        <div className="col-lg-4">
                             <Link to={path('/')} className="footer-brand">
                                 KraftInk
                             </Link>
@@ -205,6 +218,15 @@ export function SiteLayout() {
                                     rel="noreferrer"
                                 >
                                     GitHub
+                                </a>
+                                <a
+                                    href={discordUrl}
+                                    className="link-secondary d-inline-flex align-items-center gap-2"
+                                    target="_blank"
+                                    rel={externalLinkRel(discordUrl)}
+                                >
+                                    <DiscordIcon />
+                                    {copy.community.name}
                                 </a>
                             </nav>
                         </div>
