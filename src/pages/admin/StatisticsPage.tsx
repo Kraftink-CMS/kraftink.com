@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api, ApiError } from '../../lib/api';
 import { useLocale } from '../../lib/i18n';
 import { statisticsMessages } from '../../lib/translations';
@@ -33,19 +34,38 @@ function periodDates(period: Exclude<Period, 'custom'>) {
 export function StatisticsPage() {
     const { locale } = useLocale();
     const t = statisticsMessages[locale];
-    const [preset, setPreset] = useState<Period>('currentMonth');
-    const [dates, setDates] = useState(() => periodDates('currentMonth'));
-    const [currency, setCurrency] = useState('EUR');
-    const [query, setQuery] = useState(() => ({ ...periodDates('currentMonth'), currency: 'EUR', refresh: 0 }));
+    const [search, setSearch] = useSearchParams();
+    const requestedPeriod = search.get('period') ?? '';
+    const period: Period = ['currentMonth', 'previousMonth', 'currentYear', 'custom'].includes(requestedPeriod)
+        ? (requestedPeriod as Period)
+        : search.has('from') || search.has('to')
+          ? 'custom'
+          : 'currentMonth';
+    const defaults = periodDates(period === 'custom' ? 'currentMonth' : period);
+    const requestedFrom = search.get('from') ?? '';
+    const requestedTo = search.get('to') ?? '';
+    const from = /^\d{4}-\d{2}-\d{2}$/.test(requestedFrom) ? requestedFrom : defaults.from;
+    const to = /^\d{4}-\d{2}-\d{2}$/.test(requestedTo) ? requestedTo : defaults.to;
+    const selectedCurrency = /^[A-Z]{3}$/.test(search.get('currency') ?? '') ? search.get('currency')! : 'EUR';
+    const [preset, setPreset] = useState<Period>(period);
+    const [dates, setDates] = useState({ from, to });
+    const [currency, setCurrency] = useState(selectedCurrency);
+    const [refresh, setRefresh] = useState(0);
     const [statistics, setStatistics] = useState<SalesStatistics | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<unknown>(null);
 
     useEffect(() => {
+        setDates({ from, to });
+        setCurrency(selectedCurrency);
+        setPreset(period);
+    }, [from, to, selectedCurrency, period]);
+
+    useEffect(() => {
         const controller = new AbortController();
         setLoading(true);
         setError(null);
-        const parameters = new URLSearchParams({ from: query.from, to: query.to, currency: query.currency });
+        const parameters = new URLSearchParams({ from, to, currency: selectedCurrency });
         void api<SalesStatistics>(`/api/admin/statistics?${parameters}`, { signal: controller.signal })
             .then((data) => {
                 if (!controller.signal.aborted) {
@@ -63,7 +83,7 @@ export function StatisticsPage() {
                 }
             });
         return () => controller.abort();
-    }, [query]);
+    }, [from, to, selectedCurrency, refresh]);
 
     function apply(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -71,7 +91,12 @@ export function StatisticsPage() {
             setError(new ApiError('invalid_statistics_period'));
             return;
         }
-        setQuery((current) => ({ ...dates, currency, refresh: current.refresh + 1 }));
+        const next = new URLSearchParams({ ...dates, currency, period: preset });
+        if (next.toString() === search.toString()) {
+            setRefresh((current) => current + 1);
+        } else {
+            setSearch(next);
+        }
     }
 
     const number = new Intl.NumberFormat(locale);
@@ -88,7 +113,7 @@ export function StatisticsPage() {
                     type="button"
                     className="btn btn-outline-secondary"
                     disabled={loading}
-                    onClick={() => setQuery((current) => ({ ...current, refresh: current.refresh + 1 }))}
+                    onClick={() => setRefresh((current) => current + 1)}
                 >
                     {t.refresh}
                 </button>

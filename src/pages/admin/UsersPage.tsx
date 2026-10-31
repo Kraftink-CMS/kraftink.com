@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import type { FormEvent } from 'react';
 import { accountCopy } from '../../lib/translations';
 import { api, ApiError } from '../../lib/api';
@@ -32,9 +33,10 @@ export function AdminUsersPage() {
     const copy = accountCopy[locale];
     const { user, sensitive, confirming } = useSession();
     const [users, setUsers] = useState<ManagedUser[]>([]);
-    const [query, setQuery] = useState('');
-    const [submittedQuery, setSubmittedQuery] = useState('');
-    const [offset, setOffset] = useState(0);
+    const [search, setSearch] = useSearchParams();
+    const submittedQuery = (search.get('q') ?? '').slice(0, 100);
+    const requestedOffset = Number(search.get('offset') ?? 0);
+    const offset = Number.isSafeInteger(requestedOffset) && requestedOffset >= 0 ? requestedOffset : 0;
     const [nextOffset, setNextOffset] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
@@ -50,23 +52,49 @@ export function AdminUsersPage() {
     const [maxUploadMiB, setMaxUploadMiB] = useState('');
     const [defaultMaxUploadBytes, setDefaultMaxUploadBytes] = useState(25 * 1024 * 1024);
 
-    const load = useCallback(async () => {
-        setLoading(true);
-        try {
-            const data = await api<{ users: ManagedUser[]; nextOffset: number | null; defaultMaxUploadBytes: number }>(
-                `/api/admin/users?q=${encodeURIComponent(submittedQuery)}&offset=${offset}`,
-            );
-            setUsers(data.users);
-            setNextOffset(data.nextOffset);
-            setDefaultMaxUploadBytes(data.defaultMaxUploadBytes);
-        } finally {
-            setLoading(false);
-        }
-    }, [offset, submittedQuery]);
+    const load = useCallback(
+        async (signal?: AbortSignal) => {
+            setLoading(true);
+            try {
+                const data = await api<{
+                    users: ManagedUser[];
+                    nextOffset: number | null;
+                    defaultMaxUploadBytes: number;
+                }>(`/api/admin/users?q=${encodeURIComponent(submittedQuery)}&offset=${offset}`, { signal });
+                if (signal?.aborted) {
+                    return;
+                }
+                setUsers(data.users);
+                setNextOffset(data.nextOffset);
+                setDefaultMaxUploadBytes(data.defaultMaxUploadBytes);
+            } finally {
+                if (!signal?.aborted) {
+                    setLoading(false);
+                }
+            }
+        },
+        [offset, submittedQuery],
+    );
 
     useEffect(() => {
-        void load().catch(setError);
+        const controller = new AbortController();
+        void load(controller.signal).catch((failure) => {
+            if (!controller.signal.aborted) {
+                setError(failure);
+            }
+        });
+        return () => controller.abort();
     }, [load]);
+
+    function page(offset: number) {
+        const next = new URLSearchParams(search);
+        if (offset) {
+            next.set('offset', String(offset));
+        } else {
+            next.delete('offset');
+        }
+        setSearch(next);
+    }
 
     function close() {
         setSelected(null);
@@ -162,7 +190,7 @@ export function AdminUsersPage() {
                             className="btn btn-outline-secondary"
                             type="button"
                             disabled={loading || offset === 0}
-                            onClick={() => setOffset(Math.max(offset - 50, 0))}
+                            onClick={() => page(Math.max(offset - 50, 0))}
                         >
                             {copy.previous}
                         </button>
@@ -170,7 +198,7 @@ export function AdminUsersPage() {
                             className="btn btn-outline-secondary"
                             type="button"
                             disabled={loading || nextOffset === null}
-                            onClick={() => setOffset(nextOffset!)}
+                            onClick={() => page(nextOffset!)}
                         >
                             {copy.next}
                         </button>
@@ -181,8 +209,12 @@ export function AdminUsersPage() {
                     className="row g-2 mb-4"
                     onSubmit={(event) => {
                         event.preventDefault();
-                        setOffset(0);
-                        setSubmittedQuery(query);
+                        const query = String(new FormData(event.currentTarget).get('q') ?? '').trim();
+                        if (query === submittedQuery && offset === 0) {
+                            void load().catch(setError);
+                        } else {
+                            setSearch(query ? { q: query } : {});
+                        }
                     }}
                 >
                     <div className="col">
@@ -192,8 +224,9 @@ export function AdminUsersPage() {
                         <input
                             id="user-search"
                             className="form-control"
-                            value={query}
-                            onChange={(event) => setQuery(event.target.value)}
+                            name="q"
+                            key={submittedQuery}
+                            defaultValue={submittedQuery}
                             maxLength={100}
                             placeholder={copy.search}
                         />

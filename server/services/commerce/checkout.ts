@@ -217,7 +217,7 @@ export async function startCheckout(
                 enabled: true,
                 invoice_data: { metadata: { order_id: id, resource_id: resource.id } },
             },
-            success_url: `${env.APP_ORIGIN}/account?checkout=success&order=${id}`,
+            success_url: `${env.APP_ORIGIN}/account/purchases?checkout=success&order=${id}`,
             cancel_url: `${env.APP_ORIGIN}/market?checkout=cancelled`,
         },
         { ...stripeRequestOptions(env, accountId), idempotencyKey: `kraftink-checkout-${id}` },

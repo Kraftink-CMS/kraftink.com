@@ -7,15 +7,7 @@ import type { AccountActions } from './types';
 import type { Purchase } from './types';
 import type { AccountCommerce } from './useAccountCommerce';
 
-export function PurchasesPanel({
-    commerce,
-    actions,
-    onConnectCms,
-}: {
-    commerce: AccountCommerce;
-    actions: AccountActions;
-    onConnectCms: () => void;
-}) {
+export function PurchasesPanel({ commerce, actions }: { commerce: AccountCommerce; actions: AccountActions }) {
     const { locale, path } = useLocale();
     const copy = accountCopy[locale];
     const { purchases, setPurchases, purchasesCursor, setPurchasesCursor } = commerce;
@@ -39,13 +31,9 @@ export function PurchasesPanel({
                                 footer={
                                     purchase.access_status === 'active' &&
                                     ['published', 'withdrawn'].includes(purchase.status) ? (
-                                        <button
-                                            className="btn btn-outline-secondary"
-                                            type="button"
-                                            onClick={onConnectCms}
-                                        >
+                                        <Link className="btn btn-outline-secondary" to={path('/account/site')}>
                                             {copy.site}
-                                        </button>
+                                        </Link>
                                     ) : undefined
                                 }
                             >

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Select } from '../../components/Select';
 import { ResourceCard } from '../../components/market/ResourceCard';
 import { CardsLoading, Empty, ErrorNotice, PageTitle } from '../../components/UI';
@@ -11,9 +11,26 @@ export function MarketPage() {
     const text = publicMessages[locale];
     const common = commonMessages[locale];
     const { data, error } = useCatalogue();
-    const [query, setQuery] = useState('');
-    const [type, setType] = useState('');
-    const [offer, setOffer] = useState('');
+    const [search, setSearch] = useSearchParams();
+    const query = search.get('q') ?? '';
+    const requestedType = search.get('type') ?? '';
+    const requestedOffer = search.get('offer') ?? '';
+    const type = ['plugin', 'theme', 'game'].includes(requestedType) ? requestedType : '';
+    const offer = ['free', 'paid'].includes(requestedOffer) ? requestedOffer : '';
+    function filter(key: string, value: string, replace = false) {
+        setSearch(
+            (current) => {
+                const next = new URLSearchParams(current);
+                if (value) {
+                    next.set(key, value);
+                } else {
+                    next.delete(key);
+                }
+                return next;
+            },
+            { replace },
+        );
+    }
     const resources =
         data?.resources.filter(
             (resource) =>
@@ -37,7 +54,7 @@ export function MarketPage() {
                         className="form-control"
                         type="search"
                         value={query}
-                        onChange={(event) => setQuery(event.target.value)}
+                        onChange={(event) => filter('q', event.target.value, true)}
                     />
                 </div>
                 <div>
@@ -48,7 +65,7 @@ export function MarketPage() {
                         id="market-type"
                         className="form-select"
                         value={type}
-                        onChange={(event) => setType(event.target.value)}
+                        onChange={(event) => filter('type', event.target.value)}
                     >
                         <option value="">{text.allTypes}</option>
                         {(['plugin', 'theme', 'game'] as const).map((value) => (
@@ -66,7 +83,7 @@ export function MarketPage() {
                         id="market-offer"
                         className="form-select"
                         value={offer}
-                        onChange={(event) => setOffer(event.target.value)}
+                        onChange={(event) => filter('offer', event.target.value)}
                     >
                         <option value="">{text.allOffers}</option>
                         <option value="free">{text.free}</option>

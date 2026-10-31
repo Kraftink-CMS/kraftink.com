@@ -469,7 +469,7 @@ routes.get('/auth/github/callback', async (c) => {
             fail(403, 'password_confirmation_required');
         }
         const proof = await issueSensitiveToken(c, flow.action_purpose, { method: 'github', githubId });
-        const url = new URL('/account', c.env.APP_ORIGIN);
+        const url = new URL(flow.return_path, c.env.APP_ORIGIN);
         url.hash = new URLSearchParams({ sensitive: proof.sensitiveToken, purpose: proof.purpose }).toString();
         return c.redirect(url.toString(), 302);
     }
@@ -478,7 +478,7 @@ routes.get('/auth/github/callback', async (c) => {
             fail(409, 'github_already_linked');
         }
         await linkGithubAccount(c.env.DB, githubId, flow.user_id!, flow.session_id!);
-        return c.redirect(new URL('/account?github=linked', c.env.APP_ORIGIN).toString(), 302);
+        return c.redirect(new URL('/account/profile?github=linked', c.env.APP_ORIGIN).toString(), 302);
     }
     if (existing) {
         if (existing.banned_at !== null) {

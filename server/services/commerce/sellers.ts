@@ -185,8 +185,8 @@ export async function startSellerOnboarding(
         account: accountId,
         type: 'account_onboarding',
         collection_options: { fields: 'eventually_due' },
-        refresh_url: `${env.APP_ORIGIN}/creator?stripe=refresh`,
-        return_url: `${env.APP_ORIGIN}/creator?stripe=return`,
+        refresh_url: `${env.APP_ORIGIN}/creator/payments?stripe=refresh`,
+        return_url: `${env.APP_ORIGIN}/creator/payments?stripe=return`,
     });
     await recordAudit('seller.onboarding_started', user.id, { accountId });
     return { url: link.url };

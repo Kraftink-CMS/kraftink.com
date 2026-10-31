@@ -9,7 +9,7 @@ export function CheckoutReturnPage() {
     return (
         <>
             <PageTitle title={text.verified} description={text.paymentPending} />
-            <Link to={path('/account')} className="btn btn-primary">
+            <Link to={path('/account/purchases')} className="btn btn-primary">
                 {commonMessages[locale].purchases}
             </Link>
         </>

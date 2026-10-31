@@ -112,7 +112,7 @@ export async function sendAccountMail(
             ? '/verify-email'
             : kind === 'reset'
               ? '/reset-password'
-              : '/account';
+              : '/account/profile';
     const link = new URL(path, env.APP_ORIGIN);
     if (kind === 'verify' || kind === 'reset' || kind === 'email-change') {
         link.hash = new URLSearchParams({

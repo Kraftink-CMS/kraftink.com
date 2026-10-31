@@ -1,12 +1,14 @@
 import { Select } from '../../components/Select';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../../lib/api';
 import { useSession } from '../../lib/session';
 import { localized, useLocale } from '../../lib/i18n';
-import { Card, Empty, ErrorNotice, TableLoading, PageTitle, StatusBadge } from '../../components/UI';
+import { Card, Empty, ErrorNotice, Loading, TableLoading, PageTitle, StatusBadge } from '../../components/UI';
 import { workspace } from '../../lib/translations';
 import { SensitiveButton } from '../../components/auth/SensitiveButton';
 import { hasRole } from '../../../shared/auth';
+import { moderationTabs } from '../../../shared/routes';
 
 interface Review {
     id: string;
@@ -51,22 +53,28 @@ function proposal(review: Review): Proposal {
 }
 
 export function ModerationPage() {
-    const { locale } = useLocale();
+    const { locale, path } = useLocale();
     const t = workspace[locale];
     const { user, sensitive } = useSession();
     const [reviews, setReviews] = useState<Review[]>([]);
     const [resources, setResources] = useState<ManagedResource[]>([]);
     const [reviewCursor, setReviewCursor] = useState<string | null>(null);
     const [resourceCursor, setResourceCursor] = useState<string | null>(null);
-    const [query, setQuery] = useState('');
-    const [submittedQuery, setSubmittedQuery] = useState('');
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [search] = useSearchParams();
+    const params = useParams();
+    const submittedQuery = (search.get('q') ?? '').slice(0, 100);
+    const tab = (params.tab ?? 'reviews') as (typeof moderationTabs)[number];
+    const reviewId = params.reviewId;
     const [loading, setLoading] = useState(true);
     const [loaded, setLoaded] = useState(false);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<unknown>(null);
     const [success, setSuccess] = useState(false);
-    const [tab, setTab] = useState<'reviews' | 'allResources'>('reviews');
-    const [selected, setSelected] = useState<Review | null>(null);
+    const [reviewDetail, setSelected] = useState<Review | null>(null);
+    const selected = reviewDetail?.id === reviewId ? reviewDetail : null;
+    const [reviewLoading, setReviewLoading] = useState(Boolean(reviewId));
     const [withdrawal, setWithdrawal] = useState<ManagedResource | null>(null);
     const [decision, setDecision] = useState<'approve' | 'reject'>('approve');
     const [reason, setReason] = useState('');
@@ -75,36 +83,79 @@ export function ModerationPage() {
     const allowed = hasRole(user, 'moderator');
     const admin = hasRole(user, 'admin');
 
-    const reload = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const [pending, all] = await Promise.all([
-                api<{ reviews: Review[]; nextCursor: string | null }>(
-                    `/api/moderation/reviews?q=${encodeURIComponent(submittedQuery)}`,
-                ),
-                api<{ resources: ManagedResource[]; nextCursor: string | null }>(
-                    `/api/moderation/resources?q=${encodeURIComponent(submittedQuery)}`,
-                ),
-            ]);
-            setReviews(pending.reviews);
-            setResources(all.resources);
-            setReviewCursor(pending.nextCursor);
-            setResourceCursor(all.nextCursor);
-        } catch (cause) {
-            setError(cause);
-        } finally {
-            setLoading(false);
-            setLoaded(true);
+    useEffect(() => {
+        setDecision('approve');
+        setReason('');
+        if (!reviewId) {
+            setSelected(null);
+            setReviewLoading(false);
+            return;
         }
-    }, [submittedQuery]);
+        const controller = new AbortController();
+        setReviewLoading(true);
+        void api<Review>(`/api/moderation/reviews/${encodeURIComponent(reviewId)}`, { signal: controller.signal })
+            .then((review) => {
+                if (!controller.signal.aborted) {
+                    setSelected(review);
+                }
+            })
+            .catch((failure) => {
+                if (!controller.signal.aborted) {
+                    setError(failure);
+                }
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) {
+                    setReviewLoading(false);
+                }
+            });
+        return () => controller.abort();
+    }, [reviewId]);
+
+    const reload = useCallback(
+        async (signal?: AbortSignal) => {
+            setLoading(true);
+            setError(null);
+            try {
+                const [pending, all] = await Promise.all([
+                    api<{ reviews: Review[]; nextCursor: string | null }>(
+                        `/api/moderation/reviews?q=${encodeURIComponent(submittedQuery)}`,
+                        { signal },
+                    ),
+                    api<{ resources: ManagedResource[]; nextCursor: string | null }>(
+                        `/api/moderation/resources?q=${encodeURIComponent(submittedQuery)}`,
+                        { signal },
+                    ),
+                ]);
+                if (signal?.aborted) {
+                    return;
+                }
+                setReviews(pending.reviews);
+                setResources(all.resources);
+                setReviewCursor(pending.nextCursor);
+                setResourceCursor(all.nextCursor);
+            } catch (cause) {
+                if (!signal?.aborted) {
+                    setError(cause);
+                }
+            } finally {
+                if (!signal?.aborted) {
+                    setLoading(false);
+                    setLoaded(true);
+                }
+            }
+        },
+        [submittedQuery],
+    );
 
     useEffect(() => {
+        const controller = new AbortController();
         if (allowed) {
-            void reload();
+            void reload(controller.signal);
         } else {
             setLoading(false);
         }
+        return () => controller.abort();
     }, [user?.id, allowed, reload]);
 
     async function loadMore(kind: 'reviews' | 'resources') {
@@ -173,6 +224,7 @@ export function ModerationPage() {
                 sensitiveToken: token,
             });
             setSelected(null);
+            navigate(`${path('/moderation/reviews')}${location.search}`, { replace: true });
             await reload();
             setSuccess(true);
         } catch (cause) {
@@ -250,32 +302,30 @@ export function ModerationPage() {
             ) : (
                 <div className="vstack gap-4">
                     <nav className="nav nav-pills gap-2" aria-label={t.moderationTitle}>
-                        <button
-                            type="button"
+                        <Link
                             className={`nav-link ${tab === 'reviews' ? 'active' : ''}`}
                             aria-current={tab === 'reviews' ? 'page' : undefined}
                             onClick={() => {
-                                setTab('reviews');
                                 setWithdrawal(null);
                             }}
+                            to={`${path('/moderation/reviews')}${location.search}`}
                         >
                             {t.reviews}{' '}
                             <span className="badge text-bg-secondary ms-1">
                                 {reviews.length}
                                 {reviewCursor ? '+' : ''}
                             </span>
-                        </button>
-                        <button
-                            type="button"
-                            className={`nav-link ${tab === 'allResources' ? 'active' : ''}`}
-                            aria-current={tab === 'allResources' ? 'page' : undefined}
+                        </Link>
+                        <Link
+                            className={`nav-link ${tab === 'resources' ? 'active' : ''}`}
+                            aria-current={tab === 'resources' ? 'page' : undefined}
                             onClick={() => {
-                                setTab('allResources');
                                 setSelected(null);
                             }}
+                            to={`${path('/moderation/resources')}${location.search}`}
                         >
                             {t.allResources}
-                        </button>
+                        </Link>
                     </nav>
                     <form
                         className="row g-2"
@@ -283,11 +333,14 @@ export function ModerationPage() {
                             event.preventDefault();
                             setSelected(null);
                             setWithdrawal(null);
+                            const query = String(new FormData(event.currentTarget).get('q') ?? '').trim();
                             if (query === submittedQuery) {
                                 void reload();
-                            } else {
-                                setSubmittedQuery(query);
                             }
+                            navigate({
+                                pathname: path(`/moderation/${tab}`),
+                                search: new URLSearchParams(query ? { q: query } : {}).toString(),
+                            });
                         }}
                     >
                         <div className="col">
@@ -297,8 +350,9 @@ export function ModerationPage() {
                             <input
                                 className="form-control"
                                 id="moderation-search"
-                                value={query}
-                                onChange={(event) => setQuery(event.target.value)}
+                                name="q"
+                                key={submittedQuery}
+                                defaultValue={submittedQuery}
                                 maxLength={100}
                                 placeholder={t.searchResources}
                             />
@@ -376,14 +430,13 @@ export function ModerationPage() {
                                                                 )}
                                                             </td>
                                                             <td>
-                                                                <button
+                                                                <Link
                                                                     className="btn btn-sm btn-outline-secondary"
-                                                                    type="button"
-                                                                    disabled={busy}
                                                                     onClick={() => chooseReview(entry)}
+                                                                    to={`${path(`/moderation/reviews/${encodeURIComponent(entry.id)}`)}${location.search}`}
                                                                 >
                                                                     {t.details}
-                                                                </button>
+                                                                </Link>
                                                             </td>
                                                         </tr>
                                                     ))}
@@ -391,6 +444,11 @@ export function ModerationPage() {
                                             </table>
                                         </div>
                                     )}
+                                </Card>
+                            )}
+                            {reviewId && reviewLoading && !selected && (
+                                <Card title={t.details}>
+                                    <Loading />
                                 </Card>
                             )}
                             {selected && payload && (
@@ -414,7 +472,9 @@ export function ModerationPage() {
                                                     className="btn btn-outline-secondary"
                                                     type="button"
                                                     disabled={busy}
-                                                    onClick={() => setSelected(null)}
+                                                    onClick={() =>
+                                                        navigate(`${path('/moderation/reviews')}${location.search}`)
+                                                    }
                                                 >
                                                     {t.cancel}
                                                 </button>
@@ -515,7 +575,7 @@ export function ModerationPage() {
                                     </Card>
                                 </form>
                             )}
-                            {tab === 'allResources' && (
+                            {tab === 'resources' && (
                                 <Card
                                     title={t.allResources}
                                     footer={

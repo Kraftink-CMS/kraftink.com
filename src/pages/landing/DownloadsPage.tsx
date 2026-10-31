@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Select } from '../../components/Select';
 import { ErrorNotice, FormLoading, Loading, Skeleton, PageTitle } from '../../components/UI';
 import { api } from '../../lib/api';
@@ -27,8 +27,9 @@ export function DownloadsPage() {
             : null,
     );
     const [error, setError] = useState<unknown>(null);
-    const [channel, setChannel] = useState<ReleaseChannel>('stable');
-    const [tag, setTag] = useState('');
+    const [search, setSearch] = useSearchParams();
+    const channel = (search.get('channel') ?? 'stable') as ReleaseChannel;
+    const tag = search.get('version') ?? '';
     useEffect(() => {
         const controller = new AbortController();
         const metadata = api<{ data: unknown }>('/api/metadata?source=releases', { signal: controller.signal });
@@ -88,8 +89,10 @@ export function DownloadsPage() {
                                                 value={selectedChannel}
                                                 disabled={channels.length === 1}
                                                 onChange={(event) => {
-                                                    setChannel(event.target.value as ReleaseChannel);
-                                                    setTag('');
+                                                    const next = new URLSearchParams(search);
+                                                    next.set('channel', event.target.value);
+                                                    next.delete('version');
+                                                    setSearch(next);
                                                 }}
                                             >
                                                 {channels.map((value) => (
@@ -107,7 +110,11 @@ export function DownloadsPage() {
                                                 className="form-select"
                                                 id="release-version"
                                                 value={selected.tag}
-                                                onChange={(event) => setTag(event.target.value)}
+                                                onChange={(event) => {
+                                                    const next = new URLSearchParams(search);
+                                                    next.set('version', event.target.value);
+                                                    setSearch(next);
+                                                }}
                                             >
                                                 {versions.map((release) => (
                                                     <option key={release.tag} value={release.tag}>
