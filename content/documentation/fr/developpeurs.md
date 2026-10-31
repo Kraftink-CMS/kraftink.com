@@ -26,6 +26,8 @@ Faites servir `public/` par votre serveur local puis terminez l’assistant. Uti
 
 Le générateur crée le paquet sous `extensions/installed/{plugins,themes,games}/`. Installez-le ensuite depuis le panneau. Conservez son propre dépôt et ne modifiez pas les fichiers du CMS pour l’intégrer.
 
+Les modèles et services comme `Document`, `PublicDocuments` ou `RecordAccess` dans les exemples représentent le code de votre extension. Ils sont à implémenter selon votre fonctionnalité.
+
 Le [manifeste et le cycle de vie](architecture-extensions.md) sont communs aux trois types. Ils définissent les dépendances, les migrations et les données conservées lors des mises à jour.
 
 ## Références selon vos besoins

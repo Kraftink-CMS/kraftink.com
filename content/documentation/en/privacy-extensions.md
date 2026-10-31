@@ -35,4 +35,4 @@ Failure to load an affected package interrupts the request. It must not be inter
 
 ## Verify behavior
 
-Test exports with restricted permissions, references to other accounts, missing tables, a disabled extension and complete rollback after an error. Fixtures use isolated accounts and files.
+Test exports with restricted permissions, references to other accounts, missing tables, a disabled extension and complete rollback after an error.

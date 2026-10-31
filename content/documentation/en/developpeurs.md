@@ -26,6 +26,8 @@ Serve `public/` through your local web server and complete the installer. Use th
 
 The generator creates packages under `extensions/installed/{plugins,themes,games}/`. Install the package from the panel afterwards. Keep its own repository and integrate it without editing CMS files.
 
+Models and services such as `Document`, `PublicDocuments` and `RecordAccess` in the examples represent your extension’s code. Implement them for your feature.
+
 The [manifest and lifecycle](architecture-extensions.md) apply to all three types. They define dependencies, migrations and data kept during updates.
 
 ## References for specific needs
