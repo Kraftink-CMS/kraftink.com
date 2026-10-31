@@ -1,18 +1,10 @@
-# Déclarer des permissions API
+# Exposer une API de plugin
 
-Un plugin peut déclarer les données et actions qu’un membre pourra déléguer à une application. Le noyau gère les jetons, leur durée, la révocation et les contrôles du compte ; le plugin conserve ses routes et ses règles métier.
-
-## Quand faut-il une permission API ?
-
-Une page publique, une recherche publique ou un classement public n’a pas besoin d’un jeton personnel. Un plugin exécuté dans KraftInk appelle directement les services et événements disponibles ; il ne crée pas un jeton pour communiquer avec un autre plugin.
-
-Une application extérieure a besoin d’une permission API lorsqu’elle consulte des données privées ou agit pour un compte : launcher lisant ses identités de jeu, application affichant ses tickets, bot consultant les données d’un compte dédié. Les identifiants des prestataires de paiement, les webhooks signés et les accès KraftLink restent des protocoles distincts.
-
-Les droits effectifs sont l’intersection de trois ensembles : **les permissions actuelles du compte, les scopes sélectionnés sur le jeton, et les fonctionnalités des extensions actives**. Un scope ne crée jamais un rôle administrateur et n’autorise pas à consulter une ressource appartenant à un autre membre.
+Pour déléguer une lecture privée ou une action à une application extérieure, déclarez une permission API, appelée scope. Le CMS gère les jetons et leur révocation. Votre plugin garde ses routes et contrôles de ressources.
 
 ## Déclarer un scope
 
-Depuis `boot()` du fournisseur du plugin :
+Dans `boot()` du fournisseur :
 
 ```php
 app(\App\Kraft\Auth\ApiScopes::class)->register(
@@ -24,23 +16,13 @@ app(\App\Kraft\Auth\ApiScopes::class)->register(
 );
 ```
 
-Le nom commence par l’identifiant propriétaire suivi de `:`. Les déclarations utilisent des clés de traduction du plugin et au moins une permission du compte. Si plusieurs permissions sont indiquées, elles sont toutes exigées. Deux déclarations identiques sont acceptées ; une déclaration différente ne peut pas remplacer le même identifiant.
+L’identifiant commence par celui du paquet suivi de `:`. Les libellés sont des clés de traduction et toutes les permissions indiquées sont exigées. Ajoutez `serviceAccounts: false` si le scope exige une personne et ne doit pas être proposé aux comptes techniques.
 
-Le registre est partagé dans le processus mais ne mémorise aucun utilisateur ni décision d’autorisation. `all()` fournit les déclarations des paquets actifs, `availableTo($user)` les scopes que le compte peut déléguer, `allows($user, $scope)` leur disponibilité actuelle. Une extension absente, désactivée, incompatible, en quarantaine ou suspendue par le mode sûr ne peut plus autoriser son scope.
+`app(ApiScopes::class)->availableTo($user)` donne les scopes délégables et `allows($user, $scope)` leur disponibilité actuelle. Une extension inactive ne peut plus autoriser ses scopes. Un scope existant garde sa portée : créez un nouvel identifiant pour des opérations plus larges.
 
-Un scope de plugin est utilisable par les comptes techniques sauf si sa déclaration précise `serviceAccounts: false`. Réservez cette option aux opérations qui exigent réellement une identité humaine. Les trois scopes natifs de profil, d’e-mail et d’identités de jeu restent personnels. Les comptes techniques vérifient leur propre identité avec `GET /api/auth/token`.
+## Protéger la route
 
-Les scopes natifs `site:news:read` et `site:servers:read` permettent déjà de connecter un bot d’annonces ou un outil de supervision sans plugin supplémentaire. Leurs routes `/api/site/news` et `/api/site/servers` conservent la sélection publique et les filtres des API publiques existantes.
-
-Le compte technique conserve uniquement sa liste de scopes approuvés. Le noyau déduit leurs permissions métier depuis le même registre, sans créer de rang ou une seconde liste d’autorisations. Le jeton restreint encore cette enveloppe et les contrôleurs gardent leurs règles de propriété et de visibilité. Si deux scopes partagent une permission, l’approbation du premier ne rend pas le second disponible.
-
-`$request->user()` reste un modèle `User`, y compris pour une identité technique. Utilisez `isServiceAccount()` lorsqu’une opération exige une personne et `User::members()` dans les annuaires et sélecteurs de membres. Une identité technique peut ne posséder ni e-mail, ni mot de passe, ni profil de jeu. Ses requêtes API ne lui ouvrent aucune session sur le site.
-
-Ne changez pas la portée métier d’un scope existant pour ajouter des opérations plus larges. Déclarez un nouvel identifiant et faites approuver ce droit explicitement.
-
-## Protéger une route
-
-Le plugin charge son propre fichier de routes API depuis son fournisseur. Son groupe doit inclure les middlewares `api`, `ApiAvailability`, `AuthenticateApiToken` avec le scope exact, sa permission métier et une limitation de débit :
+Chargez votre fichier de routes API depuis le fournisseur :
 
 ```php
 Route::prefix('api/example/documents')
@@ -54,29 +36,12 @@ Route::prefix('api/example/documents')
     ->get('/', [ApiDocumentController::class, 'index']);
 ```
 
-Le contrôleur utilise `$request->user()` et applique ses règles de propriété, visibilité, langue et publication. Une permission `read` ne doit pas couvrir une écriture. Déclarer un scope ne génère pas d’endpoint.
+Le contrôleur utilise `$request->user()` et filtre les ressources selon leur propriétaire, visibilité et publication. Un scope ne donne jamais les ressources d’un autre compte. Une lecture ne doit pas autoriser une écriture.
 
-Les jetons personnels continuent de respecter les règles de connexion locale, de vérification d’e-mail, de suspension et du jeu choisi. Les comptes sans connexion locale autorisée ne peuvent pas créer ces accès personnels. Les identités techniques suivent leur propre état administré et leur enveloppe de scopes, avec le même stockage de jetons et les mêmes protections de révocation et d’expiration.
+Le titulaire reste un modèle `User`, même pour un compte technique. Utilisez `isServiceAccount()` si votre traitement exige un membre, et `User::members()` pour vos listes de membres. Un compte technique peut ne pas avoir d’e-mail, de mot de passe ou d’identité de jeu.
 
-## Exemple fourni : Support
+## Utiliser les jetons
 
-Support déclare `support:tickets:read`, lié à `support.view`, et fournit :
+Les droits effectifs combinent les permissions actuelles du compte, les scopes du jeton et la disponibilité du plugin. Les membres créent leurs jetons dans `/account/tokens`. Les bots utilisent les [comptes techniques](service-accounts.md). Le protocole HTTP et les erreurs sont décrits dans l’[API d’authentification](auth-api.md).
 
-| Route | Contenu |
-| --- | --- |
-| `GET /api/support/tickets` | Tickets du titulaire du jeton |
-| `GET /api/support/tickets/{id}` | Ticket personnel et ses messages non internes |
-
-`page` commence à 1 et `per_page` accepte de 1 à 50, avec 20 par défaut. Même un compte administrateur utilisant ce scope personnel ne peut pas lire les tickets d’un autre membre. Les notes internes, contenus supprimés et chemins des pièces jointes sont exclus. Aucun droit d’écriture ou de gestion du support n’est délégué par ce scope.
-
-## Accorder un accès à une application
-
-1. Le propriétaire active **Connexion des applications** dans `/admin/settings/api` et fixe la durée maximale.
-2. Pour une application agissant au nom d’un membre, il attribue au compte les permissions métier nécessaires via les rangs. Pour un bot indépendant, il crée un [compte technique](service-accounts.md) et choisit directement ses scopes depuis l’administration.
-3. Le titulaire ouvre `/account/tokens`, choisit un nom, les seuls scopes nécessaires et une durée, puis confirme son mot de passe et sa 2FA lorsqu’elle est active.
-4. Il copie le secret affiché une seule fois dans le stockage privé de l’application. La réponse contenant le secret n’est pas mise en cache et le secret n’est pas conservé en clair dans la base ou la session.
-5. L’application envoie `Authorization: Bearer <jeton>` sous HTTPS. Elle traite les refus sans réutiliser une autorisation locale périmée.
-
-Le compte peut révoquer un jeton précis ou tous ses jetons, sans ressaisir ses identifiants. Retirer une permission au compte bloque immédiatement les endpoints correspondants. Une rotation conserve l’échéance et retire les scopes devenus indisponibles ; elle n’ajoute jamais de droits.
-
-Une application disposant de son propre écran de connexion peut aussi obtenir un jeton via [l’API d’authentification](auth-api.md). Ce parcours exige les identifiants du membre et sa 2FA ; aucun flux de consentement OAuth2 ou jeton sans compte n’est implicite.
+Un appel interne à un autre plugin utilise directement ses services ou événements. Les pages publiques n’exigent pas de jeton personnel. Les webhooks de paiement et les accès KraftLink conservent leurs protocoles propres.

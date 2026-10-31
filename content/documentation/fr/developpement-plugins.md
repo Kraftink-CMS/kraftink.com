@@ -1,155 +1,102 @@
 # Créer un plugin
 
-Ce guide accompagne la création d’une extension Laravel indépendante. Votre plugin possède ses données, ses routes et son interface. Il utilise les services du CMS pour les comptes, permissions et réglages.
+Un plugin possède ses routes, vues, traductions et données. Il réutilise les comptes et les services du CMS. Préparez d’abord votre [installation locale](developpeurs.md#preparer-votre-installation-locale).
 
-## Générer et installer le paquet
-
-Depuis la racine du CMS :
+## Générer le paquet
 
 ```shell
-php artisan kraft:make plugin "Exemple" --id=exemple --namespace="MonStudio\Exemple"
+php artisan kraft:make plugin "Example" --id=example --namespace="MyStudio\Example"
 ```
 
-Le générateur crée `extensions/installed/plugins/exemple/` avec le manifeste, le fournisseur, les contrôleurs, les routes, les vues et les traductions FR/EN. Il refuse l’écrasement d’un dossier existant. Installez ensuite le paquet depuis le panneau : après validation, un nouveau plugin est activé automatiquement. La génération seule ne crée pas ses tables.
-
-Conservez ce contenu dans un dépôt propre au plugin. Le CMS exécute uniquement la copie installée. Les modèles du générateur se trouvent dans `resources/stubs/extensions/`.
-
-## Déclarer le plugin
-
-Le manifeste généré fournit `id`, `type: "plugin"`, `version`, `namespace`, `provider` et les exigences CMS/PHP. Ajoutez les dépendances entre extensions dans `requires`, avec des références comme `plugin:shop` ou `game:minecraft`. Les intégrations facultatives vont dans `integrations`, avec un préfixe `plugin:`, `theme:` ou `game:`. Les bibliothèques PHP se déclarent dans `composer.json`, celles du frontend et leur compilation dans `package.json`. Ces fichiers sont facultatifs et restent propres au plugin. Voir le [cycle de vie des extensions](architecture-extensions.md).
-
-```json
-{
-    "id": "exemple",
-    "name": "Exemple",
-    "type": "plugin",
-    "version": "1.0.0",
-    "namespace": "MonStudio\\Exemple\\",
-    "provider": "MonStudio\\Exemple\\Providers\\PluginServiceProvider",
-    "requires": {"cms": ">=0.0.1", "php": "^8.4.1"}
-}
-```
-
-Votre fournisseur enregistre ses services et charge ses routes, vues et traductions. Il doit démarrer même avant la création de ses tables. Ne lisez pas les dossiers d’un autre plugin : utilisez un contrat ou un événement, avec une dépendance déclarée si elle est obligatoire.
+Le générateur crée `extensions/installed/plugins/example/`. Installez le paquet dans le panneau pour créer ses tables et activer le plugin.
 
 ```text
 manifest.json
 src/Providers/PluginServiceProvider.php
 src/Http/Controllers/
 src/Http/Controllers/Admin/
-src/Http/Middleware/
 src/Models/
-src/Contracts/
-src/Data/
 src/Services/
-src/Services/Imports/
-src/View/
-src/Console/Commands/
-src/Jobs/
-src/Listeners/
-src/Mail/
 routes/web.php
 routes/admin.php
 database/migrations/
-resources/views/default/documents/
-resources/views/admin/documents/
+resources/views/default/
+resources/views/admin/
 lang/fr/messages.php
 lang/en/messages.php
 ```
 
-Créez uniquement les dossiers utiles au paquet : `Http` pour les contrôleurs et middleware, `Models` pour Eloquent, `Services` pour les traitements métier et `Providers` pour les fournisseurs Laravel. Les vues restent sous `resources/views`, par surface et ressource.
+Le namespace du manifeste correspond à `src/`. Les contrôleurs restent sous `Http`, les modèles Eloquent sous `Models` et les traitements métier sous `Services`. Ajoutez `Contracts`, `Data`, `Jobs`, `Listeners` ou des sous-dossiers métier lorsque votre code en a besoin. Gardez des noms anglais et ne créez pas de dossiers vides pour compléter cette structure.
 
-Les tables du plugin portent le préfixe `exemple__`. Chacune possède un modèle Eloquent utilisé par le code, ou un modèle `Pivot` pour une table de liaison. Nommez les modèles au singulier et déclarez explicitement `protected $table`, les clés, timestamps, casts et relations du schéma. Les tables techniques de Laravel gardent leur fonctionnement natif.
+## Manifeste et fournisseur
 
-Les modèles portent les relations, scopes, casts et règles de persistance. Les services les réutilisent pour coordonner les opérations, transactions et intégrations externes. Privilégiez Eloquent et le chargement groupé avec `with()`. Réservez les builders de bas niveau aux imports, projections ou traitements en lot qui le nécessitent. Les formulaires utilisent la validation Laravel.
+```json
+{
+    "id": "example",
+    "name": "Example",
+    "type": "plugin",
+    "version": "1.0.0",
+    "namespace": "MyStudio\\Example\\",
+    "provider": "MyStudio\\Example\\Providers\\PluginServiceProvider",
+    "requires": {"cms": ">=0.0.1", "php": "^8.4.1"}
+}
+```
 
-## Organiser les classes et les API
+Le fournisseur généré charge les routes, vues et traductions. Enregistrez vos services dans `register()` et vos contributions dans `boot()`. Son démarrage ne doit pas lire de tables ni appeler un service distant, car il est aussi vérifié avant l’installation des données.
 
-Regroupez les opérations d’une même responsabilité dans une classe, par exemple `Documents` pour lire et modifier des documents. Ajoutez des sous-dossiers lorsqu’ils facilitent la navigation, comme `Models/History`. Un traitement interne peut rester une méthode privée. Les contrôleurs appellent les services directement.
+Déclarez les dépendances obligatoires dans `requires`, par exemple `"plugin:shop": ">=0.0.1"`. Les intégrations facultatives vont dans `integrations`. Les bibliothèques du paquet et ses migrations suivent le [contrat commun](architecture-extensions.md).
 
-Placez les interfaces d’intégration et d’API publique dans `Contracts`, leurs objets d’entrée et de résultat dans `Data`. `View` prépare le contexte d’affichage, par exemple les données d’une section de compte.
+## Données et traductions
 
-Réutilisez les composants du CMS pour les comptes, permissions, images privées et notifications. Gardez des classes distinctes lorsque leurs règles d’accès, transactions, protocoles ou cycles de vie le justifient. Chaque plugin conserve son métier et ses données.
+Préfixez les tables par `example__`. Chaque table métier possède un modèle Eloquent avec `protected $table`, ses relations et ses casts. Utilisez un `Pivot` adapté pour les liaisons. Les services coordonnent les transactions et les intégrations en réutilisant ces modèles.
 
-Déclarez les événements et widgets depuis `boot()`, avec des méthodes privées si nécessaire. Les listeners, commandes, jobs et gestionnaires liés à un contrat gardent leur classe. Regroupez les imports sous `Services/Imports`, par format source.
-
-Les services internes du noyau sont regroupés par domaine dans `App\Kraft`. Ses contrôleurs et middleware utilisent `App\Http`, ses courriels `App\Mail` et ses exceptions `App\Exceptions`.
-
-Pour vos API publiques, documentez les paramètres, résultats et effets des méthodes exposées. Les contrats des registres permettent de compléter ou remplacer un comportement.
-
-## Organiser les traductions
-
-Commencez par un `messages.php` par langue, organisé par domaine : `messages.documents.title`, `messages.documents.empty`, `messages.documents.actions.publish`. Ajoutez un catalogue lorsque le volume le justifie, par exemple `admin.php` pour un panneau important. Gardez les mêmes clés et paramètres `:name` dans chaque langue.
-
-Dans le noyau, `common.php` contient les libellés partagés, `site.php` le site et le compte, `admin.php` le panneau et `system.php` l’installation, les extensions, les imports et les mises à jour. Les catalogues standards de Laravel conservent leur rôle.
-
-Réorganiser les traductions ne change pas les identifiants de réglages, permissions ou événements. Lors d’un déplacement de clés, adaptez aussi les appels dynamiques, manifestes et surcharges de thèmes.
+Les traductions sont des tableaux PHP avec les mêmes clés dans chaque langue. Par exemple, `documents.title` dans `lang/fr/messages.php` s’appelle avec `__('example::messages.documents.title')`. Ajoutez d’autres catalogues uniquement lorsque le volume le justifie.
 
 ## Routes et permissions
 
-Utilisez `/plugins/exemple` pour le site et `/admin/plugins/exemple` pour le panneau. Les noms de routes suivent `plugins.exemple.<surface>.<ressource>.<action>`. Les routes privées exigent authentification, accès au panneau et permission métier. Une entrée de menu ne protège jamais une route.
+Les routes publiques utilisent `/plugins/example` et les noms `plugins.example.public.*`. Celles du panneau utilisent `/admin/plugins/example` et `plugins.example.admin.*`.
 
-Les permissions appartiennent à votre identifiant. Déclarez leur libellé et, si nécessaire, leurs valeurs initiales par modèle de rang :
+Déclarez les permissions dans le manifeste :
 
 ```json
 "permissions": {
-    "plugins.exemple.view": {
-        "label": "exemple::messages.permission_view",
+    "plugins.example.view": {
+        "label": "example::messages.permission_view",
         "default": {"visitor": true, "member": true}
     },
-    "plugins.exemple.manage": {
-        "label": "exemple::messages.permission_manage",
+    "plugins.example.manage": {
+        "label": "example::messages.permission_manage",
         "default": {"admin": true}
     }
 }
 ```
 
-Les modèles sont `visitor`, `member`, `mod` et `admin`. Un choix explicite du propriétaire reste prioritaire. Les permissions administratives ne peuvent pas déclarer de valeurs publiques `visitor` ou `member`.
+Les valeurs initiales acceptent `visitor`, `member`, `mod` et `admin`. Les choix du propriétaire restent prioritaires. Une permission administrative ne peut pas être publique.
 
 ```php
-Route::get('/plugins/exemple', [DocumentController::class, 'index'])
-    ->middleware(['web', 'permission:plugins.exemple.view'])
-    ->name('plugins.exemple.public.documents.index');
+Route::get('/plugins/example', [DocumentController::class, 'index'])
+    ->middleware(['web', 'permission:plugins.example.view'])
+    ->name('plugins.example.public.documents.index');
 ```
 
-Ajoutez `auth` lorsqu’un compte est nécessaire. Pour les requêtes de contenu et les accès sans session, utilisez `PermissionAccess::allows($user, $permission)` avec un utilisateur nullable. Ne reconstruisez pas les permissions à partir des rangs bruts.
+Ajoutez `auth` pour une action réservée aux membres. Les routes du panneau demandent aussi `permission:admin.access` et votre permission de gestion. Une entrée de menu ne protège pas sa route. Pour les contrôles hors middleware, utilisez `PermissionAccess::allows($user, $permission)` avec un utilisateur éventuellement nul.
 
-## Vues et disponibilité
+## Vues et intégration au site
 
-Les vues publiques utilisent `default.layouts.layout`, celles du panneau `admin.layouts.layout`. Bootstrap 5 et AdminLTE sont déjà fournis localement. Les traductions sont des tableaux PHP, appelés avec `__('exemple::messages.title')`. Nettoyez le HTML riche avec `App\Kraft\Html::clean` avant stockage.
+Les pages étendent `default.layouts.layout` ou `admin.layouts.layout`. Le thème actif peut ainsi les habiller. Bootstrap 5, AdminLTE et les composants communs sont fournis par le CMS. Les vues du plugin s’appellent avec son namespace, par exemple `example::default.documents.index`.
 
-Enregistrez une fonctionnalité depuis `boot()` pour que le CMS puisse masquer une destination indisponible :
+Enregistrez une destination conditionnelle avec `Features` :
 
 ```php
-app(\App\Kraft\Features::class)->register('exemple', function (?\App\Models\Accounts\User $user): bool {
+app(\App\Kraft\Features::class)->register('example', function (?\App\Models\Accounts\User $user): bool {
     return app(PublicDocuments::class)->visibleTo($user)->exists();
 });
 ```
 
-Le résolveur réutilise vos règles de visibilité, sans écriture ni appel réseau. Ajoutez `capability:extension,exemple` à la route concernée. Les vues publiques consultent `$capabilities->extension('exemple')` ou `$capabilities->routeAvailable($routeName)`. Les contrôles d’accès restent obligatoires sur chaque action.
+Ajoutez `capability:extension,example` aux routes concernées. Dans les vues, `$capabilities->extension('example')` ou `routeAvailable($routeName)` indique leur disponibilité. Gardez les contrôles de visibilité sur chaque ressource.
 
-Les sections de compte, menus, formulaires AJAX et images privées utilisent les [primitives d’interface](ui-contributions.md). Les thèmes peuvent remplacer vos vues publiques en conservant leur chemin relatif.
+Les [menus, formulaires et métadonnées](ui-contributions.md) et les [tableaux](tables.md) utilisent les composants du CMS. Nettoyez le HTML riche avec `App\Kraft\Html::clean` avant stockage.
 
-Les listes tabulaires réutilisent le [système commun de tableaux](tables.md) pour la pagination, la recherche, le tri et le nombre de lignes. Déclarez les colonnes autorisées côté serveur et les composants Blade, sans ajouter un script à chaque page. Appliquez vos règles d’accès à la requête avant sa pagination.
+Pour un secret, utilisez `app(App\Kraft\Secrets::class)->set($key, $value)` et `get($key)`. Pour une action sensible, appelez `app(App\Kraft\System\SensitiveAction::class)->confirm($request)` en conservant permissions et CSRF.
 
-Pour intégrer vos pages au même écran SEO que le noyau, déclarez leurs routes et variables avec `CollectingSeoPages`, puis fournissez leurs valeurs dans `$seoVariables`. Le [guide SEO des extensions](seo.md#intégrer-un-plugin) présente le contrat, les sections de métadonnées et les contrôles de confidentialité.
-
-## Secrets et actions sensibles
-
-Enregistrez les secrets avec `app(App\Kraft\Secrets::class)->set('exemple.api_secret', $value)` et lisez-les avec `get()`. Ne renvoyez pas leur valeur dans les formulaires. Un jeton uniquement comparé peut être stocké sous forme d’empreinte.
-
-Pour une opération sensible, `app(App\Kraft\System\SensitiveAction::class)->confirm($request)` contrôle les identifiants et le second facteur actif. Conservez aussi permissions et CSRF. Les réglages de présentation ordinaires n’exigent pas cette confirmation.
-
-## Aller plus loin
-
-- [Soldes et opérations idempotentes](developpement-soldes.md)
-- [Services des plugins](api-plugins.md)
-- [Événements métier](plugin-events.md)
-- [Widgets configurables](plugin-widgets.md)
-- [Notifications unifiées](plugin-notifications.md)
-- [Permissions et jetons API](plugin-api-scopes.md)
-- [Gestion des données personnelles](privacy-extensions.md)
-- [Adaptateurs et mappings d’import](development-migrations.md)
-- [Publication d’une extension](extensions-publication.md)
-
-Avant distribution, vérifiez l’installation sans autre plugin facultatif, les accès avec et sans permission, les entrées invalides et la mise à jour d’un site contenant déjà des données.
+Avant distribution, testez les accès autorisés et refusés, les saisies invalides et la mise à jour avec des données existantes. Ajoutez un [gestionnaire de confidentialité](privacy-extensions.md) si le plugin conserve des données de membres.

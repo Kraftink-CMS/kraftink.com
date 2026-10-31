@@ -1,25 +1,8 @@
 # Integrate plugin APIs
 
-Use these contracts to add a currency, pricing strategy or vote provider, or read public Forum data. Declare `plugin:shop` or `plugin:vote` in `requires`, with its version constraint, whenever your extension uses its classes. The currency registry belongs to the core.
+These APIs add Shop pricing or a Vote provider and expose Forum and Support data. Declare the plugin in `requires` or `integrations` depending on whether the dependency is required or optional.
 
-To configure existing extensions, see [payments](shop-administration.md), [Vote](vote.md) or [extension installation](extensions-catalogue.md).
-
-## Declare a currency
-
-In your plugin provider’s `register()` method:
-
-```php
-$this->app->make(\App\Kraft\Currencies\CurrencyRegistry::class)
-    ->register('AUD', 2, 'my-currencies::messages.aud');
-```
-
-The code has three uppercase letters. The exponent is required: **only `2` is supported**. Do not register a currency with zero or three decimal places as one with two decimal places.
-
-The optional label is a plugin translation key. Repeating an identical registration is accepted. Changing the label of an existing code is rejected.
-
-The registry provides `get($code)`, which returns an immutable object with `code`, `decimals` and `label()`, or rejects an unknown code. `find($code)` returns `null` when missing. `all()` and `codes()` expose the registry.
-
-Adding a currency does not automatically extend payment methods. A [gateway](passerelles-paiement.md) must implement `KraftInk\Plugins\Shop\Contracts\Payments\SupportsCurrencies` and its `supportsCurrency(Currency $currency): bool` method, using `App\Kraft\Currencies\Currency`. Without it, only EUR, USD, GBP, CAD and CHF are accepted. Amounts remain integer minor units, with no implicit conversion.
+Currencies use the shared registry described in the [wallet](developpement-soldes.md#amounts-and-currency). Payment providers follow the [gateway contract](passerelles-paiement.md).
 
 ## Add Shop pricing
 
@@ -96,3 +79,7 @@ The following GET routes require an active Forum plugin and the `forum.view` per
 | `/api/forum/categories/{id}/feeds/{format}` | Category feed |
 
 `locale` accepts a site language, `page` starts at 1 and `per_page` ranges from 1 to 50, with 20 by default. Paginated lists return `data.items` and `data.pagination` (`page`, `per_page`, `total`, `last_page`). Inaccessible content returns 404. Feeds accept `rss` or `atom` and provide ETag/Last-Modified.
+
+## Reading Support tickets
+
+`GET /api/support/tickets` and `GET /api/support/tickets/{id}` require a token with `support:tickets:read`, linked to `support.view`. They expose the holder’s tickets and non-internal messages, even for an administrator account. `page` starts at 1 and `per_page` accepts 1 to 50, defaulting to 20.

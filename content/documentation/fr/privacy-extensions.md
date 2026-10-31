@@ -1,6 +1,6 @@
 # Gérer les données personnelles
 
-Une extension qui conserve des données personnelles doit participer à l’export et à l’anonymisation du compte, même lorsqu’elle est désactivée.
+Déclarez un gestionnaire de confidentialité si votre extension conserve des données de membres. Le CMS l’appelle lors de l’export ou de l’anonymisation d’un compte, y compris pour une extension désactivée.
 
 ## Déclarer le gestionnaire
 

@@ -1,6 +1,6 @@
 # Integrate accounts and balances from a server
 
-This API is for connector authors offering account or wallet operations from the game. To install KraftLink, use the [owner guide](kraftlink.md). For delivery commands and acknowledgements, see the [KraftLink protocol](developpement-kraftlink.md). New transports belong in a [game module](developpement-jeux.md).
+This API lets a connector manage accounts and balances from the game. It complements the [delivery protocol](developpement-kraftlink.md) with a separate key and permissions.
 
 ## Obtain dedicated access
 
@@ -24,7 +24,7 @@ Prefix: `/api/link/accounts`. Use HTTPS, `Authorization: Bearer IDENTIFIER|SECRE
 | `POST /players/{uuid}/balance/debit` | `wallet:debit` |
 | `POST /players/{uuid}/balance/set` | `wallet:set` |
 
-JSON responses use `success` to indicate success and `data` for the result. The profile returns the account number, name and game identity inside `data`. Balance returns `data.balance_minor` and `data.currency`. Responses are private and uncached. Respect `Retry-After` on `429` and interruptions during maintenance, updates or imports. Multiple CMS instances need a shared cache for attempt limits.
+JSON responses use `success` to indicate success and `data` for the result. The profile returns the account number, name and game identity inside `data`. Balance returns `data.balance_minor` and `data.currency`. Responses are private and uncached. Respect `Retry-After` on `429` and interruptions during maintenance, updates or imports.
 
 ## Registration and credential changes
 

@@ -1,37 +1,49 @@
-# Import an existing site
+# Importing an existing site
 
-The assistant under **Administration → Imports** can read a KraftInk, Azuriom or historical MineWeb source. Its report shows what your site can actually import. A CMS or plugin name does not guarantee a complete transfer.
+**Administration → Imports** reads supported data from KraftInk, Azuriom or historical MineWeb. The installer report lists available conversions and data that will only be archived.
 
-See [Migrate MineWeb or Azuriom](migration-mineweb-azuriom.md) for plugin coverage and source file locations.
+## Preparing and running the import
 
-## Prepare the transfer
+1. Back up the old site’s database and files. Test on a copy before the final transfer.
+2. Prepare read-only access to its database or SQLite file, separate from the destination. Restore a `.sql` export into a separate database first.
+3. Start analysis. The wizard can install available, compatible KraftInk equivalents of the source extensions.
+4. Check counts, account matches and data that cannot be converted before confirming.
 
-1. Back up the old site’s database **and files**. Run a first trial on a copy.
-2. Prepare read-only access to its MySQL/MariaDB or PostgreSQL database, or its SQLite file. The source must be separate from KraftInk’s database.
-3. If you only have a `.sql` export, restore it into a separate source database. The panel does not accept SQL dumps directly.
-4. Let the assistant install and enable available matching KraftInk extensions, or install them beforehand. Free catalogue equivalents use the standard compatibility and integrity checks. A matching theme can also be selected. Unavailable extensions are listed.
-5. Put the old site into maintenance for the final transfer to avoid new purchases, messages or registrations during the copy.
+**Add to existing content** keeps the destination. **Replace convertible content** backs up and replaces the selected domains. Local accounts and installation settings are kept. Shop and Vote merge their histories.
 
-## Read the report before confirming
+For the final transfer, put the old site into maintenance to stop registrations, purchases and messages during copying. Repeat analysis if the source has changed.
 
-Analysis does not convert data yet. When automatic installation is selected, it also prepares matching extensions. Check the counts, dependencies between data and items that cannot be converted. If the source changes after analysis, run it again.
+## MineWeb and Azuriom data
 
-After conversion, open **View the report** in recent imports. It separates converted rows from items kept only in the archive and lists files or rules to restore with their source table and identifier. You can download the JSON report. An available converter does not guarantee an equivalent for every column.
+Reference formats are MineWeb **1.15.2** and Azuriom **1.2.13** with their official plugins. Forks, third-party extensions and NewMinewebCMS may need a suitable converter.
 
-**Add to existing content** keeps destination content and adds converted items. **Replace convertible content** backs up and replaces only the areas selected in the preview. Replacement preserves local accounts and installation settings. Shop’s financial history and Vote data are always merged.
+| Domain | Planned conversion |
+| --- | --- |
+| Accounts | Names, emails, ranks, identities, dates, representable balances and bcrypt or Argon2 passwords |
+| Site | Compatible public settings, pages, news, menus and social links |
+| Wiki, FAQ and Staff | Categories, content, order and compatible restrictions. Staff applies to MineWeb |
+| Support | Tickets, messages, categories, assignments and compatible states |
+| Forum | Categories, topics, posts and representable access rules, Azuriom polls. MineWeb private messages stay archived |
+| Vote | Representable directories, votes, rewards and rankings without new distribution |
+| Shop | Catalogue, coupons, gift cards and supported financial history. Subscriptions require reconciliation with the provider |
 
-For accounts already present, check matches by email or game identity and choose to preserve their local access. Resolve ambiguous matches before continuing.
+Content arrives as drafts, hidden or disabled for review. Ranks do not automatically receive the old administration privileges. Data without an equivalent stays in the private archive.
 
-## Transfer missing items
+## Files and access to restore
 
-Reading the database does not copy files. Keep images, avatars, downloadable products and attachments from the old hosting. Upload them to KraftInk and attach them to the appropriate content, using private storage for restricted files.
+Reading the database does not transfer files. In particular, keep:
 
-Secrets, external sign-in connections and two-factor protections do not automatically become usable. Some imported accounts will need to reset their passwords. Verify the owner of a protected or locked account before unlocking it.
+| Source | Usual directories |
+| --- | --- |
+| MineWeb | `app/webroot/img/uploads/`, `app/webroot/files/` and any skin or cape directories in use |
+| Azuriom | `storage/app/public/` and `storage/app/shop/packages/` for sold files |
 
-Old rewards and deliveries are not replayed. Handle payment services, subscriptions, pending deliveries and settings that cannot be converted separately.
+Include external or custom storage. Upload public images to the media library and restricted files to their private area, then attach them to content. Copying an old directory does not recreate these associations.
 
-## Check and open
+Reconfigure SMTP, OAuth, payment and game connection secrets. Some members will need to reset their passwords. Protected or locked accounts require verification before reopening.
 
-Compare accounts, amounts and counts with the original site. Test links, images, sign-in and permissions as a visitor and then as a member. Reconfigure access to private areas before publishing them.
+## Checking the result
 
-Resume an interrupted import from the panel. Keep `.env`, its key and the private archives in `storage/app/private/imports/` until the result is verified. They may contain personal data and must not be made public. Keep a complete backup of the original site even after a successful import.
+Open **View report** to find outstanding items and download the JSON report. Check accounts, permissions, amounts, links and images before publishing content. Old commands, rewards and payments are not replayed.
+
+An interrupted import can resume from the panel. Keep `.env` and the private archives in `storage/app/private/imports/` until the transfer is approved.

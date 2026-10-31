@@ -1,22 +1,34 @@
-# Create a plugin
+# Creating a plugin
 
-This guide walks through an independent Laravel extension. Your plugin owns its data, routes and interface, using CMS services for accounts, permissions and settings.
+A plugin owns its routes, views, translations and data. It reuses CMS accounts and services. First prepare your [local installation](developpeurs.md#preparing-a-local-installation).
 
-## Generate and install the package
-
-From the CMS root:
+## Generating the package
 
 ```shell
 php artisan kraft:make plugin "Example" --id=example --namespace="MyStudio\Example"
 ```
 
-The generator creates `extensions/installed/plugins/example/` with a manifest, provider, controllers, routes, views and FR/EN translations. It refuses to overwrite an existing directory. Install the package from the panel: after validation, a new plugin is enabled automatically. Generation alone does not create its tables.
+The generator creates `extensions/installed/plugins/example/`. Install the package in the panel to create its tables and enable the plugin.
 
-Keep this content in the plugin’s own repository. The CMS only executes the installed copy. Generator templates live in `resources/stubs/extensions/`.
+```text
+manifest.json
+src/Providers/PluginServiceProvider.php
+src/Http/Controllers/
+src/Http/Controllers/Admin/
+src/Models/
+src/Services/
+routes/web.php
+routes/admin.php
+database/migrations/
+resources/views/default/
+resources/views/admin/
+lang/fr/messages.php
+lang/en/messages.php
+```
 
-## Declare the plugin
+The manifest namespace maps to `src/`. Controllers belong under `Http`, Eloquent models under `Models` and business operations under `Services`. Add `Contracts`, `Data`, `Jobs`, `Listeners` or domain subdirectories when your code needs them. Use English names and avoid empty directories added only to complete this structure.
 
-The generated manifest provides `id`, `type: "plugin"`, `version`, `namespace`, `provider` and CMS/PHP requirements. Declare required extensions under `requires` with references such as `plugin:shop` or `game:minecraft`. Add optional integrations under `integrations` with a `plugin:`, `theme:` or `game:` prefix. PHP libraries belong in `composer.json`, frontend libraries and their build command in `package.json`. These optional files belong to the plugin. See the [extension lifecycle](architecture-extensions.md).
+## Manifest and provider
 
 ```json
 {
@@ -30,66 +42,21 @@ The generated manifest provides `id`, `type: "plugin"`, `version`, `namespace`, 
 }
 ```
 
-Your provider registers services and loads routes, views and translations. It must boot before its tables exist. Do not read another plugin’s directories: use a contract or event, declaring a dependency when required.
+The generated provider loads routes, views and translations. Register services in `register()` and contributions in `boot()`. Booting must not read tables or contact a remote service, because it is also checked before data installation.
 
-```text
-manifest.json
-src/Providers/PluginServiceProvider.php
-src/Http/Controllers/
-src/Http/Controllers/Admin/
-src/Http/Middleware/
-src/Models/
-src/Contracts/
-src/Data/
-src/Services/
-src/Services/Imports/
-src/View/
-src/Console/Commands/
-src/Jobs/
-src/Listeners/
-src/Mail/
-routes/web.php
-routes/admin.php
-database/migrations/
-resources/views/default/documents/
-resources/views/admin/documents/
-lang/fr/messages.php
-lang/en/messages.php
-```
+Declare required dependencies in `requires`, such as `"plugin:shop": ">=0.0.1"`. Optional integrations belong in `integrations`. Package libraries and migrations follow the [shared contract](architecture-extensions.md).
 
-Create only the directories the package needs: `Http` for controllers and middleware, `Models` for Eloquent, `Services` for business operations and `Providers` for Laravel service providers. Views stay under `resources/views`, grouped by surface and resource.
+## Data and translations
 
-Plugin tables use the `example__` prefix. Each has an Eloquent model used by the code, or a `Pivot` model for a relationship table. Use singular model names and explicitly declare `protected $table`, keys, timestamps, casts and relationships matching the schema. Laravel infrastructure tables retain their native behavior.
+Prefix tables with `example__`. Each business table has an Eloquent model with `protected $table`, relations and casts. Use an appropriate `Pivot` for join tables. Services coordinate transactions and integrations by reusing these models.
 
-Models own relationships, scopes, casts and persistence rules. Services reuse them to coordinate operations, transactions and external integrations. Prefer Eloquent and eager loading with `with()`. Reserve lower level builders for imports, projections or bulk operations that need them. Forms use Laravel validation.
-
-## Organize classes and APIs
-
-Group operations with the same responsibility in a class, such as `Documents` for reading and changing documents. Add subdirectories when they make navigation easier, such as `Models/History`. Internal processing can remain a private method. Controllers call services directly.
-
-Place integration and public API interfaces in `Contracts`, with input and result objects in `Data`. `View` prepares display context, such as the data for an account section.
-
-Reuse CMS components for accounts, permissions, private images and notifications. Keep separate classes when access rules, transactions, protocols or lifecycles warrant it. Each plugin owns its business rules and data.
-
-Declare events and widgets from `boot()`, using private methods when helpful. Listeners, commands, jobs and handlers implementing a contract keep their own classes. Group imports under `Services/Imports` by source format.
-
-Internal core services are grouped by domain under `App\Kraft`. Its controllers and middleware use `App\Http`, mail classes use `App\Mail` and exceptions use `App\Exceptions`.
-
-Document the parameters, results and effects of public API methods. Registry contracts allow extensions to add or replace behavior.
-
-## Organize translations
-
-Start with one `messages.php` per language, grouped by domain: `messages.documents.title`, `messages.documents.empty`, `messages.documents.actions.publish`. Add a catalogue when the volume warrants it, such as `admin.php` for a large panel. Keep the same keys and `:name` parameters in every language.
-
-In the core, `common.php` holds shared labels, `site.php` covers the site and account, `admin.php` the panel, and `system.php` installation, extensions, imports and updates. Standard Laravel catalogues retain their role.
-
-Reorganizing translations does not change setting, permission or event identifiers. When moving keys, also update dynamic calls, manifests and theme overrides.
+Translations are PHP arrays with matching keys across languages. For example, `documents.title` in `lang/en/messages.php` is called with `__('example::messages.documents.title')`. Add other catalogues when their size warrants it.
 
 ## Routes and permissions
 
-Use `/plugins/example` for the site and `/admin/plugins/example` for administration. Route names follow `plugins.example.<surface>.<resource>.<action>`. Private routes require authentication, panel access and a business permission. Menu entries never protect routes.
+Public routes use `/plugins/example` and names `plugins.example.public.*`. Panel routes use `/admin/plugins/example` and `plugins.example.admin.*`.
 
-Permissions belong to your identifier. Declare their label and, when needed, initial values for role templates:
+Declare permissions in the manifest:
 
 ```json
 "permissions": {
@@ -104,7 +71,7 @@ Permissions belong to your identifier. Declare their label and, when needed, ini
 }
 ```
 
-Templates are `visitor`, `member`, `mod` and `admin`. An owner’s explicit choice takes precedence. Administrative permissions cannot declare public `visitor` or `member` defaults.
+Defaults accept `visitor`, `member`, `mod` and `admin`. Owner choices take priority. Administrative permissions cannot be public.
 
 ```php
 Route::get('/plugins/example', [DocumentController::class, 'index'])
@@ -112,13 +79,13 @@ Route::get('/plugins/example', [DocumentController::class, 'index'])
     ->name('plugins.example.public.documents.index');
 ```
 
-Add `auth` when an account is required. For content queries and sessionless access, use `PermissionAccess::allows($user, $permission)` with a nullable user. Do not rebuild permissions from raw role data.
+Add `auth` for member-only actions. Panel routes also require `permission:admin.access` and your management permission. A menu entry does not protect its route. Outside middleware, use `PermissionAccess::allows($user, $permission)` with a nullable user.
 
-## Views and availability
+## Views and site integration
 
-Public views extend `default.layouts.layout`, panel views extend `admin.layouts.layout`. Bootstrap 5 and AdminLTE are already supplied locally. Translations are PHP arrays, called through `__('example::messages.title')`. Clean rich HTML with `App\Kraft\Html::clean` before storing it.
+Pages extend `default.layouts.layout` or `admin.layouts.layout` so the active theme can style them. Bootstrap 5, AdminLTE and shared components come with the CMS. Plugin views use its namespace, such as `example::default.documents.index`.
 
-Register a feature from `boot()` so the CMS can hide an unavailable destination:
+Register a conditional destination with `Features`:
 
 ```php
 app(\App\Kraft\Features::class)->register('example', function (?\App\Models\Accounts\User $user): bool {
@@ -126,22 +93,10 @@ app(\App\Kraft\Features::class)->register('example', function (?\App\Models\Acco
 });
 ```
 
-The resolver reuses your visibility rules without writes or network calls. Add `capability:extension,example` to the relevant route. Public views use `$capabilities->extension('example')` or `$capabilities->routeAvailable($routeName)`. Every action must still enforce its own access checks.
+Add `capability:extension,example` to the relevant routes. In views, `$capabilities->extension('example')` or `routeAvailable($routeName)` reports availability. Keep visibility checks for each resource.
 
-Account sections, menus, AJAX forms and private images use the [interface primitives](ui-contributions.md). Themes can override your public views while retaining their relative paths.
+[Menus, forms and metadata](ui-contributions.md) and [tables](tables.md) use CMS components. Clean rich HTML with `App\Kraft\Html::clean` before storage.
 
-## Secrets and sensitive actions
+Store secrets through `app(App\Kraft\Secrets::class)->set($key, $value)` and `get($key)`. For a sensitive action, call `app(App\Kraft\System\SensitiveAction::class)->confirm($request)` alongside permissions and CSRF.
 
-Store secrets with `app(App\Kraft\Secrets::class)->set('example.api_secret', $value)` and read them with `get()`. Do not return stored secrets in forms. Comparison-only tokens can be stored as hashes.
-
-For sensitive operations, `app(App\Kraft\System\SensitiveAction::class)->confirm($request)` verifies credentials and the active second factor. Keep permissions and CSRF protection. Ordinary presentation settings do not require this confirmation.
-
-## Further integration
-
-- [Balances and idempotent operations](developpement-soldes.md)
-- [Plugin services and events](api-plugins.md)
-- [Personal data handling](privacy-extensions.md)
-- [Import adapters and mappings](development-migrations.md)
-- [Publishing an extension](extensions-publication.md)
-
-Before distribution, verify installation without optional plugins, access with and without permissions, invalid input and upgrades on an existing populated site.
+Before distribution, test allowed and denied access, invalid input and updates with existing data. Add a [privacy handler](privacy-extensions.md) if the plugin keeps member data.

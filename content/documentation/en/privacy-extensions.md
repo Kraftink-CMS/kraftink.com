@@ -1,6 +1,6 @@
 # Handle personal data
 
-An extension retaining personal data must participate in account export and anonymization, including while disabled.
+Declare a privacy handler when your extension keeps member data. The CMS calls it for account exports and anonymisation, including when the extension is disabled.
 
 ## Declare the handler
 
@@ -29,7 +29,7 @@ Lazy collections are supported. The CMS prepares exports before sending them and
 
 The handler runs inside the global account transaction: errors roll back all database writes. Defer physical file deletion until commit. Preserve files still referenced and records needed for history while removing their personal content.
 
-Handle previous revisions as well: they must not restore data erased for privacy. For [private editor images](ui-contributions.md#editeurs-et-images-privees), call `anonymizeUser($id)`.
+Handle previous revisions as well: they must not restore data erased for privacy. For [private editor images](ui-contributions.md#editors-and-private-images), call `anonymizeUser($id)`.
 
 Failure to load an affected package interrupts the request. It must not be interpreted as absence of data.
 

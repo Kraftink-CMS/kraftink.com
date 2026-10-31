@@ -1,39 +1,25 @@
-# Create a theme
+# Creating a site or admin theme
 
-A theme customizes the site or panel without editing core views. To install an existing design, see [Install an extension](extensions-catalogue.md).
+A theme customises one interface through views, styles and settings. `site` and `admin` themes are selected independently and use the same package format.
 
-## Generate the package
-
-From the CMS root:
+## Generating and organising a theme
 
 ```shell
 php artisan kraft:make theme "My theme" --id=my-theme
 php artisan kraft:make theme "My panel" --id=my-panel --target=admin
 ```
 
-The first command creates a `site` theme, the second an `admin` theme, under `extensions/installed/themes/`. Install the package and select it for its target in the panel. Missing overrides retain the native rendering.
+The package is created under `extensions/installed/themes/`. Install it and select it for its target in the panel.
 
-The generator provides `resources/views/default/layouts/layout.blade.php` for a `site` theme, and `resources/views/admin/layouts/layout.blade.php` for an `admin` theme. This layout is optional. Remove it to create a CSS skin over the native structure, or keep it if your presentation requires its own structure. Native rendering provides the fallback for each missing page or layout.
-
-The generator also provides `package.json` and `package-lock.json` with the locked Sass dependencies required by the manifest’s SCSS build. Commit both files with the theme. Publication compiles its assets in a temporary directory.
-
-```text
-manifest.json
-package.json
-package-lock.json
-resources/scss/theme.scss
-public/theme.css
-public/fonts/
-resources/views/
-lang/fr/messages.php
-lang/en/messages.php
-```
-
-The manifest declares `type: "theme"`, `target: "site"` or `"admin"`, its version, requirements and assets. An update cannot change a theme’s target.
-
-Views are grouped under `resources/views` by surface and resource. The `views` directory remains supported for existing packages. Optional PHP classes follow the same directories as plugins, with `src/Providers`, `src/Http/Controllers` and `src/Services` according to the theme's needs.
-
-Optional PHP libraries belong in the theme’s `composer.json`. Its frontend libraries and build tools belong in its `package.json`, with committed lock files. Publication prepares private PHP libraries and compiles assets. The server receives a self-contained archive. See [Libraries and frontend builds](architecture-extensions.md#libraries-and-frontend-builds).
+| Directory or file | Contents |
+| --- | --- |
+| `manifest.json` | Identity, target, requirements and assets |
+| `resources/views/default/` | Public views for a `site` theme |
+| `resources/views/admin/` | Panel views for an `admin` theme |
+| `resources/scss/` | Style sources |
+| `public/` | Distributed CSS, JavaScript, images and fonts |
+| `lang/fr/messages.php`, `lang/en/messages.php` | Translations with matching keys |
+| `src/` | Optional PHP classes, organised like a plugin |
 
 ```json
 {
@@ -48,9 +34,11 @@ Optional PHP libraries belong in the theme’s `composer.json`. Its frontend lib
 }
 ```
 
-## Override views
+The target stays fixed during updates. The generator provides the target layout and npm files for Sass. Keep their lockfiles. [Dependencies and libraries](extensions-publication.md#libraries-and-assets) belong to the theme.
 
-An override retains the original view path. [Views and components](architecture-extensions.md#views-and-components) explains where pages, layouts, partials and components belong:
+## Overriding views
+
+An override keeps the original view’s path:
 
 | Original view | Theme file |
 | --- | --- |
@@ -59,47 +47,84 @@ An override retains the original view path. [Views and components](architecture-
 | `admin.layouts.layout` | `resources/views/admin/layouts/layout.blade.php` |
 | `wiki::default.documents.show` | `resources/views/plugins/wiki/default/documents/show.blade.php` |
 
-A `site` theme overrides public views, while an `admin` theme overrides panel views. Declare optional plugin compatibility in `integrations`, such as `"plugin:wiki": ">=0.0.1"`. Preserve form protections, `head` and `scripts` stacks, shared assets, slots and access checks when replacing a layout.
+Only supplied views are replaced. Remove the generated layout to create a CSS skin of the native appearance, or adapt it for a theme-specific structure. Declare optional plugin compatibility in `integrations`.
 
-Fragments owned by a single page are inlined into that page. Layout partials, such as the header, footer or navigation, remain reusable override points when they support theme customization. Preserve the `<x-extensions.slot>` and `<x-widgets.zone>` insertion points expected by pages and their contributions.
+Keep forms and their protections, `<x-extensions.slot>` slots, `<x-widgets.zone>` areas, and `@stack('head')` and `@stack('scripts')`. Public layouts retain `default.layouts.partials.metadata` for the title and SEO tags.
 
-The public `default.layouts.layout` layout receives `$pageMetadata` prepared by the core using the page context, including `$seoVariables`. Its overrides retain the `default.layouts.partials.metadata` include, which contains the single `<title>` and SEO tags. The local `<!--suppress HtmlRequiredTitleElement -->` annotation before `<head>` avoids warnings in IDEs that do not resolve this Blade include.
+Generic components use `<x-…>` and panel components use `<x-admin::…>`. Reusable fragments go in their resource or layout’s `partials/`. Active theme translations use `theme::messages.*`. Configuration uses the theme identifier, such as `my-theme::messages.settings.accent`.
 
-Active-theme translations use `__('theme::messages.key')`. Configuration pages use the theme identifier, such as `__('my-theme::messages.accent')`.
+### Errors, pagination and email
 
-### Pagination
+| Output | Override |
+| --- | --- |
+| HTTP error | `resources/views/errors/404.blade.php`, then `4xx.blade.php` as fallback |
+| Maintenance | `resources/views/errors/maintenance.blade.php` |
+| Pagination | `resources/views/partials/pagination.blade.php` |
+| Account email | `resources/views/emails/account/notification.blade.php` |
+| Plugin email | `resources/views/plugins/<plugin>/<path>.blade.php` |
+| Laravel email | `resources/views/vendor/notifications/email.blade.php` |
+| Markdown components | `resources/views/vendor/mail/html/` and `text/` |
 
-Complete and simple pagination share `resources/views/partials/pagination.blade.php`. Override this same path in the theme. The view must handle the absence of `$elements` and a total when rendering simple pagination.
+Simple pagination uses the same view without totals or `$elements`. [Interactive tables](tables.md) keep their attributes and shared JavaScript. Emails use the site theme and must retain variables, action links and text versions.
 
-## View context
+## Context and assets
 
-Public views receive `$publicSite` for site identity, `$appearance` for appearance and `$capabilities` for features available to the visitor. `$headerLinks`, `$footerLinks`, `$extensionHeaderLinks` and `$extensionFooterLinks` already apply availability rules.
+Public views receive `$publicSite`, `$appearance`, `$capabilities` and filtered links `$headerLinks`, `$footerLinks`, `$extensionHeaderLinks` and `$extensionFooterLinks`. Check destinations with `$capabilities->extension($id)` and `routeAvailable($routeName)`.
 
-```blade
-@if ($capabilities->canManageConnections)
-    <a href="{{ route('account.connections.index') }}">{{ __('oauth.connections') }}</a>
-@endif
+For another view namespace, provide context from a view composer with `app(App\Kraft\Site\PublicViewContext::class)->data(request())`. Native availability properties are defined in `App\Kraft\Site\ViewCapabilities`.
 
-@if ($capabilities->extension('wiki'))
-    <a href="{{ route('plugins.wiki.public.documents.index') }}">{{ __('wiki::messages.wiki') }}</a>
-@endif
+Declare CSS in `assets.styles`, scripts in `assets.scripts` and fonts in `assets.fonts`, using paths relative to `public/`. The CMS loads them automatically, placing theme CSS after core CSS. From the theme directory, run `npm ci` and `npm run build` when a script is defined. Otherwise, publication tooling handles the manifest build declaration.
+
+Keep fonts locally under `public/fonts/`, retain their licences and use relative CSS URLs. A native skin can target `.theme-native .site-header`.
+
+```json
+"capabilities": {
+    "appearance": ["light", "dark", "auto"]
+}
 ```
 
-Use `$capabilities->routeAvailable($routeName)` for a custom destination. Native properties are defined in `App\Kraft\Site\ViewCapabilities`. Do not rebuild rules from settings or route existence alone. Server access checks remain mandatory.
+Advertise only supported palettes. `auto` requires `light` and `dark`. Layouts receive `data-bs-theme="light"` or `"dark"`. Custom public layouts can reuse `default.layouts.partials.appearance-head` and `appearance-menu`.
 
-If your theme defines another view namespace, add the common context:
+## Theme settings
 
-```php
-view()->composer('my-theme::*', function ($view) {
-    $view->with(app(\App\Kraft\Site\PublicViewContext::class)->data(request()));
-});
+The CMS can generate a form from `configuration.schema`:
+
+```json
+"configuration": {
+    "schema": [{
+        "id": "appearance",
+        "label": "my-theme::messages.settings.appearance",
+        "fields": {
+            "accent": {
+                "type": "color",
+                "label": "my-theme::messages.settings.accent",
+                "default": "#4267a8"
+            },
+            "hero_title": {
+                "type": "text",
+                "label": "my-theme::messages.settings.hero_title",
+                "max": 120
+            },
+            "sections": {
+                "type": "repeater",
+                "label": "my-theme::messages.settings.sections",
+                "max": 12,
+                "fields": {
+                    "title": {"type": "text", "label": "my-theme::messages.settings.title", "required": true},
+                    "body": {"type": "richtext", "label": "my-theme::messages.settings.body"},
+                    "enabled": {"type": "boolean", "label": "my-theme::messages.settings.enabled", "default": true}
+                }
+            }
+        }
+    }]
+}
 ```
 
-The public server connection address is available through `app(App\Kraft\CommunityConnection::class)->address()`, returning a validated address or `null`.
+Types are `text`, `textarea`, `richtext`, `url`, `color`, `number`, `boolean`, `select`, `multiselect`, `media`, `menu` and `repeater`. Use `help`, `default`, `required`, `min` and `max` as appropriate. `options` maps values to translation keys and `mime` restricts media types. A `repeater` contains simple fields without nesting.
 
-## Theme configuration
+Views receive values in `$themeSettings`. Escape text with `{{ }}`. A `richtext` field’s HTML is cleaned and can use `{!! !!}`. Resolve media identifiers through CMS services.
 
-The theme owns its configuration form. Its manifest provides the route and permission:
+For custom configuration, declare a route:
 
 ```json
 "configuration": {
@@ -109,29 +134,37 @@ The theme owns its configuration form. Its manifest provides the route and permi
 }
 ```
 
-`configuration.routes` loads configuration routes even for an inactive theme, provided it is installed and verified. The file must stay under `routes/`. The core applies panel access checks. Your theme owns validation and persistence. Routes follow `themes.<id>.admin.*` under `/admin/themes/<id>/`.
+The file stays under `routes/`. Routes follow `themes.<id>.admin.*` under `/admin/themes/<id>/`. The CMS adds panel access checks. Your code handles validation and saving. A route can supplement the schema through **Advanced configuration**.
 
-## Styles, fonts and appearance
+Settings remain accessible for an installed inactive theme. Preview lets the current account try values without saving them on the active theme.
 
-Declare SCSS entries in `build.scss`, outputs in `assets.styles` and scripts in `assets.scripts`. The core automatically loads the active theme's declared assets into the `head` and `scripts` stacks, with theme CSS after core CSS. Preserve `@stack('head')` and `@stack('scripts')` in each custom layout to receive these assets and extension contributions.
+## Page templates and menus
 
-A CSS skin reusing the native layout targets its classes, such as `.theme-native .site-header`. A theme's own layout chooses its own classes. From a development installation, using Node 22.12 or later:
-
-```shell
-npm ci
-npm run build
-```
-
-Ship compiled assets in the package. Place WOFF2 files under `public/fonts/`, declare them in `assets.fonts`, use relative CSS URLs and preserve their licenses. Use `font-display: swap` to display content while fonts load. Font files remain local.
-
-Only advertise supported palettes:
+Declare variants for a view:
 
 ```json
-"capabilities": {
-    "appearance": ["light", "dark", "auto"]
+"templates": {
+    "pages": {
+        "label": "my-theme::messages.templates.pages",
+        "view": "default.content.show",
+        "routes": ["site.pages.show"],
+        "choices": {
+            "wide": {"label": "my-theme::messages.templates.wide", "view": "templates.content.wide"},
+            "sidebar": {"label": "my-theme::messages.templates.sidebar", "view": "templates.content.sidebar"}
+        }
+    }
 }
 ```
 
-`auto` requires `light` and `dark`. The layout receives `data-bs-theme="light"` or `"dark"`. A standalone layout can reuse `default.layouts.partials.appearance-head` and `default.layouts.partials.appearance-menu` with the result of `Appearance::resolve($request, $themeManifest)`.
+Blade files are local to the theme. `default` can select an initial choice. The form offers selections per view. For `default.content.show`, an administrator with `content.manage` can also choose a template per page or news item.
 
-Verify desktop and mobile layouts, long content, forms, empty states, permissions and each advertised palette. See [Interface integration](ui-contributions.md) for shared blocks and forms.
+A public theme can add menu locations:
+
+```json
+"navigation_locations": {
+    "mobile": "my-theme::messages.menus.mobile",
+    "footer_resources": "my-theme::messages.menus.resources"
+}
+```
+
+Filtered trees are available in `$themeMenus['mobile']`, using the same format as `$headerLinks`. Links survive theme changes. For blocks the owner can move, use [widgets](plugin-widgets.md).

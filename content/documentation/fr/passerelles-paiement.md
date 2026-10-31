@@ -27,7 +27,7 @@ Utilisez un identifiant stable, également retourné par `id()`. Un identifiant 
 
 ## Implémenter le paiement
 
-Les passerelles fournies par Shop sont les classes de `Services/Payments/Gateways`, comme `StripeGateway` et `PayPalGateway`. Les contrats communs sont dans `Contracts/Payments`, et les objets de résultat dans `Data/Payments`. Un plugin supplémentaire conserve son implémentation dans ses propres services.
+Gardez l’implémentation dans les services de votre plugin. Les interfaces sont sous `KraftInk\Plugins\Shop\Contracts\Payments` et leurs résultats sous `Data\Payments`.
 
 La classe implémente `KraftInk\Plugins\Shop\Contracts\Payments\PaymentGateway` :
 
@@ -89,7 +89,7 @@ Tous les contrats ci-dessous sont dans `KraftInk\Plugins\Shop\Contracts\Payments
 
 | Contrat | Usage |
 | --- | --- |
-| `SupportsCurrencies` | `supportsCurrency(Currency $currency): bool`. Voir les [devises](api-plugins.md#declarer-une-devise) |
+| `SupportsCurrencies` | `supportsCurrency(Currency $currency): bool`. Voir les [devises](developpement-soldes.md#montants-et-devise) |
 | `DefaultAvailability` | `defaultEnabled(): bool` pour l’activation initiale |
 | `ProvidesInstructions` | `instructions(): string`, figées avec la commande |
 | `ReservationPolicy` | `reservationSeconds(): int`, borné entre 60 secondes et 7 jours |
@@ -100,5 +100,7 @@ Tous les contrats ci-dessous sont dans `KraftInk\Plugins\Shop\Contracts\Payments
 `Currency` désigne `App\Kraft\Currencies\Currency`. `PaymentReference` et `RefundResult` viennent de `KraftInk\Plugins\Shop\Data\Payments`. Leurs constructeurs sont `PaymentReference(string $id, string $kind, int $amount, string $currency)` et `RefundResult(string $id, string $paymentReference, int $amount, string $currency, string $status, ?string $requestKey = null)`.
 
 Les remboursements doivent conserver l’idempotence, le rapprochement et la reprise d’un résultat incertain. Passez par les services financiers de Shop pour préserver la répartition entre prestataire, portefeuille et carte cadeau.
+
+Sans `SupportsCurrencies`, la passerelle accepte EUR, USD, GBP, CAD et CHF. Implémentez ce contrat pour déclarer ses devises réelles.
 
 Avant livraison, testez en environnement d’essai du prestataire : signatures invalides, montant ou devise incorrects, événement répété et interruption avant sauvegarde. Vérifiez aussi les secrets et les fonctions facultatives que vous annoncez.

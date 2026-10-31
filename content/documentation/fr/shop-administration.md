@@ -1,24 +1,15 @@
-# Préparer les paiements de la boutique
+# Configurer les paiements
 
-Installez et activez Shop, puis configurez vos comptes marchands avant d’ouvrir les ventes. Les produits et leurs options se règlent directement dans le panneau.
-
-
-## Préparer le site
-
-Utilisez le domaine HTTPS définitif, une [messagerie testée](configuration.md) et des [tâches planifiées fonctionnelles](operations.md). Complétez l’identité du vendeur et les réglages de facturation dans le panneau. Sauvegardez le site avant un changement de prestataire ou de devise.
-
-Les prestataires doivent pouvoir joindre les adresses de notification sans écran de connexion ni challenge du proxy ou du pare-feu. Reprenez l’URL complète affichée par KraftInk, surtout si le site est installé dans un sous-dossier.
+Installez Shop, puis configurez vos comptes marchands avec l’adresse HTTPS définitive du site. Les prestataires doivent pouvoir joindre les URL de notification affichées dans le panneau.
 
 ## Stripe et PayPal
 
-| Prestataire | Identifiants à reporter dans KraftInk | Destination des notifications |
+| Prestataire | Identifiants | URL de notification |
 | --- | --- | --- |
 | Stripe | Clé secrète et secret de signature du webhook | `/shop/webhooks/stripe` |
-| PayPal | Client ID, secret et identifiant du webhook de l’application | `/shop/webhooks/paypal` |
+| PayPal | Client ID, secret et identifiant du webhook | `/shop/webhooks/paypal` |
 
-Faites correspondre les identifiants et le webhook au même environnement de test ou de production. PayPal démarre en mode Sandbox. Un retour du navigateur vers la boutique ne suffit pas à confirmer un paiement : les notifications doivent fonctionner même si l’acheteur ferme la page.
-
-Pour Stripe, activez les événements suivants :
+Utilisez les identifiants et webhooks du même environnement. PayPal démarre en Sandbox. Dans Stripe, activez :
 
 ```text
 checkout.session.completed
@@ -34,7 +25,7 @@ refund.failed
 charge.dispute.*
 ```
 
-`charge.dispute.*` désigne tous les événements de cette famille. Pour PayPal, activez les paiements, les remboursements, les abonnements et les litiges :
+Dans PayPal, activez :
 
 ```text
 PAYMENT.CAPTURE.COMPLETED
@@ -51,28 +42,20 @@ CUSTOMER.DISPUTE.UPDATED
 CUSTOMER.DISPUTE.RESOLVED
 ```
 
-`BILLING.SUBSCRIPTION.*` désigne tous les événements d’abonnement. Le compte marchand doit aussi autoriser les opérations de remboursement et de litige proposées par le panneau.
+`charge.dispute.*` et `BILLING.SUBSCRIPTION.*` désignent tous les événements de ces familles.
 
 ## Paysafecard et Paymentwall
 
-Paysafecard utilise la clé marchande REST commençant par `psc_`. KraftInk transmet au prestataire une adresse de notification propre à la commande. Vous n’avez pas à inventer une URL générique.
+Paysafecard utilise la clé marchande REST commençant par `psc_`. L’adresse de notification est transmise automatiquement pour chaque commande.
 
-Pour Paymentwall, préparez un projet **Widget API / Digital Goods**, sa clé de projet et sa clé secrète. Configurez la signature version 3 et l’adresse `/shop/webhooks/paymentwall` affichée par le site.
+Pour Paymentwall, préparez un projet **Widget API / Digital Goods**, ses clés de projet et secrète, la signature version 3 et l’adresse `/shop/webhooks/paymentwall` affichée par le CMS.
 
-Ces deux intégrations démarrent en mode test et concernent les achats ponctuels. Elles ne proposent pas les abonnements ni un remboursement déclenché depuis KraftInk. Faites correspondre le mode du site à celui du projet marchand et validez la réception des notifications avant de passer en production.
+Ces deux moyens démarrent en test et concernent les achats ponctuels. Ils ne proposent ni abonnement ni remboursement déclenché depuis KraftInk.
 
-## Vérifier un achat complet
+## Vérifier avant l’ouverture
 
-1. Préparez un produit de test et le moyen de paiement dans son environnement d’essai.
-2. Effectuez le parcours d’achat, puis contrôlez sa confirmation dans le compte marchand et KraftInk.
-3. Vérifiez l’attribution attendue : rang, solde, téléchargement privé ou [commande en jeu](kraftlink.md).
-4. Pour les fonctions utilisées, testez aussi le renouvellement d’abonnement et le remboursement.
-5. Remplacez les identifiants de test par ceux de production et configurez leurs propres notifications avant d’activer les ventes réelles.
+Effectuez un achat en environnement d’essai, puis vérifiez sa confirmation et l’avantage reçu : rang, solde, fichier privé ou [commande en jeu](kraftlink.md). Testez aussi les renouvellements ou remboursements si vous les utilisez.
 
-Pour une récompense en jeu, testez les commandes sur le serveur destinataire et sa liste d’autorisations. Un fichier vendu se charge comme fichier privé du produit. Une image de médiathèque reste publique.
+Avant les ventes réelles, remplacez les identifiants de test par ceux de production et configurez leurs notifications. Le retour du navigateur ne confirme pas à lui seul un paiement.
 
-## Paiement reçu, livraison absente
-
-Consultez la commande, sa notification et le journal du serveur. Si le prestataire a encaissé, ne demandez pas un second règlement pour réparer une attribution. Corrigez la cause et utilisez la reprise proposée par le panneau. Une commande dont l’effet en jeu est incertain doit être vérifiée avant relance.
-
-Après un remboursement ou un litige, contrôlez les avantages retirés et les opérations signalées à vérifier. Une restauration du site n’annule pas les paiements ni les commandes déjà exécutés à l’extérieur.
+Si un paiement est reçu sans livraison, consultez la commande et ses notifications avant d’utiliser la reprise du panneau. Pour une commande en jeu incertaine, vérifiez d’abord son effet sur le serveur.
