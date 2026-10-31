@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../lib/api';
 import { useSession } from '../../lib/session';
 import { useLocale } from '../../lib/i18n';
@@ -11,12 +12,17 @@ import { LegalNotice } from '../../components/legal/LegalNotice';
 import { SensitiveButton } from '../../components/auth/SensitiveButton';
 import type { Resource, SellerStatus, Sale } from './types';
 import { hasRole } from '../../../shared/auth';
+import { creatorTabs } from '../../../shared/routes';
 
 export function CreatorPage() {
-    const { locale } = useLocale();
+    const { locale, path } = useLocale();
     const t = workspace[locale];
     const { user, sensitive } = useSession();
-    const [tab, setTab] = useState<'resources' | 'payments' | 'sales'>('resources');
+    const navigate = useNavigate();
+    const params = useParams();
+    const tab = (params.tab ?? 'resources') as (typeof creatorTabs)[number];
+    const creating = params.resourceId === 'new';
+    const selected = creating ? null : params.resourceId;
     const [resources, setResources] = useState<Resource[]>([]);
     const [sales, setSales] = useState<Sale[]>([]);
     const [salesCursor, setSalesCursor] = useState<string | null>(null);
@@ -33,8 +39,6 @@ export function CreatorPage() {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<unknown>(null);
     const [success, setSuccess] = useState(false);
-    const [creating, setCreating] = useState(false);
-    const [selected, setSelected] = useState<string | null>(null);
     const onboarding = useRef(false);
     const { accountReady, taxReady, ready, reason } = sellerState;
     const administrator = hasRole(user, 'admin');
@@ -61,9 +65,6 @@ export function CreatorPage() {
         }
         if (results[1].status === 'fulfilled') {
             setSellerState(results[1].value);
-            if (!results[1].value.ready) {
-                setCreating(false);
-            }
         } else {
             setSellerState((current) => ({
                 ...current,
@@ -73,7 +74,6 @@ export function CreatorPage() {
                 ready: false,
                 reason: 'payments_unavailable',
             }));
-            setCreating(false);
         }
         if (results[2].status === 'fulfilled') {
             setSales(results[2].value.orders);
@@ -162,16 +162,15 @@ export function CreatorPage() {
             ) : (
                 <>
                     <nav className="nav nav-pills gap-2 mb-4" aria-label={t.creatorTitle}>
-                        {(['resources', 'payments', 'sales'] as const).map((value) => (
-                            <button
+                        {creatorTabs.map((value) => (
+                            <Link
                                 key={value}
-                                type="button"
                                 className={`nav-link ${tab === value ? 'active' : ''}`}
                                 aria-current={tab === value ? 'page' : undefined}
-                                onClick={() => setTab(value)}
+                                to={path(`/creator/${value}`)}
                             >
                                 {t[value]}
-                            </button>
+                            </Link>
                         ))}
                     </nav>
                     <ErrorNotice error={error} />
@@ -219,7 +218,7 @@ export function CreatorPage() {
                                                     type="button"
                                                     className="btn btn-primary"
                                                     disabled={busy || !ready}
-                                                    onClick={() => setCreating(true)}
+                                                    onClick={() => navigate(path('/creator/resources/new'))}
                                                 >
                                                     {t.create}
                                                 </button>
@@ -264,16 +263,14 @@ export function CreatorPage() {
                                                                         )}
                                                                     </td>
                                                                     <td>
-                                                                        <button
-                                                                            type="button"
+                                                                        <Link
                                                                             className="btn btn-sm btn-outline-secondary"
-                                                                            onClick={() => {
-                                                                                setSelected(resource.id);
-                                                                                setCreating(false);
-                                                                            }}
+                                                                            to={path(
+                                                                                `/creator/resources/${encodeURIComponent(resource.id)}`,
+                                                                            )}
                                                                         >
                                                                             {t.open}
-                                                                        </button>
+                                                                        </Link>
                                                                     </td>
                                                                 </tr>
                                                             ))}
@@ -290,23 +287,17 @@ export function CreatorPage() {
                                                     ? t.publicationUnavailable
                                                     : t.publicationSetupRequired}
                                             </p>
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline-secondary"
-                                                disabled={busy}
-                                                onClick={() => setTab('payments')}
-                                            >
+                                            <Link className="btn btn-outline-secondary" to={path('/creator/payments')}>
                                                 {t.payments}
-                                            </button>
+                                            </Link>
                                         </div>
                                     )}
                                     {creating && ready && (
                                         <ArchiveSubmission
-                                            onCancel={() => setCreating(false)}
+                                            onCancel={() => navigate(path('/creator/resources'))}
                                             onSubmitted={async (id) => {
                                                 await reloadResources();
-                                                setSelected(id);
-                                                setCreating(false);
+                                                navigate(path(`/creator/resources/${encodeURIComponent(id)}`));
                                             }}
                                         />
                                     )}

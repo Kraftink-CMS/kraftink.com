@@ -10,7 +10,7 @@ import { fail, sessionCookieName, type AppContext } from './http';
 import { getCookie } from 'hono/cookie';
 import { resolveSession, sessionData } from './middleware/authentication';
 import { hasRole } from '../shared/auth';
-import { protectedPages } from '../shared/routes';
+import { matchProtectedPage } from '../shared/routes';
 import type { Env } from './types';
 import { cachedMetadata, mergedCatalogue } from './services/market/catalogue';
 
@@ -172,7 +172,7 @@ export async function renderPage(c: AppContext): Promise<Response> {
     }
     const relative = localePath.split('/').slice(2).join('/');
     const personalized = Boolean(session.user || getCookie(c, sessionCookieName(c)) || c.req.header('Authorization'));
-    const protectedPage = Object.hasOwn(protectedPages, relative);
+    const protectedPage = matchProtectedPage(relative);
     if (protectedPage && !session.user) {
         return new Response(null, {
             status: 302,
@@ -188,7 +188,7 @@ export async function renderPage(c: AppContext): Promise<Response> {
     }
     const data: PageData = { ...(await publicData(c.env, locale, relative, session.user?.id ?? null)), session };
     let metadata = pageMetadata(localePath, url.search, locale, data, new URL(c.env.APP_ORIGIN).origin);
-    const requiredRole = protectedPage ? protectedPages[relative as keyof typeof protectedPages] : null;
+    const requiredRole = protectedPage?.role;
     if (requiredRole && !hasRole(session.user, requiredRole)) {
         metadata = { ...metadata, status: 403 };
     }

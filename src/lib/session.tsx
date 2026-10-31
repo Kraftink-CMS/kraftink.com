@@ -10,7 +10,7 @@ import {
     type Dispatch,
     type SetStateAction,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { SessionData } from '../../shared/auth';
 import { api, ApiError, setCsrfToken } from './api';
 import { useLocale } from './i18n';
@@ -56,6 +56,7 @@ export function SessionProvider({
     const codeField = useRef<HTMLInputElement>(null);
     const { locale, path } = useLocale();
     const navigate = useNavigate();
+    const location = useLocation();
     const text = commonMessages[locale];
     const twoFactorText = twoFactorMessages[locale];
 
@@ -94,22 +95,9 @@ export function SessionProvider({
         if (token && purpose && /^[A-Za-z0-9_-]{43}$/.test(token)) {
             proof.current = { token, purpose };
             history.replaceState(null, '', window.location.pathname + window.location.search);
-            const destination =
-                purpose.startsWith('moderation.') || purpose === 'admin.resource-revoke'
-                    ? '/moderation'
-                    : purpose === 'admin.users' || purpose === 'admin.roles'
-                      ? '/admin/users'
-                      : purpose === 'admin.announcements'
-                        ? '/admin/announcements'
-                        : purpose === 'creator.payments'
-                          ? '/creator'
-                          : '/account';
-            navigate(path(destination), {
-                replace: true,
-                ...(purpose === 'account.password' ? { state: { accountTab: 'profile' } } : {}),
-            });
+            navigate(window.location.pathname + window.location.search, { replace: true });
         }
-    }, [navigate, path]);
+    }, [navigate]);
 
     const sensitive = async (purpose: string): Promise<string> => {
         const user = session.user;
@@ -263,7 +251,7 @@ export function SessionProvider({
                                         key={provider.id}
                                         provider={provider}
                                         className="w-100 mt-3"
-                                        href={`/api/auth/${provider.id}?purpose=reauthenticate&action=${encodeURIComponent(pending?.purpose ?? '')}`}
+                                        href={`/api/auth/${provider.id}?purpose=reauthenticate&action=${encodeURIComponent(pending?.purpose ?? '')}&next=${encodeURIComponent(location.pathname + location.search)}`}
                                     />
                                 ))}
                     </div>

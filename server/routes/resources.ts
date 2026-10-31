@@ -19,6 +19,7 @@ import {
 } from '../services/resources/publication';
 import {
     listResourceReviews,
+    resourceReview,
     listModeratedResources,
     reviewArchive,
     reviewImage,
@@ -105,6 +106,10 @@ routes.delete('/creator/resources/:id/versions/:versionId', async (c) =>
 routes.get('/moderation/reviews', async (c) => {
     requireRole(c, 'moderator');
     return c.json(await listResourceReviews(c.env, listing(c)));
+});
+routes.get('/moderation/reviews/:id', async (c) => {
+    requireRole(c, 'moderator');
+    return c.json(await resourceReview(c.env, c.req.param('id')));
 });
 routes.get('/moderation/resources', async (c) => {
     requireRole(c, 'moderator');

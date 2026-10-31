@@ -14,6 +14,19 @@ export interface ReviewListing {
     id: string;
     query: string;
 }
+export async function resourceReview(env: Env, id: string) {
+    const review = await env.DB.prepare(
+        `SELECT v.*, r.slug, r.type, r.name AS current_name, r.author_id,
+            u.username AS author_name FROM resource_versions v JOIN resources r ON r.id = v.resource_id
+            JOIN users u ON u.id = r.author_id WHERE v.id = ? AND v.status = 'pending'`,
+    )
+        .bind(id)
+        .first<ResourceVersionRow>();
+    if (!review) {
+        error(404, 'resource_not_found');
+    }
+    return review;
+}
 export async function listResourceReviews(env: Env, cursor: ReviewListing) {
     const reviews = await env.DB.prepare(
         `SELECT v.*, r.slug, r.type, r.name AS current_name, r.author_id,

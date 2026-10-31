@@ -1,11 +1,13 @@
 import { Select } from '../../components/Select';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { api, ApiError } from '../../lib/api';
 import { localized, useLocale } from '../../lib/i18n';
 import { useSession } from '../../lib/session';
 import { announcementMessages } from '../../lib/translations';
 import { fallbackLocale, localeRegistry } from '../../../shared/locales';
-import { Card, Empty, ErrorNotice, Loading, Skeleton, PageTitle } from '../../components/UI';
+import { Card, Empty, ErrorNotice, FormLoading, Loading, Skeleton, PageTitle } from '../../components/UI';
+import { NotFoundPage } from '../NotFoundPage';
 import { SensitiveButton } from '../../components/auth/SensitiveButton';
 import { externalLinkRel } from '../../../shared/links';
 
@@ -25,11 +27,14 @@ function localDate(timestamp: number): string {
 }
 
 export function AnnouncementsPage() {
-    const { locale } = useLocale();
+    const { locale, path } = useLocale();
+    const navigate = useNavigate();
+    const { announcementId } = useParams();
     const { sensitive } = useSession();
     const text = announcementMessages[locale];
     const [announcements, setAnnouncements] = useState<Announcement[] | null>(null);
-    const [editing, setEditing] = useState<Announcement | 'new' | null>(null);
+    const editing =
+        announcementId === 'new' ? 'new' : (announcements?.find((entry) => entry.id === announcementId) ?? null);
     const [error, setError] = useState<unknown>(null);
     const [notice, setNotice] = useState('');
     const [busy, setBusy] = useState(false);
@@ -54,6 +59,9 @@ export function AnnouncementsPage() {
     useEffect(() => {
         reload();
     }, [reload]);
+    useEffect(() => {
+        setTranslations({});
+    }, [announcementId]);
 
     async function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -89,7 +97,7 @@ export function AnnouncementsPage() {
                     },
                 },
             );
-            setEditing(null);
+            navigate(path('/admin/announcements'));
             setNotice(text.success);
             await reload();
         } catch (failure) {
@@ -107,12 +115,19 @@ export function AnnouncementsPage() {
         try {
             const sensitiveToken = await sensitive('admin.announcements');
             await api(`/api/admin/announcements/${announcement.id}`, { method: 'DELETE', sensitiveToken });
+            if (announcementId === announcement.id) {
+                navigate(path('/admin/announcements'), { replace: true });
+            }
             await reload();
         } catch (failure) {
             setError(failure);
         } finally {
             setBusy(false);
         }
+    }
+
+    if (announcementId && announcementId !== 'new' && announcements && !editing) {
+        return <NotFoundPage />;
     }
 
     return (
@@ -123,7 +138,7 @@ export function AnnouncementsPage() {
                     className="btn btn-primary"
                     disabled={busy}
                     onClick={() => {
-                        setEditing('new');
+                        navigate(path('/admin/announcements/new'));
                         setTranslations({});
                         setNotice('');
                     }}
@@ -132,6 +147,11 @@ export function AnnouncementsPage() {
                 </button>
             </PageTitle>
             <ErrorNotice error={error} />
+            {announcementId && announcementId !== 'new' && !announcements && (
+                <Card title={text.edit} className="mb-4">
+                    <FormLoading fields={6} />
+                </Card>
+            )}
             {notice && (
                 <div className="alert alert-success" role="status">
                     {notice}
@@ -286,7 +306,7 @@ export function AnnouncementsPage() {
                         <button
                             type="button"
                             className="btn btn-outline-secondary"
-                            onClick={() => setEditing(null)}
+                            onClick={() => navigate(path('/admin/announcements'))}
                             disabled={busy}
                         >
                             {text.cancel}
@@ -318,7 +338,9 @@ export function AnnouncementsPage() {
                                         type="button"
                                         className="btn btn-outline-secondary"
                                         onClick={() => {
-                                            setEditing(announcement);
+                                            navigate(
+                                                path(`/admin/announcements/${encodeURIComponent(announcement.id)}`),
+                                            );
                                             setTranslations({});
                                         }}
                                         disabled={busy}

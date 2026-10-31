@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { SiteLayout } from './layouts/SiteLayout';
 import { RequireUser } from './routing/RequireUser';
 import { LocaleRedirect } from './routing/LocaleRedirect';
@@ -19,7 +19,7 @@ import { ModerationPage } from './pages/moderation/ModerationPage';
 import { AnnouncementsPage } from './pages/admin/AnnouncementsPage';
 import { StatisticsPage } from './pages/admin/StatisticsPage';
 import { LegalPage } from './pages/legal/LegalPage';
-import { protectedPages } from '../shared/routes';
+import { matchProtectedPage, protectedPages, type PrivatePage } from '../shared/routes';
 import type { ReactNode } from 'react';
 
 const privatePages = {
@@ -30,7 +30,16 @@ const privatePages = {
     'admin/statistics': <StatisticsPage />,
     'admin/announcements': <AnnouncementsPage />,
     'checkout/success': <CheckoutReturnPage />,
-} satisfies Record<keyof typeof protectedPages, ReactNode>;
+} satisfies Record<PrivatePage, ReactNode>;
+
+function PrivateRoute() {
+    const location = useLocation();
+    const page = matchProtectedPage(location.pathname.split('/').slice(2).join('/'));
+    if (!page) {
+        return <NotFoundPage />;
+    }
+    return <RequireUser role={page.role ?? undefined}>{privatePages[page.page]}</RequireUser>;
+}
 
 export function App() {
     return (
@@ -51,16 +60,8 @@ export function App() {
                 <Route path="forgot-password" element={<AuthPage mode="forgot" />} />
                 <Route path="reset-password" element={<AuthPage mode="reset" />} />
                 <Route path="verify-email" element={<AuthPage mode="verify" />} />
-                {Object.entries(protectedPages).map(([route, role]) => (
-                    <Route
-                        key={route}
-                        path={route}
-                        element={
-                            <RequireUser role={role ?? undefined}>
-                                {privatePages[route as keyof typeof privatePages]}
-                            </RequireUser>
-                        }
-                    />
+                {protectedPages.map(({ path }) => (
+                    <Route key={path} path={path} element={<PrivateRoute />} />
                 ))}
                 <Route path="*" element={<NotFoundPage />} />
             </Route>

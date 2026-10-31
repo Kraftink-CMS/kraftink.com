@@ -27,7 +27,9 @@ export function ResourceEditor({
     const [cancelId, setCancelId] = useState<string | null>(null);
 
     const reload = useCallback(async () => {
-        const data = await api<{ resource: Resource; versions: Version[] }>(`/api/creator/resources/${resourceId}`);
+        const data = await api<{ resource: Resource; versions: Version[] }>(
+            `/api/creator/resources/${encodeURIComponent(resourceId)}`,
+        );
         setResource(data.resource);
         setVersions(data.versions);
     }, [resourceId]);
@@ -45,7 +47,10 @@ export function ResourceEditor({
         setBusy(true);
         setError(null);
         try {
-            await api(`/api/creator/resources/${resourceId}/versions/${cancelId}`, { method: 'DELETE' });
+            await api(
+                `/api/creator/resources/${encodeURIComponent(resourceId)}/versions/${encodeURIComponent(cancelId)}`,
+                { method: 'DELETE' },
+            );
             setCancelId(null);
             await reload();
             await onChanged();

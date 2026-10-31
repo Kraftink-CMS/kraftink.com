@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { accountCopy } from '../../lib/translations';
 import { api } from '../../lib/api';
 import { useLocale } from '../../lib/i18n';
@@ -14,6 +14,7 @@ import { ProfilePanel } from './ProfilePanel';
 import { TwoFactorPanel } from './TwoFactorPanel';
 import { AccountDeletionPanel } from './AccountDeletionPanel';
 import { AccountLoading } from './AccountLoading';
+import { accountTabs } from '../../../shared/routes';
 
 export function AccountPage() {
     const { locale, path } = useLocale();
@@ -28,9 +29,7 @@ export function AccountPage() {
     const copy = accountCopy[locale];
     const { user } = useSession();
     const userId = user?.id;
-    const [tab, setTab] = useState<'purchases' | 'orders' | 'site' | 'profile'>(
-        location.state?.accountTab === 'profile' ? 'profile' : 'purchases',
-    );
+    const tab = (useParams().tab ?? 'purchases') as (typeof accountTabs)[number];
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<unknown>(null);
@@ -46,11 +45,6 @@ export function AccountPage() {
     const [checkoutRefreshing, setCheckoutRefreshing] = useState(false);
     const stopCheckoutPolling = useRef<(() => void) | null>(null);
     const manualCheckoutRefresh = useRef<AbortController | null>(null);
-    useEffect(() => {
-        if (location.state?.accountTab === 'profile') {
-            setTab('profile');
-        }
-    }, [location.state]);
     const load = useCallback(
         async (signal?: AbortSignal) => {
             const [profileData, siteData] = await Promise.all([
@@ -255,13 +249,12 @@ export function AccountPage() {
                                 {checkoutRefreshing ? copy.loading : copy.refreshPurchases}
                             </button>
                         )}
-                        <button
+                        <Link
                             className="btn btn-sm btn-outline-secondary"
-                            type="button"
-                            onClick={() => setTab('orders')}
+                            to={`${path('/account/orders')}${location.search}`}
                         >
                             {copy.viewOrders}
-                        </button>
+                        </Link>
                     </div>
                 </div>
             )}
@@ -284,25 +277,22 @@ export function AccountPage() {
                 </div>
             )}
             <nav className="nav nav-pills gap-2 mb-4" aria-label={copy.account}>
-                {(['purchases', 'orders', 'site', 'profile'] as const).map((item) => (
-                    <button
+                {accountTabs.map((item) => (
+                    <Link
                         key={item}
                         className={`nav-link${tab === item ? ' active' : ''}`}
-                        type="button"
                         aria-current={tab === item ? 'page' : undefined}
-                        onClick={() => setTab(item)}
+                        to={`${path(`/account/${item}`)}${location.search}`}
                     >
                         {copy[item]}
-                    </button>
+                    </Link>
                 ))}
             </nav>
             {loading && !profile ? (
                 <AccountLoading tab={tab} />
             ) : (
                 <>
-                    {tab === 'purchases' && (
-                        <PurchasesPanel commerce={commerce} actions={actions} onConnectCms={() => setTab('site')} />
-                    )}
+                    {tab === 'purchases' && <PurchasesPanel commerce={commerce} actions={actions} />}
                     {tab === 'orders' && <OrdersPanel commerce={commerce} actions={actions} />}
                     {tab === 'site' && <SiteConnectionPanel connection={connection} actions={actions} reload={load} />}
                     {tab === 'profile' && (

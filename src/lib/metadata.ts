@@ -10,6 +10,7 @@ import {
     workspace,
 } from './translations';
 import type { PublicPageData } from './rendering';
+import { matchProtectedPage } from '../../shared/routes';
 
 export interface PageMetadata {
     title: string;
@@ -64,7 +65,8 @@ export function pageMetadata(
         'admin/announcements': { title: common.announcements, description: site.description, public: false },
         'checkout/success': { title: text.verified, description: site.description, public: false },
     };
-    const page = pages[relative];
+    const protectedPage = matchProtectedPage(relative);
+    const page = pages[protectedPage?.page ?? relative];
     let title = page?.title ?? text.notFound;
     let description = page?.description ?? text.notFoundText;
     let indexable = page?.public ?? false;
@@ -72,6 +74,18 @@ export function pageMetadata(
     let canonicalLocale = locale;
     let canonicalRelative = relative;
     let languages = Object.keys(localeRegistry);
+    if (protectedPage) {
+        const section = relative.split('/')[1];
+        const sections: Record<string, string> =
+            protectedPage.page === 'account'
+                ? { purchases: account.purchases, orders: account.orders, site: account.site, profile: account.profile }
+                : protectedPage.page === 'creator'
+                  ? { resources: panel.resources, payments: panel.payments, sales: panel.sales }
+                  : protectedPage.page === 'moderation'
+                    ? { reviews: panel.reviews, resources: panel.allResources }
+                    : {};
+        title = sections[section] ? `${sections[section]} - ${page.title}` : title;
+    }
     if (relative === 'documentation' || relative.startsWith('documentation/')) {
         let slug = 'index';
         try {
