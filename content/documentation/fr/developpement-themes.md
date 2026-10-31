@@ -122,7 +122,22 @@ Le CMS peut générer le formulaire à partir de `configuration.schema` :
 
 Les types sont `text`, `textarea`, `richtext`, `url`, `color`, `number`, `boolean`, `select`, `multiselect`, `media`, `menu` et `repeater`. Utilisez `help`, `default`, `required`, `min` et `max` selon le type. `options` associe les valeurs aux clés de traduction et `mime` limite les médias. Un `repeater` contient des champs simples, sans imbrication.
 
-Les valeurs sont disponibles dans `$themeSettings`. Échappez les textes avec `{{ }}`. Le HTML d’un champ `richtext` est nettoyé et peut être affiché avec `{!! !!}`. Résolvez les identifiants médias avec les services du CMS.
+Les valeurs sont disponibles dans `$themeSettings`. Pour afficher les champs du schéma précédent :
+
+```blade
+<h1>{{ $themeSettings['hero_title'] }}</h1>
+
+@foreach ($themeSettings['sections'] as $section)
+    @if ($section['enabled'])
+        <section>
+            <h2>{{ $section['title'] }}</h2>
+            {!! $section['body'] !!}
+        </section>
+    @endif
+@endforeach
+```
+
+Les champs texte restent échappés avec `{{ }}`. Seul le champ `richtext` nettoyé utilise ici `{!! !!}`. Résolvez les identifiants médias avec les services du CMS.
 
 Pour une configuration spécifique, déclarez une route :
 

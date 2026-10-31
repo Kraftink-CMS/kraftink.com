@@ -122,7 +122,22 @@ The CMS can generate a form from `configuration.schema`:
 
 Types are `text`, `textarea`, `richtext`, `url`, `color`, `number`, `boolean`, `select`, `multiselect`, `media`, `menu` and `repeater`. Use `help`, `default`, `required`, `min` and `max` as appropriate. `options` maps values to translation keys and `mime` restricts media types. A `repeater` contains simple fields without nesting.
 
-Views receive values in `$themeSettings`. Escape text with `{{ }}`. A `richtext` field’s HTML is cleaned and can use `{!! !!}`. Resolve media identifiers through CMS services.
+Views receive values in `$themeSettings`. To render the fields from the preceding schema:
+
+```blade
+<h1>{{ $themeSettings['hero_title'] }}</h1>
+
+@foreach ($themeSettings['sections'] as $section)
+    @if ($section['enabled'])
+        <section>
+            <h2>{{ $section['title'] }}</h2>
+            {!! $section['body'] !!}
+        </section>
+    @endif
+@endforeach
+```
+
+Text fields stay escaped with `{{ }}`. Only the cleaned `richtext` field uses `{!! !!}` here. Resolve media identifiers through CMS services.
 
 For custom configuration, declare a route:
 

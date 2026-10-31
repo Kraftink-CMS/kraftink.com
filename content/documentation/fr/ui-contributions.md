@@ -17,7 +17,19 @@ Déclarez les liens dans `manifest.navigation.public`, `admin` ou `footer`. Une 
 }
 ```
 
-`permissions` accepte plusieurs permissions alternatives à la place de `permission`. `children` regroupe des entrées. `parent` vise un groupe du panneau : `content` pour les contenus, `presentation` pour l’apparence, `members` pour les membres, `servers` pour les jeux et serveurs, ou `settings`, `security`, `integrations`, `operations` et `deployment` pour l’administration. Sans champ `parent`, le lien rejoint les outils des extensions.
+Pour afficher le lien avec l’une ou l’autre de deux permissions déclarées par votre plugin, remplacez `permission` par `permissions` :
+
+```json
+{
+    "label": "example::messages.title",
+    "route": "plugins.example.admin.documents.index",
+    "permissions": ["example.manage", "example.moderate"]
+}
+```
+
+Cette liste utilise une condition **OU**, sans demander les deux droits. Elle contrôle l’affichage du lien. Les routes et actions conservent leurs propres contrôles d’accès.
+
+`children` regroupe des entrées. `parent` vise un groupe du panneau : `content` pour les contenus, `presentation` pour l’apparence, `members` pour les membres, `servers` pour les jeux et serveurs, ou `settings`, `security`, `integrations`, `operations` et `deployment` pour l’administration. Sans champ `parent`, le lien rejoint les outils des extensions.
 
 Avec `parent: null`, le lien apparaît directement dans la section choisie par `section` : `site`, `community` ou `administration`. `position` fixe son ordre dans le groupe ou la section. Les entrées natives sont espacées de 100, ce qui permet d’insérer une contribution entre deux liens. Protégez aussi la route.
 

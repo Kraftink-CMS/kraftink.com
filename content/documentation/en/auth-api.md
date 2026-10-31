@@ -20,7 +20,16 @@ Send `POST /api/auth/authenticate`:
 
 A 200 response contains `data.access_token`, `token_type: "Bearer"`, `expires_at`, `scopes` and `user`, with `success: true` and `data.status: "success"`. Store the secret privately, it is shown only at creation or rotation.
 
-With 2FA, the first response is 202 with `data.status: "pending"`, `reason: "2fa"`, `challenge` and `expires_in: 300`. Send the challenge and `code` to `POST /api/auth/challenge`. The code can be a TOTP or recovery code. The challenge lasts five minutes with up to five attempts.
+With 2FA, the first response is 202 with `data.status: "pending"`, `reason: "2fa"`, `challenge` and `expires_in: 300`. Then send `POST /api/auth/challenge` with the returned challenge and the member’s code:
+
+```json
+{
+    "challenge": "RETURNED_CHALLENGE",
+    "code": "123456"
+}
+```
+
+`code` accepts a TOTP or recovery code. The challenge lasts five minutes with up to five attempts. Successful validation returns a token as for sign-in without 2FA.
 
 ## Using and revoking
 

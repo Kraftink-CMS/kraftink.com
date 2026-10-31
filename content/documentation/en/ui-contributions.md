@@ -17,7 +17,19 @@ Declare links in `manifest.navigation.public`, `admin` or `footer`. An entry pro
 }
 ```
 
-`permissions` accepts alternative permissions instead of `permission`. `children` groups entries. `parent` targets a panel group such as `content` or `presentation`. Without a parent, entries join the extension tools. Protect the route as well.
+To show the link with either of two permissions declared by your plugin, replace `permission` with `permissions`:
+
+```json
+{
+    "label": "example::messages.title",
+    "route": "plugins.example.admin.documents.index",
+    "permissions": ["example.manage", "example.moderate"]
+}
+```
+
+This list uses an **OR** condition without requiring both permissions. It controls link visibility. Routes and actions retain their own access checks.
+
+`children` groups entries. `parent` targets a panel group such as `content` or `presentation`. Without a parent, entries join the extension tools.
 
 To add a block without overriding a view, register a slot from the provider:
 
