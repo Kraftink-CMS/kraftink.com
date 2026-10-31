@@ -1,0 +1,100 @@
+.site-header .header-inner {
+    max-width: 1320px;
+}
+.site-header .account-menu {
+    margin-inline-start: 0.25rem;
+}
+.site-header .account-menu summary {
+    font-size: 0.9375rem;
+}
+.site-main.home-content {
+    padding-top: 0;
+}
+.site-footer > .container {
+    display: block;
+}
+.site-footer nav {
+    align-items: flex-start;
+}
+.docs-layout {
+    grid-template-columns: 260px minmax(0, 1fr);
+}
+.documentation-content {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    padding: 2rem;
+}
+.documentation-content h1 {
+    font-size: 2rem;
+}
+.site-header-actions .form-select {
+    max-width: 185px;
+}
+.nav-pills {
+    --bs-nav-pills-link-active-bg: var(--accent);
+}
+.nav-pills .nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.nav-pills .nav-link .badge {
+    --bs-badge-padding-x: 0.5em;
+    --bs-badge-padding-y: 0.2em;
+    font-size: inherit;
+}
+.market-filters .form-select {
+    min-width: 150px;
+}
+.resource-art img {
+    object-fit: contain;
+}
+.form-control[type='file'] {
+    height: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+    line-height: calc(2.75rem - 2px);
+}
+.form-control[type='file']::file-selector-button {
+    box-sizing: border-box;
+    height: 100%;
+    margin: 0 0.875rem 0 0;
+    padding: 0 0.875rem;
+    border: 0;
+    border-inline-end: 1px solid var(--line);
+    line-height: inherit;
+    vertical-align: top;
+}
+.site-header .navbar-collapse .account-menu > div {
+    top: calc(100% + 0.6rem);
+}
+
+@media (max-width: 1199px) {
+    .site-header .navbar-collapse {
+        margin-inline-start: 0;
+        padding-top: 1rem;
+    }
+    .site-header .navbar-nav {
+        margin-bottom: 0.75rem;
+    }
+    .site-header-actions {
+        padding-bottom: 0.25rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .docs-layout {
+        display: flex;
+        flex-direction: column;
+    }
+    .documentation-content {
+        padding: 1.25rem;
+    }
+    .site-header .account-name {
+        display: inline;
+    }
+    .site-header .header-inner {
+        min-height: 80px;
+    }
+}

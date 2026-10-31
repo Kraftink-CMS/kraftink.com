@@ -1,0 +1,70 @@
+name: Deploy the website
+on:
+  push:
+    branches: [master]
+  repository_dispatch:
+    types: [kraftink-release-published]
+permissions:
+  contents: read
+concurrency:
+  group: website-production-${{ github.repository }}
+  cancel-in-progress: false
+  queue: max
+jobs:
+  deploy:
+    if: github.repository == 'Kraftink-CMS/kraftink.com' && !github.event.repository.fork && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: master
+          persist-credentials: false
+      - uses: Kraftink-CMS/automation@master
+        id: tools
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Verify the production source
+        id: source
+        env:
+          AUTOMATION_ROOT: ${{ steps.tools.outputs.root }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/scripts/deployment.mjs prepare
+      - name: Validate and build a production push
+        if: github.event_name == 'push'
+        uses: ./.github/actions/build
+        with:
+          version: ${{ steps.source.outputs.version }}
+          output-directory: ${{ runner.temp }}/website-release-assets
+      - name: Install the declared deployment tools
+        if: github.event_name == 'repository_dispatch'
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          run_install: false
+      - name: Install locked deployment dependencies
+        if: github.event_name == 'repository_dispatch'
+        run: pnpm install --frozen-lockfile
+      - name: Download the verified published build
+        if: github.event_name == 'repository_dispatch'
+        env:
+          AUTOMATION_ROOT: ${{ steps.tools.outputs.root }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/scripts/deployment.mjs artifact
+      - name: Recheck the selected production commit
+        env:
+          AUTOMATION_ROOT: ${{ steps.tools.outputs.root }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/scripts/deployment.mjs check
+      - name: Migrate D1 and deploy the validated Worker and assets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo '::error::Configure CLOUDFLARE_API_TOKEN in the production environment.'; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo '::error::Configure CLOUDFLARE_ACCOUNT_ID in the production environment.'; exit 1; }
+          pnpm db:migrate:remote --config dist/kraftink/wrangler.json
+          pnpm exec wrangler deploy --config dist/kraftink/wrangler.json
