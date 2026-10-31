@@ -391,6 +391,14 @@ small,
     flex-shrink: 0;
 }
 
+.account-loading {
+    display: inline-flex;
+    align-items: center;
+    width: 6.5rem;
+    height: 2.25rem;
+    color: var(--line);
+}
+
 .social-links {
     display: flex;
     flex-shrink: 0;

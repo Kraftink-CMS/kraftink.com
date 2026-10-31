@@ -12,7 +12,7 @@ import { SocialLinks } from '../components/SocialLinks';
 
 export function SiteLayout() {
     const { locale, path } = useLocale();
-    const { user, logout } = useSession();
+    const { user, loading, sessionError, logout } = useSession();
     const text = commonMessages[locale];
     const legal = legalMessages[locale];
     const copy = useSiteCopy();
@@ -127,7 +127,11 @@ export function SiteLayout() {
                                 <Link to={path('/downloads')} className="btn btn-primary btn-sm">
                                     {copy.download}
                                 </Link>
-                                {user ? (
+                                {loading ? (
+                                    <span className="account-loading" role="status" aria-label={text.loading}>
+                                        <span className="placeholder w-100 rounded-pill" aria-hidden="true" />
+                                    </span>
+                                ) : user ? (
                                     <details className="account-menu" key={location.pathname}>
                                         <summary>
                                             <span className="user-avatar">
@@ -147,8 +151,11 @@ export function SiteLayout() {
                                         </div>
                                     </details>
                                 ) : (
-                                    <Link className="btn btn-outline-secondary btn-sm" to={path('/login')}>
-                                        {text.login}
+                                    <Link
+                                        className="btn btn-outline-secondary btn-sm"
+                                        to={path(sessionError ? '/account' : '/login')}
+                                    >
+                                        {sessionError ? text.account : text.login}
                                     </Link>
                                 )}
                             </div>
