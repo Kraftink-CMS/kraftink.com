@@ -7,6 +7,8 @@ import { now } from '../../lib/time';
 import { entitlements, orders, type OrderRow } from '../../models/commerce';
 import { stripeClient, stripeRequestOptions, stripeWebhookConfigured } from './stripe';
 import { requireSellerReady } from './sellers';
+import { parseRepositorySource } from '../../../shared/packages/repository';
+import { repositoryRelease } from '../resources/repository-updates';
 
 interface PurchasableRow {
     id: string;
@@ -15,6 +17,8 @@ interface PurchasableRow {
     name: string;
     price_cents: number;
     currency: string;
+    approved_version_id: string;
+    payload_json: string;
 }
 
 export async function expireBannedCheckouts(env: Env, userId?: string): Promise<void> {
@@ -84,7 +88,7 @@ export async function startCheckout(
     recordAudit: (action: string, target: string, details?: Record<string, unknown>) => Promise<void>,
 ) {
     const resource = await env.DB.prepare(
-        `SELECT r.id, r.author_id, r.slug, r.name, r.price_cents, r.currency
+        `SELECT r.id, r.author_id, r.slug, r.name, r.price_cents, r.currency, r.approved_version_id, v.payload_json
             FROM resources r JOIN users u ON u.id = r.author_id
             JOIN resource_versions v ON v.id = r.approved_version_id
             WHERE r.id = ? AND r.status = 'published' AND u.banned_at IS NULL AND v.status = 'approved'
@@ -94,6 +98,10 @@ export async function startCheckout(
         .first<PurchasableRow>();
     if (!resource) {
         error(409, 'resource_unavailable');
+    }
+    const source = parseRepositorySource(resource.payload_json);
+    if (source && !(await repositoryRelease(env, resource.id, resource.approved_version_id, source))) {
+        error(409, 'repository_unavailable');
     }
     if (resource.author_id === user.id) {
         error(409, 'own_resource');

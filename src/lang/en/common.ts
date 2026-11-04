@@ -177,6 +177,26 @@ export default {
         password_confirmation_mismatch: 'Both passwords must match.',
         password_required: 'Set a password before unlinking GitHub.',
         github_not_linked: 'No GitHub account is linked.',
+        github_link_required: 'Link your GitHub account from your KraftInk account to submit a repository.',
+        repository_invalid: 'Enter a GitHub repository URL in the format https://github.com/owner/repository.',
+        repository_unavailable: 'This resource is temporarily unavailable. Please try again later.',
+        repository_public_required: 'The repository and its releases must be public and accessible without signing in.',
+        repository_owner_required:
+            'The repository must belong to your linked GitHub account or to an organization where your membership is public.',
+        repository_release_required:
+            'Publish a stable release with an installable ZIP containing a valid manifest.json at its root.',
+        repository_release_changed:
+            'The release changed since the preview. Check the resource again before confirming.',
+        repository_license_required: 'The repository must declare a recognized open source license.',
+        repository_identity_changed: 'This repository’s identity or owner has changed. Check its source.',
+        repository_url_invalid: 'Enter a GitHub repository URL in the format https://github.com/owner/repository.',
+        repository_github_required: 'Link your GitHub account from your KraftInk account to submit a repository.',
+        repository_organization_required:
+            'You must be a public member of the GitHub organization that owns the repository.',
+        repository_release_invalid: 'The GitHub release must be stable and its tag must match the manifest version.',
+        repository_manifest_invalid: 'The release manifest is invalid or does not match this resource.',
+        repository_archive_invalid: 'The GitHub archive is invalid or does not match the published release.',
+        repository_archive_required: 'Add an installable ZIP to your GitHub release assets.',
         authentication_method_unavailable: 'Your sign-in method is currently unavailable for identity confirmation.',
         role_invalid: 'Choose a valid user role.',
     },

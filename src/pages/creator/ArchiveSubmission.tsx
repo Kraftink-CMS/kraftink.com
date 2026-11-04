@@ -2,6 +2,9 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { api } from '../../lib/api';
 import { localized, useLocale } from '../../lib/i18n';
 import { maxArchiveBytes, type ArchiveInspection } from '../../../shared/packages/zip';
+import type { RepositorySource } from '../../../shared/packages/repository';
+import { externalLinkRel } from '../../../shared/links';
+import { Link } from 'react-router-dom';
 import { Card, ErrorNotice } from '../../components/UI';
 import { workspace } from '../../lib/translations';
 import { useSession } from '../../lib/session';
@@ -30,13 +33,17 @@ export function ArchiveSubmission({
     onCancel?: () => void;
     onSubmitted: (id: string) => Promise<void>;
 }) {
-    const { locale } = useLocale();
+    const { locale, path } = useLocale();
     const t = workspace[locale];
     const { user } = useSession();
     const administrator = hasRole(user, 'admin');
+    const [sourceKind, setSourceKind] = useState<'zip' | 'github'>(resource?.source ? 'github' : 'zip');
     const [preview, setPreview] = useState<{
-        inspection: ArchiveInspection;
-        file: File;
+        inspection: Pick<ArchiveInspection, 'manifest' | 'metadata' | 'entries' | 'expandedBytes'>;
+        file?: File;
+        source?: RepositorySource;
+        sha256?: string;
+        sizeBytes: number;
         price: number;
         imageUrl: string | null;
     } | null>(null);
@@ -46,6 +53,7 @@ export function ArchiveSubmission({
     const [error, setError] = useState<unknown>(null);
     const [localError, setLocalError] = useState<string | null>(null);
     const workerRef = useRef<Worker | null>(null);
+    const requestRef = useRef<AbortController | null>(null);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const formRef = useRef<HTMLFormElement | null>(null);
     const prefix = resource ? `archive-${resource.id}` : 'archive-new';
@@ -76,6 +84,7 @@ export function ArchiveSubmission({
             });
         return () => {
             controller.abort();
+            requestRef.current?.abort();
             stopWorker();
         };
     }, []);
@@ -89,6 +98,8 @@ export function ArchiveSubmission({
     );
 
     function reset() {
+        requestRef.current?.abort();
+        requestRef.current = null;
         stopWorker();
         setInspecting(false);
         setPreview(null);
@@ -96,7 +107,7 @@ export function ArchiveSubmission({
         setLocalError(null);
     }
 
-    function inspect(event: FormEvent<HTMLFormElement>) {
+    async function inspect(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (disabled) {
             return;
@@ -104,15 +115,49 @@ export function ArchiveSubmission({
         const fields = new FormData(event.currentTarget);
         const file = fields.get('file');
         const price = cents(String(fields.get('price')));
+        if (price === null) {
+            setLocalError(t.invalidPrice);
+            return;
+        }
+        if (sourceKind === 'github') {
+            reset();
+            setInspecting(true);
+            const controller = new AbortController();
+            requestRef.current = controller;
+            try {
+                const result = await api<{
+                    source: RepositorySource;
+                    inspection: Pick<ArchiveInspection, 'manifest' | 'metadata' | 'entries' | 'expandedBytes'>;
+                    sha256: string;
+                    sizeBytes: number;
+                }>('/api/creator/resources/preview-repository', {
+                    method: 'POST',
+                    json: { repository: String(fields.get('repository')).trim(), resourceId: resource?.id },
+                    signal: controller.signal,
+                });
+                if (!controller.signal.aborted) {
+                    setPreview({ ...result, price, imageUrl: null });
+                }
+            } catch (cause) {
+                if (!controller.signal.aborted) {
+                    setError(cause);
+                }
+            } finally {
+                if (requestRef.current === controller) {
+                    requestRef.current = null;
+                    setInspecting(false);
+                }
+            }
+            return;
+        }
         if (
-            price === null ||
             !(file instanceof File) ||
             file.size <= 0 ||
             maxUploadBytes === null ||
             file.size > maxUploadBytes ||
             !file.name.toLowerCase().endsWith('.zip')
         ) {
-            setLocalError(price === null ? t.invalidPrice : t.invalidArchive);
+            setLocalError(t.invalidArchive);
             return;
         }
         reset();
@@ -157,7 +202,7 @@ export function ArchiveSubmission({
                           new Blob([new Uint8Array(inspection.image.bytes)], { type: inspection.image.mime }),
                       )
                     : null;
-                setPreview({ inspection, file, price, imageUrl });
+                setPreview({ inspection, file, sizeBytes: file.size, price, imageUrl });
             };
             worker.onerror = fail;
             timeoutRef.current = setTimeout(fail, 20000);
@@ -183,11 +228,21 @@ export function ArchiveSubmission({
         try {
             const result = await api<{ resource: { id: string } }>(
                 resource ? `/api/creator/resources/${resource.id}/versions` : '/api/creator/resources',
-                {
-                    method: 'POST',
-                    body: preview.file,
-                    headers: { 'Content-Type': 'application/zip', 'X-Resource-Price': String(preview.price) },
-                },
+                preview.source
+                    ? {
+                          method: 'POST',
+                          timeoutMs: 120000,
+                          json: {
+                              repository: preview.source.repository,
+                              priceCents: preview.price,
+                              expectedSource: { tag: preview.source.tag, sha256: preview.sha256 },
+                          },
+                      }
+                    : {
+                          method: 'POST',
+                          body: preview.file,
+                          headers: { 'Content-Type': 'application/zip', 'X-Resource-Price': String(preview.price) },
+                      },
             );
             await onSubmitted(result.resource.id);
             reset();
@@ -217,9 +272,14 @@ export function ArchiveSubmission({
                             <button
                                 type="submit"
                                 className="btn btn-primary"
-                                disabled={disabled || busy || inspecting || maxUploadBytes === null}
+                                disabled={
+                                    disabled ||
+                                    busy ||
+                                    inspecting ||
+                                    (sourceKind === 'zip' ? maxUploadBytes === null : !user?.githubLinked)
+                                }
                             >
-                                {inspecting ? t.inspectingArchive : t.previewArchive}
+                                {inspecting ? t.inspectingResource : t.previewArchive}
                             </button>
                             {onCancel && (
                                 <button
@@ -234,31 +294,97 @@ export function ArchiveSubmission({
                         </div>
                     }
                 >
+                    <fieldset className="mb-4" disabled={disabled || inspecting || busy}>
+                        <legend className="fs-6 fw-semibold">{t.resourceSource}</legend>
+                        <div className="row g-3">
+                            {(['zip', 'github'] as const).map((kind) => (
+                                <div className="col-md-6" key={kind}>
+                                    <label
+                                        className={`border rounded p-3 d-flex gap-3 h-100 ${sourceKind === kind ? 'border-primary' : ''}`}
+                                        htmlFor={`${prefix}-source-${kind}`}
+                                    >
+                                        <input
+                                            className="form-check-input flex-shrink-0"
+                                            id={`${prefix}-source-${kind}`}
+                                            type="radio"
+                                            name="sourceKind"
+                                            value={kind}
+                                            checked={sourceKind === kind}
+                                            onChange={() => {
+                                                reset();
+                                                setSourceKind(kind);
+                                            }}
+                                        />
+                                        <span>
+                                            <span className="d-block fw-semibold">
+                                                {kind === 'zip' ? t.zip : t.publicRepository}
+                                            </span>
+                                            <span className="small text-body-secondary">
+                                                {kind === 'zip' ? t.zipSourceHint : t.repositorySourceHint}
+                                            </span>
+                                        </span>
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                    </fieldset>
                     <p>{t.manifestOnlyHint}</p>
                     <div className="row g-3">
                         <div className="col-md-8">
-                            <label className="form-label" htmlFor={`${prefix}-file`}>
-                                {t.zip}
-                            </label>
-                            <input
-                                className="form-control"
-                                id={`${prefix}-file`}
-                                name="file"
-                                type="file"
-                                accept=".zip,application/zip"
-                                required
-                                disabled={disabled || inspecting || busy}
-                            />
-                            <p className="form-text">
-                                {t.zipStructureHint}{' '}
-                                {maxUploadBytes !== null && (
-                                    <>
-                                        {t.uploadLimit}{' '}
-                                        {new Intl.NumberFormat(locale).format(maxUploadBytes / 1024 / 1024)}{' '}
-                                        {t.megabytes}.
-                                    </>
-                                )}
-                            </p>
+                            {sourceKind === 'zip' ? (
+                                <>
+                                    <label className="form-label" htmlFor={`${prefix}-file`}>
+                                        {t.zip}
+                                    </label>
+                                    <input
+                                        className="form-control"
+                                        id={`${prefix}-file`}
+                                        name="file"
+                                        type="file"
+                                        accept=".zip,application/zip"
+                                        required
+                                        disabled={disabled || inspecting || busy}
+                                    />
+                                    <p className="form-text">
+                                        {t.zipStructureHint}{' '}
+                                        {maxUploadBytes !== null && (
+                                            <>
+                                                {t.uploadLimit}{' '}
+                                                {new Intl.NumberFormat(locale).format(maxUploadBytes / 1024 / 1024)}{' '}
+                                                {t.megabytes}.
+                                            </>
+                                        )}
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <label className="form-label" htmlFor={`${prefix}-repository`}>
+                                        {t.repositoryUrl}
+                                    </label>
+                                    <input
+                                        className="form-control"
+                                        id={`${prefix}-repository`}
+                                        name="repository"
+                                        type="url"
+                                        placeholder="https://github.com/owner/repository"
+                                        defaultValue={resource?.source?.repository ?? ''}
+                                        maxLength={300}
+                                        aria-describedby={`${prefix}-repository-help`}
+                                        required
+                                        disabled={disabled || inspecting || busy}
+                                    />
+                                    <p className="form-text" id={`${prefix}-repository-help`}>
+                                        {t.repositoryOwnershipHint}
+                                    </p>
+                                    {!user?.githubLinked && (
+                                        <p className="alert alert-warning">
+                                            {t.repositoryLinkRequired}{' '}
+                                            <Link to={path('/account')}>{t.linkGithubAccount}</Link>
+                                        </p>
+                                    )}
+                                    <p className="small text-body-secondary">{t.repositoryReleaseHint}</p>
+                                </>
+                            )}
                         </div>
                         <div className="col-md-4">
                             <label className="form-label" htmlFor={`${prefix}-price`}>
@@ -282,7 +408,9 @@ export function ArchiveSubmission({
                             </p>
                         </div>
                     </div>
-                    <p className="small text-body-secondary mb-0">{t.localPreviewHint}</p>
+                    <p className="small text-body-secondary mb-0">
+                        {sourceKind === 'zip' ? t.localPreviewHint : t.paidOpenSourceHint}
+                    </p>
                 </Card>
             </form>
             {preview && (
@@ -299,7 +427,7 @@ export function ArchiveSubmission({
                                 {busy ? t.submitting : administrator ? t.publish : t.submit}
                             </button>
                             <button type="button" className="btn btn-outline-secondary" disabled={busy} onClick={reset}>
-                                {t.changeArchive}
+                                {t.changeSource}
                             </button>
                             {onCancel && (
                                 <button
@@ -341,15 +469,38 @@ export function ArchiveSubmission({
                                 <dt className="col-sm-4">{t.archiveSize}</dt>
                                 <dd className="col-sm-8">
                                     {new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(
-                                        preview.file.size / 1024 / 1024,
+                                        preview.sizeBytes / 1024 / 1024,
                                     )}{' '}
                                     {t.megabytes}
                                 </dd>
+                                {preview.source && (
+                                    <>
+                                        <dt className="col-sm-4">{t.publicRepository}</dt>
+                                        <dd className="col-sm-8 text-break">
+                                            <a
+                                                className="text-break"
+                                                href={preview.source.repository}
+                                                target="_blank"
+                                                rel={externalLinkRel(preview.source.repository)}
+                                            >
+                                                {preview.source.repository} ↗
+                                            </a>
+                                        </dd>
+                                        <dt className="col-sm-4">{t.repositoryTag}</dt>
+                                        <dd className="col-sm-8">
+                                            <code>{preview.source.tag}</code>
+                                        </dd>
+                                    </>
+                                )}
                             </dl>
                         </div>
                     </div>
                     <p className="alert alert-info mt-4 mb-0">
-                        {administrator ? t.adminPublicationHint : t.reviewHint}
+                        {administrator
+                            ? t.adminPublicationHint
+                            : preview.source
+                              ? t.repositoryReviewHint
+                              : t.reviewHint}
                     </p>
                 </Card>
             )}

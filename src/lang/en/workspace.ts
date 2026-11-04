@@ -42,7 +42,7 @@ export default {
     adminPublicationHint: 'Your resource will be published directly with your administrator role.',
     publish: 'Publish',
     metadataHint: 'The proposed name, description and price will be published with this release after approval.',
-    pendingHint: 'A release is already awaiting review. You can cancel it before submitting a new ZIP.',
+    pendingHint: 'A release is already awaiting review. You can cancel it before submitting a new version.',
     unavailableHint: 'This resource has been withdrawn. New submissions are suspended.',
     submit: 'Submit for review',
     submitting: 'Uploading…',
@@ -53,7 +53,7 @@ export default {
     confirmCancel: 'Confirm cancellation',
     back: 'Back',
     cancel: 'Cancel',
-    cancelHint: 'The pending ZIP will be deleted. The currently published release remains available.',
+    cancelHint: 'The pending submission will be cancelled. The currently published release remains available.',
     success: 'The operation was saved.',
     noVersions: 'No release has been submitted for this resource.',
     stripeTitle: 'Payments',
@@ -146,7 +146,7 @@ export default {
     searchResources: 'Search resources or creators',
     searchAction: 'Search',
     manifestOnlyHint:
-        'Choose your resource ZIP and its price. Its name, description, image, type and version come from the manifest.',
+        'Choose your resource source and its price. Its name, description, image, type and version come from the manifest.',
     localPreviewHint: 'The preview is prepared on your device. The ZIP is uploaded only after you confirm.',
     previewArchive: 'Check and preview',
     inspectingArchive: 'Checking the archive…',
@@ -161,4 +161,26 @@ export default {
     megabytes: 'MB',
     zipStructureHint: 'Place manifest.json and the resource files directly at the ZIP root, without a wrapper folder.',
     uploadLimit: 'Maximum size:',
+    resourceSource: 'Resource distribution',
+    publicRepository: 'Public GitHub repository',
+    zipSourceHint: 'Upload your ZIP here for each new version.',
+    repositorySourceHint: 'Publish your versions on GitHub. The Market then follows your releases automatically.',
+    repositoryUrl: 'GitHub repository URL',
+    repositoryOwnershipHint:
+        'The repository must belong to your linked GitHub account or to an organization where your membership is public.',
+    repositoryLinkRequired: 'Link your GitHub account to submit a repository.',
+    linkGithubAccount: 'Link my GitHub account',
+    repositoryReleaseHint:
+        'The repository must be public and offer a stable release with an installable ZIP, containing manifest.json at its root and an open source license.',
+    paidOpenSourceHint:
+        'The code and archives remain public on GitHub. Purchasing gives access to the resource and its updates through the CMS.',
+    repositoryAutomaticHint:
+        'After initial approval, new stable releases are checked and offered automatically. You no longer need to upload ZIP files here.',
+    repositoryReviewHint:
+        'The first publication will be reviewed by moderation. New stable releases from this repository will then be followed automatically.',
+    repositoryModerationHint:
+        'Approval authorizes automatic tracking of future stable releases from this public repository. Review the repository, its owner and its contents before approving.',
+    repositoryTag: 'GitHub tag',
+    inspectingResource: 'Checking the resource…',
+    changeSource: 'Change source or price',
 };

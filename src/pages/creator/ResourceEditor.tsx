@@ -6,6 +6,7 @@ import { workspace } from '../../lib/translations';
 
 import { ArchiveSubmission } from './ArchiveSubmission';
 import type { Resource, Version } from './types';
+import { externalLinkRel } from '../../../shared/links';
 
 export function ResourceEditor({
     resourceId,
@@ -101,6 +102,19 @@ export function ResourceEditor({
             )}
             {resource && (
                 <>
+                    {resource.source && (
+                        <Card title={t.publicRepository}>
+                            <p>{t.repositoryAutomaticHint}</p>
+                            <a
+                                className="text-break"
+                                href={resource.source.repository}
+                                target="_blank"
+                                rel={externalLinkRel(resource.source.repository)}
+                            >
+                                {resource.source.repository} ↗
+                            </a>
+                        </Card>
+                    )}
                     {pending ? (
                         <p className="alert alert-info">{t.pendingHint}</p>
                     ) : !available ? (
@@ -109,7 +123,10 @@ export function ResourceEditor({
                         <ArchiveSubmission
                             resource={resource}
                             disabled={!canSubmit}
-                            previousVersion={versions.find((version) => version.status === 'approved')?.version}
+                            previousVersion={
+                                resource.published_version ??
+                                versions.find((version) => version.status === 'approved')?.version
+                            }
                             onSubmitted={async () => {
                                 await reload();
                                 await onChanged();

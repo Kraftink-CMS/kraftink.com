@@ -183,6 +183,27 @@ export default {
         password_confirmation_mismatch: 'Les deux mots de passe doivent être identiques.',
         password_required: 'Définissez un mot de passe avant de délier GitHub.',
         github_not_linked: 'Aucun compte GitHub n’est lié.',
+        github_link_required: 'Liez votre compte GitHub depuis votre compte KraftInk pour proposer un dépôt.',
+        repository_invalid: 'Indiquez un lien de dépôt GitHub au format https://github.com/proprietaire/depot.',
+        repository_unavailable: 'Cette ressource est temporairement indisponible. Réessayez plus tard.',
+        repository_public_required: 'Le dépôt et ses releases doivent être publics et accessibles sans connexion.',
+        repository_owner_required:
+            'Le dépôt doit appartenir à votre compte GitHub lié ou à une organisation dont vous êtes membre public.',
+        repository_release_required:
+            'Publiez une release stable avec un ZIP installable contenant un manifest.json valide à la racine.',
+        repository_release_changed:
+            'La release a changé depuis l’aperçu. Vérifiez à nouveau la ressource avant de confirmer.',
+        repository_license_required: 'Le dépôt doit déclarer une licence open source reconnue.',
+        repository_identity_changed: 'L’identité ou le propriétaire de ce dépôt a changé. Vérifiez sa source.',
+        repository_url_invalid: 'Indiquez un lien de dépôt GitHub au format https://github.com/proprietaire/depot.',
+        repository_github_required: 'Liez votre compte GitHub depuis votre compte KraftInk pour proposer un dépôt.',
+        repository_organization_required:
+            'Vous devez être membre public de l’organisation GitHub propriétaire du dépôt.',
+        repository_release_invalid:
+            'La release GitHub doit être stable et son tag doit correspondre à la version du manifeste.',
+        repository_manifest_invalid: 'Le manifeste de la release est invalide ou ne correspond pas à cette ressource.',
+        repository_archive_invalid: 'L’archive GitHub est invalide ou ne correspond pas à la release publiée.',
+        repository_archive_required: 'Ajoutez un ZIP installable aux fichiers de votre release GitHub.',
         authentication_method_unavailable:
             'Votre moyen de connexion est actuellement indisponible pour confirmer votre identité.',
         role_invalid: 'Sélectionnez un grade valide.',

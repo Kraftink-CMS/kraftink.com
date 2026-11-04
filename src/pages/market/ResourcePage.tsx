@@ -111,7 +111,12 @@ export function ResourcePage() {
                             ))}
                         </dl>
                         {resource.repository && (
-                            <a href={resource.repository} target="_blank" rel={externalLinkRel(resource.repository)}>
+                            <a
+                                className="btn btn-outline-secondary"
+                                href={resource.repository}
+                                target="_blank"
+                                rel={externalLinkRel(resource.repository)}
+                            >
                                 {text.source} ↗
                             </a>
                         )}
@@ -128,7 +133,11 @@ export function ResourcePage() {
                         }
                     >
                         <ErrorNotice error={failure} />
-                        {resource.commercial.kind === 'free' ? (
+                        {resource.access?.code === 'repository_unavailable' ? (
+                            <p className="alert alert-warning mb-0" role="status">
+                                {text.resourceUnavailable}
+                            </p>
+                        ) : resource.commercial.kind === 'free' ? (
                             <a
                                 className="btn btn-primary w-100"
                                 href={version?.download?.url ?? resource.repository}

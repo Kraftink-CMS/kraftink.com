@@ -5,6 +5,7 @@ import { authMiddleware } from './middleware/authentication';
 import { responseHeaders } from './middleware/headers';
 import { cleanupExpiredRecords } from './jobs/cleanup';
 import { cleanupArchives } from './services/resources/archives';
+import { refreshRepositoryResources } from './services/resources/repository-updates';
 import { expireBannedCheckouts } from './services/commerce/checkout';
 import authRoutes from './routes/auth';
 import accountRoutes from './routes/account';
@@ -68,5 +69,6 @@ export default {
         ctx.waitUntil(cleanupArchives(env));
         ctx.waitUntil(expireBannedCheckouts(env));
         ctx.waitUntil(cleanupExpiredRecords(env));
+        ctx.waitUntil(refreshRepositoryResources(env));
     },
 };
