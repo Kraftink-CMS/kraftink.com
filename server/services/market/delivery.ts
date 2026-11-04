@@ -9,6 +9,8 @@ import { sha256 } from '../../security/crypto';
 import { ipMatchesPolicy } from '../../../shared/ip';
 import type { Env } from '../../types';
 import { resourceStorage } from '../resources/storage';
+import { parseRepositorySource } from '../../../shared/packages/repository';
+import { repositoryRelease } from '../resources/repository-updates';
 
 export async function resolveSiteLicense(
     env: Env,
@@ -62,6 +64,8 @@ async function purchasedArchive(env: Env, userId: string, resourceId: string, ve
             version: resourceVersions.version,
             archive_key: resourceVersions.archive_key,
             sha256: resourceVersions.sha256,
+            payload_json: resourceVersions.payload_json,
+            version_id: resourceVersions.id,
         })
         .from(resources)
         .innerJoin(resourceVersions, eq(resourceVersions.id, resources.approved_version_id))
@@ -80,7 +84,30 @@ async function purchasedArchive(env: Env, userId: string, resourceId: string, ve
             ),
         )
         .get();
-    if (!resource || !resource.archive_key || (version !== undefined && resource.version !== version)) {
+    if (!resource || !resource.archive_key) {
+        fail(403, 'resource_denied');
+    }
+    const source = parseRepositorySource(resource.payload_json);
+    if (source) {
+        const release = await repositoryRelease(env, resourceId, resource.version_id, source);
+        if (!release) {
+            fail(503, 'repository_unavailable');
+        }
+        if (version !== undefined && release.version !== version) {
+            fail(403, 'resource_denied');
+        }
+        return new Response(null, {
+            status: 302,
+            headers: {
+                Location: release.source.archiveUrl,
+                'Cache-Control': 'private, no-store',
+                'CDN-Cache-Control': 'no-store',
+                'X-Content-Type-Options': 'nosniff',
+                'X-KraftInk-SHA256': release.sha256,
+            },
+        });
+    }
+    if (version !== undefined && resource.version !== version) {
         fail(403, 'resource_denied');
     }
     const archive = await resourceStorage(env).get(resource.archive_key);

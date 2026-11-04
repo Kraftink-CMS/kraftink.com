@@ -11,6 +11,9 @@ import { defaultUploadLimit, effectiveUploadLimit } from '../../upload-limits';
 import { cleanupArchives } from './archives';
 import { resourceStorage } from './storage';
 import { requireSellerReady } from '../commerce/sellers';
+import { parseRepositorySource, type RepositorySource } from '../../../shared/packages/repository';
+import { inspectRepository } from './repository';
+import { repositoryRelease, seedRepositoryRelease } from './repository-updates';
 
 export interface ResourceEffects {
     audit(action: string, target: string, details?: Record<string, unknown>): Promise<void>;
@@ -58,9 +61,10 @@ export async function findOwnedResource(env: Env, actorId: string, id: string) {
 }
 export async function listCreatorResources(env: Env, actorId: string) {
     const resources = await env.DB.prepare(
-        `SELECT r.*, v.version AS published_version,
+        `SELECT r.*, COALESCE(json_extract(m.payload_json, '$.version'), v.version) AS published_version,
             (SELECT COUNT(*) FROM resource_versions p WHERE p.resource_id = r.id AND p.status = 'pending') AS pending_count
             FROM resources r LEFT JOIN resource_versions v ON v.id = r.approved_version_id
+            LEFT JOIN metadata_cache m ON m.key = 'repository:' || r.id || ':' || v.id
             WHERE r.author_id = ? ORDER BY r.created_at DESC LIMIT 200`,
     )
         .bind(actorId)
@@ -75,7 +79,38 @@ export async function resourceDetails(env: Env, resource: ResourceRow) {
         .orderBy(desc(resourceVersions.created_at))
         .limit(100)
         .all();
-    return { resource, versions };
+    const approved =
+        versions.find((version) => version.id === resource.approved_version_id) ??
+        (resource.approved_version_id
+            ? await database(env.DB)
+                  .select()
+                  .from(resourceVersions)
+                  .where(eq(resourceVersions.id, resource.approved_version_id))
+                  .get()
+            : undefined);
+    const source = approved ? parseRepositorySource(approved.payload_json) : null;
+    const release = source && approved ? await repositoryRelease(env, resource.id, approved.id, source, true) : null;
+    return {
+        resource: { ...resource, source, published_version: release?.version ?? approved?.version ?? null },
+        versions,
+    };
+}
+
+async function latestResourceVersion(env: Env, resource: ResourceRow): Promise<string | undefined> {
+    if (!resource.approved_version_id) {
+        return undefined;
+    }
+    const version = await database(env.DB)
+        .select()
+        .from(resourceVersions)
+        .where(eq(resourceVersions.id, resource.approved_version_id))
+        .get();
+    if (!version) {
+        return undefined;
+    }
+    const source = parseRepositorySource(version.payload_json);
+    const release = source ? await repositoryRelease(env, resource.id, version.id, source, true) : null;
+    return release?.version ?? version.version;
 }
 export async function cancelResourceVersion(
     env: Env,
@@ -129,6 +164,10 @@ export async function reviewResourceVersion(
     }
     const operation = crypto.randomUUID();
     const time = now();
+    const baselineKey = `repository:${resource.id}:${resource.approved_version_id ?? ''}`;
+    const baseline = await env.DB.prepare('SELECT payload_json FROM metadata_cache WHERE key = ?')
+        .bind(baselineKey)
+        .first<{ payload_json: string | null }>();
     const claim = env.DB.prepare(
         `UPDATE resource_versions SET status = ?, reviewer_id = ?, review_note = ?, review_token = ?, reviewed_at = ?
             WHERE id = ? AND status = 'pending' AND EXISTS (
@@ -136,7 +175,7 @@ export async function reviewResourceVersion(
                 AND r.status IN ('draft', 'published') AND r.approved_version_id IS ?
                 AND u.banned_at IS NULL AND u.email_verified_at IS NOT NULL
                 AND (u.role = 'admin' OR (u.role = 'moderator' AND r.author_id != u.id))
-            )`,
+            ) AND (? = 'reject' OR (SELECT payload_json FROM metadata_cache WHERE key = ?) IS ?)`,
     ).bind(
         input.action === 'approve' ? 'approved' : 'rejected',
         actorId,
@@ -146,11 +185,33 @@ export async function reviewResourceVersion(
         version.id,
         actorId,
         resource.approved_version_id,
+        input.action,
+        baselineKey,
+        baseline?.payload_json ?? null,
     );
     const statements = [claim];
     if (input.action === 'approve') {
+        if (!isNewerVersion(version.version, await latestResourceVersion(env, resource))) {
+            error(400, 'version_must_increase');
+        }
         if (!version.archive_key || !(await resourceStorage(env).head(version.archive_key))) {
             error(409, 'archive_unavailable');
+        }
+        const source = parseRepositorySource(version.payload_json);
+        if (source) {
+            const current = await inspectRepository(
+                env,
+                resource.author_id,
+                source.repository,
+                {
+                    slug: resource.slug,
+                    type: resource.type,
+                },
+                { source },
+            );
+            if (current.source.tag !== source.tag || (await sha256(current.bytes)) !== version.sha256) {
+                error(409, 'repository_release_changed');
+            }
         }
         const payload = JSON.parse(version.payload_json) as {
             name: LocalizedText;
@@ -203,6 +264,9 @@ export async function reviewResourceVersion(
     if (!result[0].meta.changes) {
         error(409, 'version_review_closed');
     }
+    if (input.action === 'approve') {
+        await seedRepositoryRelease(env, resource.id, version);
+    }
     await effects.audit(`resource.version_${input.action === 'approve' ? 'approved' : 'rejected'}`, resource.id, {
         versionId: version.id,
         reason: input.reason,
@@ -227,6 +291,7 @@ export async function submitArchive(
     existing: ResourceRow | undefined,
     effects: ResourceEffects,
     limitCreation: () => Promise<void>,
+    source?: RepositorySource,
 ) {
     await requireSellerReady(env, actorId);
     const bytes = await readArchive();
@@ -246,6 +311,7 @@ export async function submitArchive(
         description: metadata.description,
         priceCents: priceCents,
         currency: 'EUR',
+        ...(source ? { source } : {}),
     };
     const time = now();
     const totalSize = bytes.byteLength + (image?.bytes.byteLength ?? 0);
@@ -333,14 +399,7 @@ export async function submitArchive(
         }
         error(409, 'version_already_submitted');
     }
-    const previous = resource.approved_version_id
-        ? await database(env.DB)
-              .select({ version: resourceVersions.version })
-              .from(resourceVersions)
-              .where(eq(resourceVersions.id, resource.approved_version_id))
-              .get()
-        : null;
-    if (!isNewerVersion(manifest.version, previous?.version)) {
+    if (!isNewerVersion(manifest.version, await latestResourceVersion(env, resource))) {
         error(400, 'version_must_increase');
     }
     const id = crypto.randomUUID();

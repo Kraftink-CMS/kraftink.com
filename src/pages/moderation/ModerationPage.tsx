@@ -9,6 +9,8 @@ import { workspace } from '../../lib/translations';
 import { SensitiveButton } from '../../components/auth/SensitiveButton';
 import { hasRole } from '../../../shared/auth';
 import { moderationTabs } from '../../../shared/routes';
+import { parseRepositorySource } from '../../../shared/packages/repository';
+import { externalLinkRel } from '../../../shared/links';
 
 interface Review {
     id: string;
@@ -283,6 +285,7 @@ export function ModerationPage() {
     }
 
     const payload = selected ? proposal(selected) : null;
+    const source = selected ? parseRepositorySource(selected.payload_json) : null;
     return (
         <>
             <PageTitle title={t.moderationTitle} description={t.moderationDescription}>
@@ -517,7 +520,26 @@ export function ModerationPage() {
                                             <dd className="col-sm-8 text-break">
                                                 <code>{selected.sha256}</code>
                                             </dd>
+                                            {source && (
+                                                <>
+                                                    <dt className="col-sm-4">{t.publicRepository}</dt>
+                                                    <dd className="col-sm-8 text-break">
+                                                        <a
+                                                            href={source.repository}
+                                                            target="_blank"
+                                                            rel={externalLinkRel(source.repository)}
+                                                        >
+                                                            {source.repository} ↗
+                                                        </a>
+                                                    </dd>
+                                                    <dt className="col-sm-4">{t.repositoryTag}</dt>
+                                                    <dd className="col-sm-8">
+                                                        <code>{source.tag}</code>
+                                                    </dd>
+                                                </>
+                                            )}
                                         </dl>
+                                        {source && <p className="alert alert-info">{t.repositoryModerationHint}</p>}
                                         <details className="mb-3">
                                             <summary>{t.manifest}</summary>
                                             <pre className="mt-2 p-3 bg-body-tertiary rounded overflow-auto">

@@ -39,6 +39,6 @@
         "STRIPE_LIVE_MODE": "true",
         "STRIPE_PLATFORM_ACCOUNT_ID": "acct_1UWKPAAHcafbEFrA",
     },
-    "triggers": { "crons": ["17 * * * *"] },
+    "triggers": { "crons": ["*/5 * * * *"] },
     "observability": { "enabled": false },
 }

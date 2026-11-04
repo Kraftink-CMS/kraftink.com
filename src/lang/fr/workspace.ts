@@ -43,7 +43,8 @@ export default {
     adminPublicationHint: 'Votre ressource sera publiée directement avec votre grade administrateur.',
     publish: 'Publier',
     metadataHint: 'Le nom, la description et le prix indiqués seront publiés avec cette version après validation.',
-    pendingHint: 'Une version attend déjà sa validation. Vous pouvez l’annuler avant de soumettre un nouveau ZIP.',
+    pendingHint:
+        'Une version attend déjà sa validation. Vous pouvez l’annuler avant de soumettre une nouvelle version.',
     unavailableHint: 'Cette ressource a été retirée. Les nouvelles publications sont suspendues.',
     submit: 'Envoyer à la modération',
     submitting: 'Envoi en cours…',
@@ -54,7 +55,7 @@ export default {
     confirmCancel: 'Confirmer l’annulation',
     back: 'Retour',
     cancel: 'Annuler',
-    cancelHint: 'Le ZIP en attente sera supprimé. La version actuellement publiée reste disponible.',
+    cancelHint: 'La soumission en attente sera annulée. La version actuellement publiée reste disponible.',
     success: 'L’opération a été enregistrée.',
     noVersions: 'Aucune version soumise pour cette ressource.',
     stripeTitle: 'Paiements',
@@ -149,7 +150,7 @@ export default {
     searchResources: 'Rechercher une ressource ou un créateur',
     searchAction: 'Rechercher',
     manifestOnlyHint:
-        'Choisissez le ZIP de votre ressource et son prix. Le nom, la description, l’image, le type et la version proviennent du manifeste.',
+        'Choisissez la source de votre ressource et son prix. Le nom, la description, l’image, le type et la version proviennent du manifeste.',
     localPreviewHint:
         'L’aperçu est préparé sur votre appareil. Le ZIP sera envoyé uniquement après votre confirmation.',
     previewArchive: 'Vérifier et voir l’aperçu',
@@ -167,4 +168,26 @@ export default {
     zipStructureHint:
         'Placez manifest.json et les fichiers de la ressource directement à la racine du ZIP, sans dossier supplémentaire.',
     uploadLimit: 'Taille maximale :',
+    resourceSource: 'Distribution de la ressource',
+    publicRepository: 'Dépôt GitHub public',
+    zipSourceHint: 'Envoyez votre ZIP ici à chaque nouvelle version.',
+    repositorySourceHint: 'Publiez vos versions sur GitHub. Le Market suit ensuite vos releases automatiquement.',
+    repositoryUrl: 'Lien du dépôt GitHub',
+    repositoryOwnershipHint:
+        'Le dépôt doit appartenir à votre compte GitHub lié ou à une organisation dont vous êtes membre public.',
+    repositoryLinkRequired: 'Liez votre compte GitHub pour proposer un dépôt.',
+    linkGithubAccount: 'Lier mon compte GitHub',
+    repositoryReleaseHint:
+        'Le dépôt doit être public et proposer une release stable avec un ZIP installable, contenant manifest.json à la racine et une licence open source.',
+    paidOpenSourceHint:
+        'Le code et les archives restent publics sur GitHub. L’achat donne accès à la ressource et à ses mises à jour depuis le CMS.',
+    repositoryAutomaticHint:
+        'Après validation initiale, les nouvelles releases stables sont vérifiées et proposées automatiquement. Vous n’avez plus de ZIP à envoyer ici.',
+    repositoryReviewHint:
+        'La première publication sera examinée par la modération. Les nouvelles releases stables de ce dépôt seront ensuite suivies automatiquement.',
+    repositoryModerationHint:
+        'L’approbation autorise le suivi automatique des prochaines releases stables de ce dépôt public. Vérifiez le dépôt, son propriétaire et son contenu avant de valider.',
+    repositoryTag: 'Tag GitHub',
+    inspectingResource: 'Vérification de la ressource…',
+    changeSource: 'Modifier la source ou le prix',
 };

@@ -1,4 +1,4 @@
-import { and, asc, eq, exists, inArray, isNull, or } from 'drizzle-orm';
+import { and, asc, eq, exists, inArray, isNull, or, sql } from 'drizzle-orm';
 import { normalizedVersion, requirements } from '../../../shared/compatibility';
 import type { CatalogueResource, PublicCatalogue } from '../../../shared/catalogue';
 import { database } from '../../database';
@@ -10,6 +10,8 @@ import { signDocument } from '../../security/crypto';
 import { now } from '../../lib/time';
 import { fail } from '../../http';
 import type { Env } from '../../types';
+import { parseRepositorySource } from '../../../shared/packages/repository';
+import { cachedRepositoryRelease } from '../resources/repository-updates';
 
 const slugPattern = /^[a-z][a-z0-9-]{1,49}$/;
 export const CMS_CATALOGUE_MAX_RESOURCES = 1000;
@@ -545,13 +547,20 @@ export async function mergedCatalogue(
                 version_id: resourceVersions.id,
                 version: resourceVersions.version,
                 manifest_json: resourceVersions.manifest_json,
+                payload_json: resourceVersions.payload_json,
                 sha256: resourceVersions.sha256,
                 archive_key: resourceVersions.archive_key,
                 image_key: resourceVersions.image_key,
+                repository_payload: metadataCache.payload_json,
+                repository_fetched_at: metadataCache.fetched_at,
             })
             .from(resources)
             .innerJoin(users, eq(users.id, resources.author_id))
             .innerJoin(resourceVersions, eq(resourceVersions.id, resources.approved_version_id))
+            .leftJoin(
+                metadataCache,
+                eq(metadataCache.key, sql`'repository:' || ${resources.id} || ':' || ${resourceVersions.id}`),
+            )
             .where(
                 and(
                     inArray(resources.status, ['published', 'withdrawn']),
@@ -580,14 +589,24 @@ export async function mergedCatalogue(
             name?: CatalogueResource['name'];
             description?: CatalogueResource['description'];
         };
+        const source = parseRepositorySource(resource.payload_json);
+        const release = source
+            ? cachedRepositoryRelease(
+                  { payload_json: resource.repository_payload, fetched_at: resource.repository_fetched_at },
+                  source,
+              )
+            : null;
+        const available = !source || release !== null;
         const version = {
-            version: resource.version,
-            requirements: manifest.requires,
-            ...(forCms && purchased && resource.archive_key
+            version: release?.version ?? resource.version,
+            requirements: release?.requirements ?? manifest.requires,
+            ...(forCms && purchased && available && resource.archive_key
                 ? {
                       download: {
-                          url: `${origin}/api/market/resources/${author}/${resource.slug}/versions/${resource.version}/download`,
-                          sha256: resource.sha256,
+                          url:
+                              release?.source.archiveUrl ??
+                              `${origin}/api/market/resources/${author}/${resource.slug}/versions/${resource.version}/download`,
+                          sha256: release?.sha256 ?? resource.sha256,
                       },
                   }
                 : {}),
@@ -603,12 +622,16 @@ export async function mergedCatalogue(
                 ? { image: `${origin}/api/market/resources/${resource.id}/images/${resource.version_id}` }
                 : {}),
             author: { id: author, name: resource.author_name },
+            ...(source ? { repository: source.repository } : {}),
             commercial: {
                 kind: 'paid',
                 price: { amount: (resource.price_cents / 100).toFixed(2), currency: resource.currency },
                 url: `${origin}/market/resource/${resource.id}`,
             },
-            access: { allowed: purchased, ...(purchased ? {} : { code: 'purchase_required' }) },
+            access: {
+                allowed: purchased && available,
+                ...(!available ? { code: 'repository_unavailable' } : purchased ? {} : { code: 'purchase_required' }),
+            },
             manual_only: false,
             versions: [version],
         });

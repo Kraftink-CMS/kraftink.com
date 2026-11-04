@@ -1,3 +1,5 @@
+import type { RepositorySource } from '../../../shared/packages/repository';
+
 export interface Resource {
     id: string;
     slug: string;
@@ -9,6 +11,7 @@ export interface Resource {
     status: string;
     published_version: string | null;
     pending_count: number;
+    source?: RepositorySource | null;
 }
 
 export interface Version {

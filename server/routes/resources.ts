@@ -7,6 +7,9 @@ import { audit, requireRole, requireSensitive } from '../security/authorization'
 import { fail as error, jsonBody, requestBody } from '../http';
 import { rateLimit } from '../security/abuse';
 import { effectiveUploadLimit } from '../upload-limits';
+import { inspectRepository } from '../services/resources/repository';
+import { requireSellerReady } from '../services/commerce/sellers';
+import { sha256 } from '../security/crypto';
 import {
     findOwnedResource,
     listCreatorResources,
@@ -69,6 +72,46 @@ async function upload(c: Context<AppEnv>, existing?: ResourceRow): Promise<Respo
     if (existing && !['draft', 'published'].includes(existing.status)) error(409, 'resource_unavailable');
     const uploadLimit = await effectiveUploadLimit(c.env, user.id);
     const contentType = c.req.header('Content-Type') ?? '';
+    if (contentType.split(';', 1)[0].trim().toLowerCase() === 'application/json') {
+        const parsed = z
+            .object({
+                repository: z.string().trim().min(1).max(300),
+                priceCents: z.number().int().min(50).max(1000000),
+                expectedSource: z.object({
+                    tag: z.string().min(1).max(200),
+                    sha256: z.string().regex(/^[a-f0-9]{64}$/),
+                }),
+            })
+            .strict()
+            .safeParse(await jsonBody(c, 2048));
+        if (!parsed.success || new URL(c.req.url).search) error(400, 'invalid_resource');
+        await requireSellerReady(c.env, user.id);
+        await ensureStorageAvailable(c.env);
+        const release = await inspectRepository(
+            c.env,
+            user.id,
+            parsed.data.repository,
+            existing ? { slug: existing.slug, type: existing.type } : undefined,
+            { maxBytes: uploadLimit },
+        );
+        if (
+            release.source.tag !== parsed.data.expectedSource.tag ||
+            (await sha256(release.bytes)) !== parsed.data.expectedSource.sha256
+        ) {
+            error(409, 'repository_release_changed');
+        }
+        const result = await submitArchive(
+            c.env,
+            user.id,
+            async () => release.bytes,
+            parsed.data.priceCents,
+            existing,
+            effects(c),
+            () => rateLimit(c, 'resource.create', 20, 86400, user.id),
+            release.source,
+        );
+        return c.json(result.data, result.status);
+    }
     if (contentType.split(';', 1)[0].trim().toLowerCase() !== 'application/zip' || new URL(c.req.url).search)
         error(400, 'invalid_upload');
     const length = c.req.header('Content-Length');
@@ -93,6 +136,37 @@ async function upload(c: Context<AppEnv>, existing?: ResourceRow): Promise<Respo
 }
 
 routes.get('/creator/resources', async (c) => c.json(await listCreatorResources(c.env, creator(c).id)));
+routes.post('/creator/resources/preview-repository', async (c) => {
+    const user = creator(c);
+    await rateLimit(c, 'resource.repository-preview', 10, 3600, user.id);
+    const parsed = z
+        .object({
+            repository: z.string().trim().min(1).max(300),
+            resourceId: z.string().uuid().optional(),
+        })
+        .strict()
+        .safeParse(await jsonBody(c, 2048));
+    if (!parsed.success) error(400, 'repository_invalid');
+    const resource = parsed.data.resourceId
+        ? await findOwnedResource(c.env, user.id, parsed.data.resourceId)
+        : undefined;
+    if (resource && !['draft', 'published'].includes(resource.status)) error(409, 'resource_unavailable');
+    await requireSellerReady(c.env, user.id);
+    const release = await inspectRepository(
+        c.env,
+        user.id,
+        parsed.data.repository,
+        resource ? { slug: resource.slug, type: resource.type } : undefined,
+        { maxBytes: await effectiveUploadLimit(c.env, user.id) },
+    );
+    const { manifest, metadata, entries, expandedBytes } = release.inspection;
+    return c.json({
+        source: release.source,
+        inspection: { manifest, metadata, entries, expandedBytes },
+        sha256: await sha256(release.bytes),
+        sizeBytes: release.bytes.byteLength,
+    });
+});
 routes.post('/creator/resources', (c) => upload(c));
 routes.get('/creator/resources/:id', async (c) => c.json(await resourceDetails(c.env, await ownedResource(c))));
 routes.patch('/creator/resources/:id', async (c) => {
