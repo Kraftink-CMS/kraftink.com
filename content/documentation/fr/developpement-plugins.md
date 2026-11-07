@@ -97,6 +97,8 @@ Ajoutez `capability:extension,example` aux routes concernées. Dans les vues, `$
 
 Les [menus, formulaires et métadonnées](ui-contributions.md) et les [tableaux](tables.md) utilisent les composants du CMS. Nettoyez le HTML riche avec `App\Kraft\Html::clean` avant stockage.
 
+Si votre plugin accepte des images, utilisez l’[API d’images](ui-contributions.md#api-d-images) pour préparer les envois avant de les stocker.
+
 Pour un secret, utilisez `app(App\Kraft\Secrets::class)->set($key, $value)` et `get($key)`. Pour une action sensible, appelez `app(App\Kraft\System\SensitiveAction::class)->confirm($request)` en conservant permissions et CSRF.
 
 Avant distribution, testez les accès autorisés et refusés, les saisies invalides et la mise à jour avec des données existantes. Ajoutez un [gestionnaire de confidentialité](privacy-extensions.md) si le plugin conserve des données de membres.

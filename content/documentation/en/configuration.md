@@ -33,3 +33,11 @@ Choose the site time zone, such as `Europe/Paris`. Publication times are entered
 When visitors can choose a language, forms offer optional translations for your content. A missing field falls back to English, then the site language and finally its main value. Disabling the language choice keeps saved translations.
 
 The [SEO guide](seo.md) explains automatic page titles and descriptions and how to customise them.
+
+## Images and media library
+
+In **Content → Media library**, choose **Upload image** to reuse it in pages and news posts. The media library accepts JPEG, PNG, WebP, GIF and AVIF files up to 8 MB by default. Add alternative text describing the image for people who cannot see it.
+
+Media library images are public, even when inserted into restricted content. To limit access, add the image from the content editor and choose the private upload option where available.
+
+KraftInk removes personal metadata such as a camera’s recorded location from new uploads. If uploads fail, ask your host to check that PHP can [run ExifTool](installation.md#hosting-requirements).

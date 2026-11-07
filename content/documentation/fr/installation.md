@@ -10,6 +10,8 @@ Avec SQLite, le CMS crée sa base pendant l’installation. Pour MySQL ou MariaD
 
 L’hébergement doit autoriser `proc_open` et fournir PHP en ligne de commande dans la même version que le site. Si cet exécutable n’est pas détecté, renseignez son chemin dans `KRAFT_PHP_BINARY` dans `.env` avec l’aide de l’hébergeur. Prévoyez aussi un accès aux tâches cron pour les [automatismes](operations.md#planificateur).
 
+L’assistant vérifie que PHP peut exécuter [ExifTool](https://exiftool.org/install.html), nécessaire au nettoyage des images envoyées. Si l’exécutable n’est pas détecté, demandez à votre hébergeur de l’installer ou indiquez son chemin absolu dans `KRAFT_EXIFTOOL_BINARY` dans `.env`.
+
 ## Installation
 
 1. Extrayez l’archive dans le dossier du site, par exemple `/var/www/kraftink`.

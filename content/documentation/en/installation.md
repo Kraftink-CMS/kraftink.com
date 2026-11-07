@@ -10,6 +10,8 @@ With SQLite, the CMS creates its database during installation. For MySQL or Mari
 
 The host must allow `proc_open` and provide command-line PHP matching the version used by the site. If it is not detected, ask your host to set its path in `KRAFT_PHP_BINARY` in `.env`. You also need cron access for [scheduled tasks](operations.md#scheduler).
 
+The installer checks that PHP can run [ExifTool](https://exiftool.org/install.html), which is required to clean uploaded images. If it is not detected, ask your host to install it or set its absolute path in `KRAFT_EXIFTOOL_BINARY` in `.env`.
+
 ## Installation
 
 1. Extract the archive into the site directory, such as `/var/www/kraftink`.

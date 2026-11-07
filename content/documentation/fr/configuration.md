@@ -33,3 +33,11 @@ Choisissez le fuseau du site, par exemple `Europe/Paris`. Les horaires de public
 Lorsque le choix de langue des visiteurs est activé, les formulaires proposent des traductions facultatives de vos contenus. Un champ manquant utilise l’anglais, puis la langue du site et enfin sa valeur principale. Désactiver le choix de langue conserve les traductions.
 
 Le [guide du référencement](seo.md) explique les titres et descriptions produits automatiquement et leurs personnalisations.
+
+## Images et médiathèque
+
+Dans **Contenus → Médiathèque**, choisissez **Ajouter l’image** pour la réutiliser dans vos pages et actualités. La médiathèque accepte les fichiers JPEG, PNG, WebP, GIF et AVIF de 8 Mo maximum par défaut. Ajoutez un texte alternatif qui décrit l’image pour les personnes qui ne peuvent pas la voir.
+
+Les images de la médiathèque sont publiques, même si vous les insérez dans un contenu réservé. Pour limiter l’accès, ajoutez l’image depuis l’éditeur du contenu en choisissant l’envoi privé lorsqu’il est proposé.
+
+KraftInk retire des nouveaux envois les métadonnées personnelles telles que la localisation enregistrée par un appareil photo. Si les envois échouent, vérifiez auprès de votre hébergeur que PHP peut [exécuter ExifTool](installation.md#hebergement-requis).

@@ -97,6 +97,8 @@ Add `capability:extension,example` to the relevant routes. In views, `$capabilit
 
 [Menus, forms and metadata](ui-contributions.md) and [tables](tables.md) use CMS components. Clean rich HTML with `App\Kraft\Html::clean` before storage.
 
+If your plugin accepts images, use the [image API](ui-contributions.md#image-api) to prepare uploads before storing them.
+
 Store secrets through `app(App\Kraft\Secrets::class)->set($key, $value)` and `get($key)`. For a sensitive action, call `app(App\Kraft\System\SensitiveAction::class)->confirm($request)` alongside permissions and CSRF.
 
 Before distribution, test allowed and denied access, invalid input and updates with existing data. Add a [privacy handler](privacy-extensions.md) if the plugin keeps member data.

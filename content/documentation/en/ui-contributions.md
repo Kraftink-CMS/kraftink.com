@@ -87,6 +87,23 @@ Use `KraftForms.submit(form, submitter)` for programmatic submission. Navigate a
 
 Use `App\Kraft\System\TableQuery`, `<x-tables.controls>` and a `data-ajax-pagination data-table` region for search, sorting and pagination. The [table guide](tables.md) covers filters, page size and multiple tables, using the theme's styles and shared JavaScript.
 
+## Image API
+
+For images your plugin stores itself, pass the request’s `UploadedFile` to `App\Kraft\Media\Images::prepareUpload()` before saving it. The service checks the format and removes personal metadata. Use `validateUpload()` first to apply your own limits. `maxBytes` is expressed in bytes and `maxPixels` limits the total number of pixels.
+
+```php
+$file = $request->validate(['image' => ['required', 'file']])['image'];
+$images = app(\App\Kraft\Media\Images::class);
+$inspection = $images->validateUpload($file, maxBytes: 2 * 1024 * 1024, field: 'image');
+$image = $images->prepareUpload($file, $inspection, field: 'image');
+```
+
+The returned `ImageFile` describes the cleaned file with `mime`, `extension`, `width`, `height` and `size`. Copy the file from `path` to your plugin’s storage before the request ends. To deduplicate files, calculate their hash with `sha256()` after preparation. Your plugin defines permissions and chooses where to store its files.
+
+`inspect()` describes an existing or temporary file without changing it and returns `null` if the format is unknown or the image cannot be read. `supportedMimeTypes()` lists the types the service accepts.
+
+To add an image to the public media library, call `App\Kraft\Media\MediaLibrary::store($file, $ownerId)` directly. For restricted content, follow the [private image workflow](#editors-and-private-images). These services already prepare uploads.
+
 ## Editors and private images
 
 `data-editor="tinymce"` enables the rich editor. Clean HTML with `App\Kraft\Html::clean`. Restricted content must supply a private upload route through `data-editor-upload-url`. The shared media library creates public files.
