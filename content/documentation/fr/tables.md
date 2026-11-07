@@ -28,11 +28,7 @@ Donnez un identifiant unique à la région AJAX et gardez les contrôles avec le
 ```blade
 <div id="example-documents" data-ajax-pagination data-table tabindex="-1" class="vstack gap-4">
     <section class="card">
-        @if (\App\Kraft\System\TableQuery::options($documents)['searchable'])
-            <div class="card-body">
-                <x-tables.controls :paginator="$documents" />
-            </div>
-        @endif
+        <x-tables.controls :paginator="$documents" container-class="card-body" />
         <div class="card-body p-0 table-responsive">
             <table class="table align-middle mb-0">
                 <thead class="text-nowrap">
@@ -60,7 +56,7 @@ Donnez un identifiant unique à la région AJAX et gardez les contrôles avec le
 </div>
 ```
 
-`data-table-sort` utilise une clé de `sorts`. `<x-tables.controls>` affiche la recherche. `$documents->links()` produit le compteur, le choix du nombre de lignes et la pagination. Affichez-le même avec une seule page ou aucun résultat.
+`data-table-sort` utilise une clé de `sorts`. `<x-tables.controls>` affiche la recherche quand le tableau la propose. Utilisez `container-class` pour habiller son conteneur et `class` pour habiller le formulaire. `$documents->links()` produit le compteur, le choix du nombre de lignes et la pagination. Affichez-le même avec une seule page ou aucun résultat.
 
 Le choix de taille propose 10, 25, 50 ou 100 lignes. `perPage` change la taille initiale. Les filtres et la recherche reviennent à la première page. Sans JavaScript, les formulaires GET et liens de pagination restent utilisables.
 

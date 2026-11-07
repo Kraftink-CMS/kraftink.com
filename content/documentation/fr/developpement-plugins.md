@@ -81,6 +81,20 @@ Route::get('/plugins/example', [DocumentController::class, 'index'])
 
 Ajoutez `auth` pour une action réservée aux membres. Les routes du panneau demandent aussi `permission:admin.access` et votre permission de gestion. Une entrée de menu ne protège pas sa route. Pour les contrôles hors middleware, utilisez `PermissionAccess::allows($user, $permission)` avec un utilisateur éventuellement nul.
 
+Si chaque ligne peut exiger une permission différente, filtrez la requête Eloquent avant de la paginer.
+
+```php
+$access = app(\App\Kraft\Auth\PermissionAccess::class);
+$documents = $access->filterQuery(
+    Document::query()->where('published', true),
+    'required_permission',
+    $access->permissions($request->user()),
+    requiredPermission: 'plugins.example.view',
+)->paginate();
+```
+
+Passez le nom de colonne défini par votre modèle. Une valeur `null` ou vide laisse la ligne accessible aux personnes autorisées à consulter la liste. Utilisez `allowEmpty: false` si seul `null` signifie qu’une ligne est sans restriction. Ajoutez les conditions propres à votre contenu, comme la publication ou l’appartenance à un groupe.
+
 ## Vues et intégration au site
 
 Les pages étendent `default.layouts.layout` ou `admin.layouts.layout`. Le thème actif peut ainsi les habiller. Bootstrap 5, AdminLTE et les composants communs sont fournis par le CMS. Les vues du plugin s’appellent avec son namespace, par exemple `example::default.documents.index`.
@@ -93,12 +107,16 @@ app(\App\Kraft\Features::class)->register('example', function (?\App\Models\Acco
 });
 ```
 
-Ajoutez `capability:extension,example` aux routes concernées. Dans les vues, `$capabilities->extension('example')` ou `routeAvailable($routeName)` indique leur disponibilité. Gardez les contrôles de visibilité sur chaque ressource.
+Ajoutez `capability:extension,example` aux routes concernées. Dans les vues, utilisez `$capabilities->extension('example')` ou `$capabilities->routeAvailable($routeName)` pour vérifier leur disponibilité. Gardez les contrôles de visibilité sur chaque ressource.
 
 Les [menus, formulaires et métadonnées](ui-contributions.md) et les [tableaux](tables.md) utilisent les composants du CMS. Nettoyez le HTML riche avec `App\Kraft\Html::clean` avant stockage.
 
 Si votre plugin accepte des images, utilisez l’[API d’images](ui-contributions.md#api-d-images) pour préparer les envois avant de les stocker.
 
 Pour un secret, utilisez `app(App\Kraft\Secrets::class)->set($key, $value)` et `get($key)`. Pour une action sensible, appelez `app(App\Kraft\System\SensitiveAction::class)->confirm($request)` en conservant permissions et CSRF.
+
+## Réponses d’API paginées
+
+Pour une liste JSON, `App\Kraft\System\ApiPagination::perPage($request)` valide `page` et `per_page`. Passez sa valeur à `paginate()` après avoir appliqué vos contrôles d’accès. Utilisez `ApiPagination::data($paginator)` comme valeur de `data` dans la réponse. Elle contient `items` et `pagination` avec `page`, `per_page`, `total` et `last_page`. Appliquez `through()` sur le paginator pour choisir les champs à exposer.
 
 Avant distribution, testez les accès autorisés et refusés, les saisies invalides et la mise à jour avec des données existantes. Ajoutez un [gestionnaire de confidentialité](privacy-extensions.md) si le plugin conserve des données de membres.

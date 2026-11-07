@@ -95,7 +95,7 @@ app(TrashRegistry::class)->register(new TrashSource(
 
 Les callbacks revérifient l’état, les parents et les droits dans une transaction. `purge` est facultatif et ne doit accepter que des éléments supprimés. Retirez les enfants et références possédés, puis les fichiers après commit. Les sources d’un plugin désactivé deviennent indisponibles en conservant leurs données.
 
-Pour reprendre un effacement de fichier en échec, appelez `app(App\Kraft\Media\FileDeletionQueue::class)->schedule($path, $prefix, $references)` dans la transaction supprimant ses métadonnées. `$references` associe vos tables aux colonnes de chemin. Pour les images d’éditeur, fournissez aussi les usages des anciennes versions via le callback `history` d’`EditorImageScope`.
+Quand votre plugin remplace ou détache un fichier privé, appelez `app(App\Kraft\Media\FileDeletionQueue::class)->schedule($path, $prefix, $references)` dans la transaction qui retire sa référence. `$prefix` désigne le dossier privé du plugin. `$references` associe vos tables aux colonnes de chemin. Incluez toutes les références qui peuvent encore nécessiter le fichier, comme les commandes passées pour un téléchargement vendu. Après validation de la transaction, le CMS efface le fichier devenu inutilisé et peut reprendre une suppression en échec. Pour les images d’éditeur, fournissez aussi les usages des anciennes versions via le callback `history` d’`EditorImageScope`.
 
 ## Conservation et confidentialité
 

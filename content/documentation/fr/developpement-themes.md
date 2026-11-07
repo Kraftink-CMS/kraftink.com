@@ -69,7 +69,7 @@ La pagination simple utilise la même vue sans total ni `$elements`. Les [tablea
 
 ## Contexte et ressources
 
-Les vues publiques reçoivent `$publicSite`, `$appearance`, `$capabilities` et les liens filtrés `$headerLinks`, `$footerLinks`, `$extensionHeaderLinks` et `$extensionFooterLinks`. Utilisez `$capabilities->extension($id)` et `routeAvailable($routeName)` pour vérifier une destination.
+Les vues publiques reçoivent `$publicSite`, `$appearance`, `$capabilities`, `$headerLinks` et `$footerLinks`. Les liens filtrés des extensions se trouvent dans `$publicSite['extensionHeaderLinks']` et `$publicSite['extensionFooterLinks']`. Utilisez `$capabilities->extension($id)` et `$capabilities->routeAvailable($routeName)` pour vérifier une destination.
 
 Si vous créez un autre namespace de vues, fournissez le contexte avec `app(App\Kraft\Site\PublicViewContext::class)->data(request())` depuis un composeur de vues. Les propriétés natives de disponibilité sont définies dans `App\Kraft\Site\ViewCapabilities`.
 
