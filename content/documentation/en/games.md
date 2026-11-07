@@ -40,11 +40,11 @@ For Palworld HTTPS or Satisfactory with a private certificate, place its `.pem` 
 
 ### WebRCON for Rust
 
-In **Manage connection**, **WebRCON protocol** defaults to **WS (unencrypted)**. If the Rust server or its proxy offers encrypted WebRCON access, select **WSS (TLS)** and enter its port.
+In **Manage connection**, **WebRCON encryption** defaults to **Unencrypted**. Select **TLS encryption** if the Rust server or its proxy offers encrypted access (`wss://`), then enter its port.
 
-If the console uses a different address, enter its hostname in **WebRCON host (optional)**. If you leave the field blank, KraftInk uses the hostname in the server record. The public game address and A2S queries use the hostname in the server record in both cases.
+Leave **WebRCON host** blank to use the game server address. If the console has its own address, enter just its hostname, for example `rcon.example.org`. KraftInk uses the hostname in the server record for the public game address and A2S queries.
 
-In **WSS (TLS)** mode, the certificate must be trusted by the KraftInk host and match the WebRCON hostname. A valid public certificate is verified automatically. If the connection fails, KraftInk reports the error and keeps the encrypted mode.
+The TLS certificate must match the console hostname and be trusted by the KraftInk host. A valid public certificate is verified automatically. If TLS fails, KraftInk reports the error and stops the connection before sending the password or a command.
 
 ## Testing commands
 
