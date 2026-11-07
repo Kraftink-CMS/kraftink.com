@@ -28,7 +28,7 @@ Les réponses JSON utilisent `success` pour indiquer la réussite et `data` pour
 
 ## Inscription et modification d’identifiants
 
-Lisez `/policy`, présentez les conditions et le CAPTCHA éventuel, puis envoyez `name`, `email`, `password`, `password_confirmation`, `terms: true`, `terms_version` et `identity: {uuid, username}`. `name` est le pseudo du compte du site et `identity.username` celui du jeu. Une modification des conditions impose leur présentation à nouveau.
+Lisez `/policy`, présentez les conditions et le CAPTCHA éventuel, puis envoyez `username`, `email`, `password`, `password_confirmation`, `terms: true`, `terms_version` et `identity: {uuid, username}`. `username` est le pseudo du compte du site et `identity.username` celui du jeu. Une modification des conditions impose leur présentation à nouveau.
 
 La réponse `201` ne crée aucune session et ne prouve ni l’e-mail ni la possession du profil. Suivez `data.email_verification_required`, `data.game_verification_required` et `data.continue_url` pour terminer sur le site. L’inscription et la connexion locale doivent être autorisées. Aucun rang ou privilège ne peut être fourni par le connecteur.
 

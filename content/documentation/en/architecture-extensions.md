@@ -95,7 +95,7 @@ app(TrashRegistry::class)->register(new TrashSource(
 
 Callbacks recheck state, parents and permissions in a transaction. Optional `purge` must accept only deleted items. Remove owned children and references, then files after commit. A disabled plugin’s sources become unavailable with their data kept.
 
-To retry failed file deletion, call `app(App\Kraft\Media\FileDeletionQueue::class)->schedule($path, $prefix, $references)` in the transaction removing its metadata. `$references` maps your tables to path columns. For editor images, also provide revision usages through the `history` callback of `EditorImageScope`.
+When your plugin replaces or detaches a private file, call `app(App\Kraft\Media\FileDeletionQueue::class)->schedule($path, $prefix, $references)` in the transaction that removes the reference. `$prefix` identifies your plugin’s private folder. `$references` maps your tables to path columns. Include every reference that may still need the file, such as past orders for a purchased download. After commit, the CMS removes the file if it is unused and can retry a failed deletion. For editor images, also provide revision usages through the `history` callback of `EditorImageScope`.
 
 ## Retention and privacy
 

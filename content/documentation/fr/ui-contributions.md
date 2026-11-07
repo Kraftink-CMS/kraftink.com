@@ -83,9 +83,28 @@ Le middleware adapte les redirections et messages Laravel habituels. Une répons
 
 Pour un envoi programmatique, utilisez `KraftForms.submit(form, submitter)`. Gardez une navigation après création/suppression ou lorsque la page doit afficher un secret nouvellement généré. Les paiements externes, OAuth, téléchargements et opérations ayant leur propre progression conservent leur parcours dédié.
 
+Dans un formulaire d’administration, ajoutez `data-option-filter="locale"` à une liste qui dépend du champ `name="locale"` du même formulaire. Indiquez la valeur correspondante sur chaque option avec `data-option-group`, par exemple `data-option-group="fr"`. La liste conserve l’option vide, masque les options incompatibles et efface la sélection si elle devient incompatible. Validez également ce choix côté serveur.
+
 ## Tableaux AJAX
 
 Utilisez `App\Kraft\System\TableQuery`, `<x-tables.controls>` et une région `data-ajax-pagination data-table` pour la recherche, le tri et la pagination. Le [guide des tableaux](tables.md) explique les filtres, le choix du nombre de lignes et la gestion de plusieurs tableaux, avec les styles du thème et le JavaScript commun.
+
+## API d’images
+
+Pour une image que votre plugin stocke lui-même, passez l’`UploadedFile` de la requête à `App\Kraft\Media\Images::prepareUpload()` avant de l’enregistrer. Le service vérifie le format et retire les métadonnées personnelles. Vous pouvez d’abord valider vos propres limites avec `validateUpload()`. `maxBytes` s’exprime en octets et `maxPixels` limite le nombre total de pixels.
+
+```php
+$file = $request->validate(['image' => ['required', 'file']])['image'];
+$images = app(\App\Kraft\Media\Images::class);
+$inspection = $images->validateUpload($file, maxBytes: 2 * 1024 * 1024, field: 'image');
+$image = $images->prepareUpload($file, $inspection, field: 'image');
+```
+
+L’`ImageFile` retourné décrit le fichier nettoyé avec `mime`, `extension`, `width`, `height` et `size`. Copiez le fichier depuis `path` vers le stockage du plugin avant la fin de la requête. Pour dédupliquer les fichiers, calculez l’empreinte avec `sha256()` après la préparation. Le plugin définit ses permissions et choisit son stockage.
+
+`inspect()` décrit un fichier existant ou temporaire sans le modifier et renvoie `null` si le format est inconnu ou illisible. `supportedMimeTypes()` liste les types acceptés par le service.
+
+Pour ajouter une image à la médiathèque publique, appelez directement `App\Kraft\Media\MediaLibrary::store($file, $ownerId)`. Pour les contenus réservés, suivez le parcours des [images privées](#editeurs-et-images-privees). Ces services préparent déjà l’envoi.
 
 ## Éditeurs et images privées
 

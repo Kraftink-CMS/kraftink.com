@@ -15,14 +15,14 @@ External avatars receive the player’s public identifier and their browser’s 
 
 ## Connecting a server
 
-For Minecraft or Hytale using the connector, follow [KraftLink](kraftlink.md). For other modes, enable the service on the game server, then enter its access details in **Servers**:
+For Minecraft or Hytale using the connector, follow [KraftLink](kraftlink.md). For other modes, enable the service on the game server first. In **Game servers**, select the connection mode and save the server address. For RCON and other consoles, continue to **Manage connection** to enter settings and credentials. Ping is configured directly in the server record.
 
 | Server | Prepare on the game server |
 | --- | --- |
 | Minecraft Java | Game port for status, with `enable-rcon`, `rcon.port` and `rcon.password` for RCON, or [KraftLink](kraftlink.md) for deliveries requiring player presence |
 | Garry’s Mod, CS2, TF2, ARK: Survival Evolved, Project Zomboid | A2S UDP query port and enabled Source RCON TCP console |
 | Unturned | A2S port and a server component compatible with Source RCON |
-| Rust | A2S port and WebRCON with `rcon.web 1` |
+| Rust | A2S port and RCON enabled with `rcon.web 1` |
 | DayZ | A2S port and BattlEye RCON UDP console |
 | 7 Days to Die | A2S port and password-protected Telnet console |
 | FiveM, RedM | FXServer port for `dynamic.json` and `rcon_password` for commands |
@@ -36,7 +36,19 @@ Game, query and console ports may differ. Allow the required protocols in the fi
 
 Enter the actual host and ports, SRV records are not followed. For a private address, the hosting manager must allow its network in `config/games.php` under `network.private_cidrs`.
 
-For Palworld HTTPS or Satisfactory with a private certificate, place its `.pem` CA in `storage/app/private/game-certificates/` and enter its name in the server record.
+### RCON for Rust
+
+Select **RCON** in the Rust server record. In **Manage connection**, **RCON encryption** defaults to **Unencrypted**. Select **TLS encryption** if the server or its proxy offers encrypted access (`wss://`), then enter its port.
+
+Leave **RCON host** blank to use the game server address. If the console has its own address, enter just its hostname, for example `rcon.example.org`. KraftInk uses the hostname in the server record for the public game address and A2S queries.
+
+The TLS certificate must match the console hostname and be trusted by the KraftInk host. A valid public certificate is verified automatically. If TLS fails, KraftInk reports the error and stops the connection before sending the password or a command.
+
+### Palworld and Satisfactory APIs
+
+In **Manage connection**, select **TLS encryption** under **API encryption** if your Palworld setup provides HTTPS access. The certificate field appears with this setting. The Satisfactory API always uses HTTPS. Enter the **API token** generated on the game server.
+
+If either game’s HTTPS API uses a private certificate, place its certificate authority’s `.pem` file in `storage/app/private/game-certificates/`. Enter its name in **Certificate filename**.
 
 ## Testing commands
 

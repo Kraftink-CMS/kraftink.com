@@ -84,7 +84,7 @@ app(Notifications::class)->webhook(
 );
 ```
 
-Keep the URL in `Secrets`, never in `data`. `Notifications::validWebhook()` validates accepted URLs. Automatic mentions are disabled.
+Keep the URL in `Secrets`. In the configuration form, use `App\Kraft\System\WebhookClient::validDiscordUrl($url)` to check its format before saving it. Automatic mentions are disabled when the message is sent.
 
 ## Tracking and retries
 

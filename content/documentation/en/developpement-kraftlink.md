@@ -41,3 +41,28 @@ After processing, send `POST /api/link/commands/{id}/ack` using the full identif
 `error` is optional, limited to 1,000 characters and must contain no secrets. The lease and server must match. Repeated acknowledgements must not create another reward. An accepted acknowledgement returns `{"success":true,"data":{"ok":true}}`.
 
 Durably record identifiers and results before acknowledging. If the CMS offers an executed command again, confirm it with the new lease without replaying it. An interruption before journaling leaves an uncertain result: check its effect before executing again, even after the lease expires.
+
+## Supply commands from a plugin
+
+If your plugin keeps its own deliveries, use `DeliveryQueue` to hand them to the connector. In the plugin provider, listen for the claim and acknowledgement events.
+
+```php
+use App\Events\AcknowledgingLinkCommand;
+use App\Events\CollectingLinkCommands;
+use App\Kraft\Link\DeliveryQueue;
+use Illuminate\Support\Facades\Event;
+
+Event::listen(CollectingLinkCommands::class, function (CollectingLinkCommands $event): void {
+    app(DeliveryQueue::class)->collect($event, 'example', Delivery::query()->eligible());
+});
+
+Event::listen(AcknowledgingLinkCommand::class, function (AcknowledgingLinkCommand $event): void {
+    app(DeliveryQueue::class)->acknowledge($event, 'example', Delivery::query());
+});
+```
+
+Use your extension identifier as the channel. `Delivery` and `eligible()` belong to your plugin. Apply your business rules to claims. Include previously processed deliveries in the acknowledgement query so it can handle duplicates.
+
+The model provides a stable primary key, the target (`game`, `server_id`, `player_uuid`, `player_name`, `requires_online`) and the `command` text. Set `server_id` to `null` to use the default delivery server. Commands that require a player to be online use `player_uuid`.
+
+Create each delivery with `status` set to `pending` and `attempts` set to zero. Include `status`, `attempts`, `link_server_id`, `lease_token`, `last_error` and the cast date fields `available_at`, `lease_expires_at`, `created_at` and `delivered_at`. The queue handles leases and acknowledgements. Your plugin decides when to create a delivery and who can receive it.

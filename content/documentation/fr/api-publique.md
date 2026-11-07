@@ -19,15 +19,13 @@ Les réponses JSON utilisent `success` pour indiquer la réussite et `data` pour
 
 Seuls les contenus publiés accessibles aux visiteurs sont présents. Un compte connecté n’élargit pas la réponse. Une actualité privée, supprimée, future ou dans une autre langue renvoie 404. Les réponses annoncent un cache public de 60 secondes.
 
-## État des serveurs
+## Connexion au jeu et joueurs en ligne
 
-`GET /api/public/servers` renvoie `data`, une liste des serveurs du jeu actif dont l’affichage public est activé. Chaque entrée expose `id`, `name`, `game`, `online`, `fresh`, `players_online`, `players_max` et `last_seen_at`.
+`GET /api/public/servers` renvoie un objet `data` avec `address`, l’adresse de connexion du serveur principal du jeu actif, ainsi que `players_online` et `players_max`, ses compteurs. Le champ `address` respecte le choix d’affichage du port enregistré sur sa fiche. Sans serveur principal, les trois valeurs restent `null`.
 
-Pour une liaison active, un état reçu depuis 90 secondes au plus donne `fresh=true`. Avant le premier état, `online=null` signifie inconnu. Un état ancien ou une liaison désactivée donne `online=false`, `fresh=false` et des compteurs `null`. La réponse est mise en cache pendant 15 secondes.
+Les compteurs utilisent uniquement l’état du serveur principal reçu depuis 90 secondes au plus. Si leur affichage public est désactivé sur sa fiche, ils restent `null`. Une liaison désactivée ou une mesure indisponible donne aussi des compteurs `null`, tout en conservant l’adresse du serveur. Les autres serveurs ne sont jamais additionnés. La réponse annonce un cache HTTP de 15 secondes.
 
-L’objet `totals`, à la racine de la réponse, contient `players_online` et `players_max`. Il additionne les états récents des serveurs dont le comptage est activé, indépendamment de leur affichage public. Une valeur sans mesure disponible reste `null`.
-
-Les hôtes internes, secrets et listes nominatives des joueurs ne sont pas exposés.
+Les noms, adresses et états des autres serveurs liés, les secrets et les listes nominatives de joueurs ne sont pas exposés.
 
 ## Erreurs et limites
 

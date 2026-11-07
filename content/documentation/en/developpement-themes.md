@@ -69,7 +69,7 @@ Simple pagination uses the same view without totals or `$elements`. [Interactive
 
 ## Context and assets
 
-Public views receive `$publicSite`, `$appearance`, `$capabilities` and filtered links `$headerLinks`, `$footerLinks`, `$extensionHeaderLinks` and `$extensionFooterLinks`. Check destinations with `$capabilities->extension($id)` and `routeAvailable($routeName)`.
+Public views receive `$publicSite`, `$appearance`, `$capabilities`, `$headerLinks` and `$footerLinks`. Filtered extension links are available in `$publicSite['extensionHeaderLinks']` and `$publicSite['extensionFooterLinks']`. Check destinations with `$capabilities->extension($id)` and `$capabilities->routeAvailable($routeName)`.
 
 For another view namespace, provide context from a view composer with `app(App\Kraft\Site\PublicViewContext::class)->data(request())`. Native availability properties are defined in `App\Kraft\Site\ViewCapabilities`.
 

@@ -4,6 +4,7 @@ This documentation helps you install your site and connect services that need se
 
 - [Install KraftInk](installation.md), then [set up your domain and email](configuration.md).
 - [Add plugins and themes](extensions-catalogue.md), or [import an existing site](migration.md).
+- [Add images to the media library](configuration.md#images-and-media-library).
 - Connect a [game server](games.md), [external sign-in](oauth.md), [payments](shop-administration.md) or [voting services](vote.md).
 - Set up [scheduled tasks and backups](operations.md), then [update your site](updates.md).
 

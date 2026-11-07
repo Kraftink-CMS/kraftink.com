@@ -6,10 +6,10 @@ KraftLink transmet l’état et les joueurs présents d’un serveur à KraftInk
 
 1. Activez le jeu correspondant dans **Jeux et identités**.
 2. Dans **Serveurs → Serveurs de jeux**, ajoutez un serveur avec le mode **KraftLink**.
-3. Renseignez l’adresse et le port utilisés par les joueurs, sans `https://`.
+3. Renseignez l’adresse et le port du serveur à relier, sans `https://`.
 4. Dans **Gérer la liaison → Jeton de liaison**, créez un jeton et copiez-le. Il n’est affiché qu’une fois.
 
-Créez une fiche et un jeton par serveur. Le choix du serveur par défaut sert aux récompenses sans destination explicite. L’activation de la liaison, l’affichage public et le comptage des joueurs sont indépendants. Sur un réseau, évitez de compter à la fois les joueurs du proxy et ceux des serveurs reliés.
+Créez une fiche et un jeton par serveur. Le choix du serveur par défaut sert aux récompenses sans destination explicite. Sur la fiche du [serveur principal](configuration.md#adresse-de-connexion-au-jeu), choisissez l’adresse et l’affichage du port à présenter aux joueurs. Son état fournit aussi le compteur du site. Les autres liaisons restent disponibles pour les récompenses.
 
 Sur Velocity, les commandes s’exécutent sur le proxy. Pour agir sur un serveur Paper, installez KraftLink sur ce serveur et ciblez sa liaison.
 

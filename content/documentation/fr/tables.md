@@ -27,40 +27,32 @@ Donnez un identifiant unique à la région AJAX et gardez les contrôles avec le
 
 ```blade
 <div id="example-documents" data-ajax-pagination data-table tabindex="-1" class="vstack gap-4">
-    <section class="card">
-        @if (\App\Kraft\System\TableQuery::options($documents)['searchable'])
-            <div class="card-body">
-                <x-tables.controls :paginator="$documents" />
-            </div>
-        @endif
-        <div class="card-body p-0 table-responsive">
-            <table class="table align-middle mb-0">
-                <thead class="text-nowrap">
+    <x-admin::tables.paginated :paginator="$documents">
+        <table class="table align-middle mb-0">
+            <thead class="text-nowrap">
+                <tr>
+                    <th scope="col" data-table-sort="title">{{ __('example::messages.documents.title') }}</th>
+                    <th scope="col" data-table-sort="updated">{{ __('example::messages.documents.updated') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($documents as $document)
                     <tr>
-                        <th scope="col" data-table-sort="title">{{ __('example::messages.documents.title') }}</th>
-                        <th scope="col" data-table-sort="updated">{{ __('example::messages.documents.updated') }}</th>
+                        <td>{{ $document->title }}</td>
+                        <td>{{ app(\App\Kraft\SiteDates::class)->format($document->updated_at) }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse ($documents as $document)
-                        <tr>
-                            <td>{{ $document->title }}</td>
-                            <td>{{ app(\App\Kraft\SiteDates::class)->format($document->updated_at) }}</td>
-                        </tr>
-                    @empty
-                        <x-tables.empty colspan="2" :message="__('example::messages.documents.empty')" />
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer">
-            {{ $documents->links() }}
-        </div>
-    </section>
+                @empty
+                    <x-tables.empty colspan="2" :message="__('example::messages.documents.empty')" />
+                @endforelse
+            </tbody>
+        </table>
+    </x-admin::tables.paginated>
 </div>
 ```
 
-`data-table-sort` utilise une clé de `sorts`. `<x-tables.controls>` affiche la recherche. `$documents->links()` produit le compteur, le choix du nombre de lignes et la pagination. Affichez-le même avec une seule page ou aucun résultat.
+`data-table-sort` utilise une clé de `sorts`. Dans l’administration, `<x-admin::tables.paginated>` fournit la carte, la recherche si elle est activée et le pied de pagination. Passez `title` pour ajouter un titre de carte. Le contenu du tableau et ses actions restent dans votre vue.
+
+Pour un autre agencement, utilisez `<x-tables.controls>` pour la recherche et `$documents->links()` pour le compteur, le choix du nombre de lignes et la pagination. Gardez le pied visible avec une seule page ou aucun résultat.
 
 Le choix de taille propose 10, 25, 50 ou 100 lignes. `perPage` change la taille initiale. Les filtres et la recherche reviennent à la première page. Sans JavaScript, les formulaires GET et liens de pagination restent utilisables.
 

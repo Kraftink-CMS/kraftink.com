@@ -65,4 +65,6 @@ Handlers run in a transaction. Do not change the schema or trigger payments, ema
 
 For a missing source, your package can implement `App\Kraft\Migration\Contracts\SourceAdapter`, or extend `AbstractSourceAdapter`, and register its class in `imports.adapters.<id>` from its provider. The interface describes discovering accounts, extensions and mappings in the format.
 
+`user(array $row, ImportContext $context): array` normalizes an account. Its `identities` field contains a list of game identities with `game`, `uuid` and `username`, or an empty list. Normalize identifiers with the game adapter, as `AbstractSourceAdapter::normalizeIdentities` does. Use `$context->sourceRows($table)` to read a related table: analysis reads the source, while conversion uses frozen archives. Imported identities remain unverified. Preserved local accounts and their identities remain unchanged.
+
 Test missing relations, identity collisions, private content and invalid HTML, plus interruption, recovery and rollback. State supported source versions and data that is only archived.

@@ -65,4 +65,6 @@ Les handlers s’exécutent en transaction. N’y modifiez pas le schéma et ne 
 
 Pour une source absente, votre paquet peut implémenter `App\Kraft\Migration\Contracts\SourceAdapter`, ou étendre `AbstractSourceAdapter`, et déclarer sa classe dans `imports.adapters.<id>` depuis son fournisseur. L’interface décrit la découverte des comptes, extensions et mappings du format.
 
+`user(array $row, ImportContext $context): array` normalise un compte. Son champ `identities` contient les identités de jeu sous forme de listes `game`, `uuid` et `username`, ou une liste vide. Normalisez les identifiants avec l’adaptateur du jeu, comme le fait `AbstractSourceAdapter::normalizeIdentities`. Utilisez `$context->sourceRows($table)` pour lire une table liée : l’analyse lit la source, puis la conversion utilise les archives figées. Les identités importées restent non vérifiées. Les comptes locaux conservés et leurs identités restent inchangés.
+
 Testez les relations manquantes, collisions d’identités, contenus privés et HTML invalide, ainsi que l’arrêt, la reprise et le retour arrière. Indiquez les versions source prises en charge et les données uniquement archivées.

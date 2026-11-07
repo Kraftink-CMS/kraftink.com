@@ -81,6 +81,20 @@ Route::get('/plugins/example', [DocumentController::class, 'index'])
 
 Add `auth` for member-only actions. Panel routes also require `permission:admin.access` and your management permission. A menu entry does not protect its route. Outside middleware, use `PermissionAccess::allows($user, $permission)` with a nullable user.
 
+If each row can require a different permission, filter the Eloquent query before paginating it.
+
+```php
+$access = app(\App\Kraft\Auth\PermissionAccess::class);
+$documents = $access->filterQuery(
+    Document::query()->where('published', true),
+    'required_permission',
+    $access->permissions($request->user()),
+    requiredPermission: 'plugins.example.view',
+)->paginate();
+```
+
+Pass the column name defined by your model. A `null` or empty value makes the row accessible to people who can view the list. Use `allowEmpty: false` if only `null` marks an unrestricted row. Add the conditions specific to your content, such as publication or group membership.
+
 ## Views and site integration
 
 Pages extend `default.layouts.layout` or `admin.layouts.layout` so the active theme can style them. Bootstrap 5, AdminLTE and shared components come with the CMS. Plugin views use its namespace, such as `example::default.documents.index`.
@@ -93,10 +107,16 @@ app(\App\Kraft\Features::class)->register('example', function (?\App\Models\Acco
 });
 ```
 
-Add `capability:extension,example` to the relevant routes. In views, `$capabilities->extension('example')` or `routeAvailable($routeName)` reports availability. Keep visibility checks for each resource.
+Add `capability:extension,example` to the relevant routes. In views, use `$capabilities->extension('example')` or `$capabilities->routeAvailable($routeName)` to check availability. Keep visibility checks for each resource.
 
 [Menus, forms and metadata](ui-contributions.md) and [tables](tables.md) use CMS components. Clean rich HTML with `App\Kraft\Html::clean` before storage.
 
+If your plugin accepts images, use the [image API](ui-contributions.md#image-api) to prepare uploads before storing them.
+
 Store secrets through `app(App\Kraft\Secrets::class)->set($key, $value)` and `get($key)`. For a sensitive action, call `app(App\Kraft\System\SensitiveAction::class)->confirm($request)` alongside permissions and CSRF.
+
+## Paginated API responses
+
+For a JSON list, `App\Kraft\System\ApiPagination::perPage($request)` validates `page` and `per_page`. Pass its value to `paginate()` after applying your access rules. Use `ApiPagination::data($paginator)` as the response’s `data` value. It contains `items` and `pagination` with `page`, `per_page`, `total` and `last_page`. Use `through()` on the paginator to choose which fields to expose.
 
 Before distribution, test allowed and denied access, invalid input and updates with existing data. Add a [privacy handler](privacy-extensions.md) if the plugin keeps member data.

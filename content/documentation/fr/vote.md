@@ -12,6 +12,10 @@ L’URL privée contient un secret. Utilisez le lien public pour les joueurs. Re
 
 Pour une vérification par IP, le joueur doit garder la même adresse entre le vote et sa vérification. Pour une remise à zéro à heure fixe, faites correspondre le fuseau à celui de l’annuaire. Un annuaire absent du choix demande une intégration, son lien seul ne permet pas de vérifier les votes.
 
+## Transmettre les votes en jeu avec Votifier
+
+Si le jeu propose Votifier, choisissez ce mode de livraison dans les paramètres de l’annuaire. Le récepteur doit accepter **Votifier v2**. Renseignez son port, un nom de service et un jeton, puis utilisez le même nom et le même jeton dans la configuration du récepteur. Le panneau fournit un exemple adapté au jeu.
+
 ## Récompenses et reprises
 
 Configurez la [connexion du serveur](games.md) avant les commandes en jeu. `{player}` et `{uuid}` utilisent l’identité de jeu. L’attente d’un joueur exige une liaison capable de vérifier sa présence, comme [KraftLink](kraftlink.md).

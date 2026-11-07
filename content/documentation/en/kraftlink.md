@@ -6,10 +6,10 @@ KraftLink sends a server’s status and online players to KraftInk, then retriev
 
 1. Enable the matching game in **Games and identities**.
 2. In **Servers → Game servers**, add a server using **KraftLink**.
-3. Enter the address and port used by players, without `https://`.
+3. Enter the address and port of the server to connect, without `https://`.
 4. In **Manage connection → Connection token**, create and copy a token. It is shown once.
 
-Create a record and token per server. The default server receives rewards without an explicit destination. Connection activation, public display and player counting are independent. On a network, avoid counting both proxy players and the same players on connected servers.
+Create a record and token per server. The default server receives rewards without an explicit destination. On the [primary server](configuration.md#game-connection-address) record, choose the address and port display shown to players. Its status also supplies the website’s player counter. Other connections remain available for rewards.
 
 On Velocity, commands execute on the proxy. To act on a Paper server, install KraftLink there and target its connection.
 

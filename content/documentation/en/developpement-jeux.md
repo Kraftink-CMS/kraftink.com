@@ -69,6 +69,8 @@ The class implements `AvatarProvider` with `id()`, `metadata()` and `url(AvatarI
 
 Implement `App\Kraft\Games\Transports\Transport` and register its class under `games.transports.{game}.{connection}` from the provider. Metadata declares status and command capabilities, fields, validation rules and translated help.
 
+For a field with a fixed set of choices, set `type` to `select` and map each stored value to its translation key in `options`. Set the initial choice with `default` and validate the allowed values in `rules`. To display help below a field, add its translation key in `help`.
+
 `execute()` must call the `writing` callback after authentication, immediately before a command could be sent, and stop if it fails. This allows the CMS to durably record the beginning of transmission. An interruption after this point produces an `uncertain` result without automatic execution again.
 
 Optional `ProvidesOnlinePlayers::onlinePlayers(Server $server): array` returns canonical identifiers actually present, obtained through an authenticated interface. A public ping count does not satisfy this contract. Commands marked `requires_online` wait without presence evidence.
