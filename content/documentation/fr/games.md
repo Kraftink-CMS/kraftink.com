@@ -15,7 +15,7 @@ Les avatars externes reçoivent l’identifiant public du joueur et l’IP de so
 
 ## Connecter un serveur
 
-Pour Minecraft ou Hytale avec le connecteur, suivez [KraftLink](kraftlink.md). Pour les autres modes, activez d’abord le service côté jeu, puis reportez ses accès dans **Serveurs** :
+Pour Minecraft ou Hytale avec le connecteur, suivez [KraftLink](kraftlink.md). Pour les autres modes, activez d’abord le service côté jeu. Dans **Serveurs de jeux**, choisissez le mode et enregistrez l’adresse du serveur. Pour RCON et les autres consoles, poursuivez dans **Gérer la liaison** pour renseigner les paramètres et les accès. Ping se configure directement dans la fiche.
 
 | Serveur | À préparer côté jeu |
 | --- | --- |
@@ -36,7 +36,15 @@ Les ports de jeu, de requête et de console peuvent différer. Autorisez les pro
 
 Renseignez l’hôte et les ports réels, les enregistrements SRV ne sont pas suivis. Pour une adresse privée, le responsable de l’hébergement doit autoriser le réseau concerné dans `config/games.php`, sous `network.private_cidrs`.
 
-Pour Palworld HTTPS ou Satisfactory avec un certificat privé, déposez son CA `.pem` dans `storage/app/private/game-certificates/` et indiquez son nom dans la fiche du serveur.
+Pour Palworld HTTPS ou Satisfactory avec un certificat privé, déposez son CA `.pem` dans `storage/app/private/game-certificates/` et indiquez son nom dans **Gérer la liaison**.
+
+### WebRCON pour Rust
+
+Dans **Gérer la liaison**, le **Protocole WebRCON** est réglé sur **WS (sans chiffrement)** par défaut. Si le serveur Rust ou son proxy propose un accès WebRCON chiffré, sélectionnez **WSS (TLS)** et renseignez le port de cet accès.
+
+Si la console utilise une autre adresse, indiquez son nom d’hôte dans **Hôte WebRCON (facultatif)**. Si vous laissez ce champ vide, KraftInk utilise l’hôte de la fiche serveur. L’adresse de jeu affichée et les requêtes A2S utilisent l’hôte de la fiche serveur dans les deux cas.
+
+En mode **WSS (TLS)**, le certificat doit être reconnu par l’hébergement de KraftInk et correspondre au nom d’hôte WebRCON. Un certificat public valide est vérifié automatiquement. Si la connexion échoue, KraftInk signale l’erreur et conserve le mode chiffré.
 
 ## Tester les commandes
 

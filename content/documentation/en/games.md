@@ -15,7 +15,7 @@ External avatars receive the player’s public identifier and their browser’s 
 
 ## Connecting a server
 
-For Minecraft or Hytale using the connector, follow [KraftLink](kraftlink.md). For other modes, enable the service on the game server, then enter its access details in **Servers**:
+For Minecraft or Hytale using the connector, follow [KraftLink](kraftlink.md). For other modes, enable the service on the game server first. In **Game servers**, select the connection mode and save the server address. For RCON and other consoles, continue to **Manage connection** to enter settings and credentials. Ping is configured directly in the server record.
 
 | Server | Prepare on the game server |
 | --- | --- |
@@ -36,7 +36,15 @@ Game, query and console ports may differ. Allow the required protocols in the fi
 
 Enter the actual host and ports, SRV records are not followed. For a private address, the hosting manager must allow its network in `config/games.php` under `network.private_cidrs`.
 
-For Palworld HTTPS or Satisfactory with a private certificate, place its `.pem` CA in `storage/app/private/game-certificates/` and enter its name in the server record.
+For Palworld HTTPS or Satisfactory with a private certificate, place its `.pem` CA in `storage/app/private/game-certificates/` and enter its name in **Manage connection**.
+
+### WebRCON for Rust
+
+In **Manage connection**, **WebRCON protocol** defaults to **WS (unencrypted)**. If the Rust server or its proxy offers encrypted WebRCON access, select **WSS (TLS)** and enter its port.
+
+If the console uses a different address, enter its hostname in **WebRCON host (optional)**. If you leave the field blank, KraftInk uses the hostname in the server record. The public game address and A2S queries use the hostname in the server record in both cases.
+
+In **WSS (TLS)** mode, the certificate must be trusted by the KraftInk host and match the WebRCON hostname. A valid public certificate is verified automatically. If the connection fails, KraftInk reports the error and keeps the encrypted mode.
 
 ## Testing commands
 

@@ -69,6 +69,8 @@ La classe implémente `AvatarProvider` avec `id()`, `metadata()` et `url(AvatarI
 
 Implémentez `App\Kraft\Games\Transports\Transport` et enregistrez sa classe sous `games.transports.{game}.{connection}` dans le fournisseur. Ses métadonnées déclarent les capacités d’état et de commande, les champs, leurs règles de validation et l’aide traduite.
 
+Pour un champ à choix fermé, déclarez `type` à `select` et donnez à `options` un tableau qui associe chaque valeur enregistrée à sa clé de traduction. Définissez le choix initial avec `default` et validez les valeurs autorisées dans `rules`.
+
 `execute()` doit appeler le rappel `writing` après authentification, immédiatement avant toute possibilité d’envoi de commande, et s’arrêter si ce rappel échoue. Le CMS peut ainsi enregistrer durablement le début d’envoi. Une interruption après ce point produit un résultat `uncertain`, sans réexécution automatique.
 
 Le contrat facultatif `ProvidesOnlinePlayers::onlinePlayers(Server $server): array` fournit uniquement les identifiants canoniques réellement présents, obtenus par une interface authentifiée. Un compteur de ping public ne remplit pas ce contrat. Sans preuve de présence, les commandes `requires_online` restent en attente.
