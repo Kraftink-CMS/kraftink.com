@@ -83,6 +83,8 @@ Le middleware adapte les redirections et messages Laravel habituels. Une répons
 
 Pour un envoi programmatique, utilisez `KraftForms.submit(form, submitter)`. Gardez une navigation après création/suppression ou lorsque la page doit afficher un secret nouvellement généré. Les paiements externes, OAuth, téléchargements et opérations ayant leur propre progression conservent leur parcours dédié.
 
+Dans un formulaire d’administration, ajoutez `data-option-filter="locale"` à une liste qui dépend du champ `name="locale"` du même formulaire. Indiquez la valeur correspondante sur chaque option avec `data-option-group`, par exemple `data-option-group="fr"`. La liste conserve l’option vide, masque les options incompatibles et efface la sélection si elle devient incompatible. Validez également ce choix côté serveur.
+
 ## Tableaux AJAX
 
 Utilisez `App\Kraft\System\TableQuery`, `<x-tables.controls>` et une région `data-ajax-pagination data-table` pour la recherche, le tri et la pagination. Le [guide des tableaux](tables.md) explique les filtres, le choix du nombre de lignes et la gestion de plusieurs tableaux, avec les styles du thème et le JavaScript commun.

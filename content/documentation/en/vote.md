@@ -12,6 +12,10 @@ The private URL contains a secret. Use the public link for players. Replacing th
 
 For IP verification, players must keep the same address between voting and verification. For fixed reset times, match the directory’s time zone. A directory missing from the list needs an integration, its link alone cannot verify votes.
 
+## Sending votes to the game with Votifier
+
+If the game offers Votifier, select it as the delivery mode in the directory settings. The receiver must support **Votifier v2**. Enter its port, a service name and a token, then use the same name and token in the receiver configuration. The admin panel provides an example for the game.
+
 ## Rewards and retries
 
 Set up the [server connection](games.md) before game commands. `{player}` and `{uuid}` use the game identity. Waiting for a player requires a connection that can verify their presence, such as [KraftLink](kraftlink.md).

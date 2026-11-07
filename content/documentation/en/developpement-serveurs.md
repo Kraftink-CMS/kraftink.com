@@ -24,11 +24,11 @@ Prefix: `/api/link/accounts`. Use HTTPS, `Authorization: Bearer IDENTIFIER|SECRE
 | `POST /players/{uuid}/balance/debit` | `wallet:debit` |
 | `POST /players/{uuid}/balance/set` | `wallet:set` |
 
-JSON responses use `success` to indicate success and `data` for the result. The profile returns the account number, name and game identity inside `data`. Balance returns `data.balance_minor` and `data.currency`. Responses are private and uncached. Respect `Retry-After` on `429` and interruptions during maintenance, updates or imports.
+JSON responses use `success` to indicate success and `data` for the result. The profile returns the account number, username and game identity inside `data`. Balance returns `data.balance_minor` and `data.currency`. Responses are private and uncached. Respect `Retry-After` on `429` and interruptions during maintenance, updates or imports.
 
 ## Registration and credential changes
 
-Read `/policy`, present the terms and any CAPTCHA, then send `name`, `email`, `password`, `password_confirmation`, `terms: true`, `terms_version` and `identity: {uuid, username}`. `name` is the website account name, and `identity.username` is the game name. Changed terms must be presented again.
+Read `/policy`, present the terms and any CAPTCHA, then send `username`, `email`, `password`, `password_confirmation`, `terms: true`, `terms_version` and `identity: {uuid, username}`. `username` is the website username, and `identity.username` is the game username. Changed terms must be presented again.
 
 A `201` response creates no session and proves neither the email address nor profile ownership. Follow `data.email_verification_required`, `data.game_verification_required` and `data.continue_url` to finish on the website. Registration and local sign-in must be allowed. The connector cannot supply ranks or privileges.
 

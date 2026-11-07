@@ -18,6 +18,18 @@ Network est fourni et activé par défaut. Le désactiver rétablit la connexion
 
 Lors d’un changement de domaine, adaptez aussi les adresses de retour des [connexions externes](oauth.md) et des [paiements](shop-administration.md).
 
+## Adresse de connexion au jeu
+
+Dans **Serveurs de jeux**, ajoutez le serveur à afficher sur votre site, puis utilisez son bouton **Définir comme serveur principal** dans la liste. L’accueil et les thèmes utilisent son adresse et son nombre de joueurs. Sur un réseau, choisissez généralement le proxy qui connaît l’ensemble des joueurs connectés.
+
+Le premier serveur ajouté devient principal automatiquement. Utilisez la colonne **Principal** pour en choisir un autre. Les serveurs importés conservent uniquement le choix principal explicite du site source.
+
+Renseignez l’adresse sans port, puis le port dans son champ dédié. Cochez **Afficher le port dans l’adresse de connexion** pour afficher, par exemple, `play.example.org:25566`. Décochez-la pour afficher uniquement `play.example.org`. Un port standard reste affiché lorsque la case est cochée.
+
+Le compteur vient uniquement du serveur principal, via son mode de liaison. Sans mesure récente, il reste indisponible. Les autres serveurs peuvent recevoir des récompenses sans être affichés ni additionnés au compteur. Le choix du serveur principal ne change pas la destination des récompenses.
+
+Décochez **Afficher le nombre de joueurs en ligne** pour conserver l’adresse sans compteur public. Avec un mode de consultation comme Ping Minecraft, cela arrête aussi les interrogations. Avec RCON ou KraftLink, les échanges et les commandes restent actifs.
+
 ## E-mails
 
 Dans **E-mails et fonctionnement**, renseignez les paramètres SMTP de votre prestataire et une adresse d’expéditeur autorisée. Sendmail est également disponible si l’hébergement le fournit.

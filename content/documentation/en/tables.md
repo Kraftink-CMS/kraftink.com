@@ -27,36 +27,32 @@ Give the AJAX region a unique identifier and keep controls with the table:
 
 ```blade
 <div id="example-documents" data-ajax-pagination data-table tabindex="-1" class="vstack gap-4">
-    <section class="card">
-        <x-tables.controls :paginator="$documents" container-class="card-body" />
-        <div class="card-body p-0 table-responsive">
-            <table class="table align-middle mb-0">
-                <thead class="text-nowrap">
+    <x-admin::tables.paginated :paginator="$documents">
+        <table class="table align-middle mb-0">
+            <thead class="text-nowrap">
+                <tr>
+                    <th scope="col" data-table-sort="title">{{ __('example::messages.documents.title') }}</th>
+                    <th scope="col" data-table-sort="updated">{{ __('example::messages.documents.updated') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($documents as $document)
                     <tr>
-                        <th scope="col" data-table-sort="title">{{ __('example::messages.documents.title') }}</th>
-                        <th scope="col" data-table-sort="updated">{{ __('example::messages.documents.updated') }}</th>
+                        <td>{{ $document->title }}</td>
+                        <td>{{ app(\App\Kraft\SiteDates::class)->format($document->updated_at) }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse ($documents as $document)
-                        <tr>
-                            <td>{{ $document->title }}</td>
-                            <td>{{ app(\App\Kraft\SiteDates::class)->format($document->updated_at) }}</td>
-                        </tr>
-                    @empty
-                        <x-tables.empty colspan="2" :message="__('example::messages.documents.empty')" />
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer">
-            {{ $documents->links() }}
-        </div>
-    </section>
+                @empty
+                    <x-tables.empty colspan="2" :message="__('example::messages.documents.empty')" />
+                @endforelse
+            </tbody>
+        </table>
+    </x-admin::tables.paginated>
 </div>
 ```
 
-`data-table-sort` uses a key from `sorts`. `<x-tables.controls>` displays search when the table supports it. Use `container-class` to style its wrapper and `class` to style the form. `$documents->links()` produces the count, page size choice and pagination. Render it even for a single page or no results.
+`data-table-sort` uses a key from `sorts`. In the admin panel, `<x-admin::tables.paginated>` provides the card, search when enabled and the pagination footer. Pass `title` to add a card heading. The table contents and actions belong in your view.
+
+For a different layout, use `<x-tables.controls>` for search and `$documents->links()` for the count, page size choice and pagination. Keep the footer visible for a single page or no results.
 
 Page sizes offer 10, 25, 50 or 100 rows. `perPage` changes the initial size. Filters and search return to the first page. Without JavaScript, GET forms and pagination links remain usable.
 

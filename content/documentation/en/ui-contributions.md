@@ -83,6 +83,8 @@ Middleware adapts ordinary Laravel redirects and flash messages. Explicit JSON u
 
 Use `KraftForms.submit(form, submitter)` for programmatic submission. Navigate after creation/deletion or when a page must display a newly generated secret. External payments, OAuth, downloads and operations with dedicated progress handling retain their own flows.
 
+In an admin form, add `data-option-filter="locale"` to a select that depends on a field named `locale` in the same form. Give each option its matching value with `data-option-group`, for example `data-option-group="en"`. The select keeps the empty option, hides incompatible options and clears an incompatible selection. Validate the choice on the server as well.
+
 ## AJAX tables
 
 Use `App\Kraft\System\TableQuery`, `<x-tables.controls>` and a `data-ajax-pagination data-table` region for search, sorting and pagination. The [table guide](tables.md) covers filters, page size and multiple tables, using the theme's styles and shared JavaScript.

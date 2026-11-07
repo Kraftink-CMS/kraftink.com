@@ -18,6 +18,18 @@ Network is bundled and enabled by default. Disabling it restores direct connecti
 
 When changing domains, also update the callback addresses for [external sign-in](oauth.md) and [payments](shop-administration.md).
 
+## Game connection address
+
+In **Game servers**, add the server to show on your website, then use its **Set as primary server** button in the list. The homepage and themes use its address and player count. On a network, this will usually be the proxy that knows the total number of connected players.
+
+The first server added becomes the primary server automatically. Use the **Primary** column to choose another one. Imported servers keep only an explicit primary selection from the source site.
+
+Enter the address without a port, then enter the port in its separate field. Check **Show the port in the connection address** to display, for example, `play.example.org:25566`. Uncheck it to show only `play.example.org`. A standard port is still displayed when the box is checked.
+
+The counter comes only from the primary server through its connection mode. Without a recent measurement, it stays unavailable. Other servers can receive rewards without being displayed or added to the counter. Changing the primary server does not change reward destinations.
+
+Uncheck **Show the online player count** to keep the address without a public player counter. With a status-only mode such as Minecraft Ping, this also stops polling. With RCON or KraftLink, communication and commands remain active.
+
 ## Email
 
 In **Email and operation**, enter your provider’s SMTP settings and an authorised sender address. Sendmail is also available when supported by the host.

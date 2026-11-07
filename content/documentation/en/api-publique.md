@@ -19,15 +19,13 @@ JSON responses use `success` to indicate success and `data` for the result. List
 
 Only published content accessible to visitors is included. A signed-in account does not broaden the response. Private, deleted, future or other-language entries return 404. Responses advertise a 60-second public cache.
 
-## Server status
+## Game connection and online players
 
-`GET /api/public/servers` returns `data`, a list of servers for the active game with public display enabled. Each entry exposes `id`, `name`, `game`, `online`, `fresh`, `players_online`, `players_max` and `last_seen_at`.
+`GET /api/public/servers` returns a `data` object with `address`, the connection address of the active game’s primary server, and `players_online` and `players_max`, its counters. The `address` field respects the port display setting saved on that server. Without a primary server, all three values stay `null`.
 
-For an active connection, status received within 90 seconds gives `fresh=true`. Before the first status, `online=null` means unknown. Stale status or a disabled connection gives `online=false`, `fresh=false` and `null` counters. Responses are cached for 15 seconds.
+The counters use only the primary server’s status received within 90 seconds. If their public display is disabled on the server record, they stay `null`. A disabled connection or an unavailable measurement also gives `null` counters while keeping the server address. Other servers are never added to the count. The response advertises a 15-second HTTP cache.
 
-The root-level `totals` object contains `players_online` and `players_max`. It sums recent status from servers with player counting enabled, independently of public display. A value without an available measurement stays `null`.
-
-Internal hosts, secrets and named player lists are not exposed.
+The names, addresses and status of other linked servers, secrets and named player lists are not exposed.
 
 ## Errors and limits
 
