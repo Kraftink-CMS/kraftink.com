@@ -50,6 +50,9 @@ Une surcharge conserve le chemin de la vue d’origine :
 Seules les vues présentes sont remplacées. Supprimez le layout généré pour créer un habillage CSS du rendu natif, ou adaptez-le pour une structure propre au thème. Déclarez les compatibilités facultatives avec les plugins dans `integrations`.
 
 Gardez les formulaires et leurs protections, les slots `<x-extensions.slot>`, les zones `<x-widgets.zone>` et les piles `@stack('head')` et `@stack('scripts')`. Le layout public conserve `default.layouts.partials.metadata`, qui produit le titre et les balises SEO.
+Ce partiel affiche aussi les balises `hreflang` à partir de `$pageMetadata['alternates']`. Le CMS fournit une liste vide lorsqu’il n’existe aucune autre version publique et indexable de la page.
+
+Les sections `canonical`, `og_type` et `og_image` permettent de personnaliser l’URL canonique et l’aperçu social. Les sections `seo_title` et `seo_description` sont disponibles pour les pages des plugins. Les articles et pages natifs prennent leur titre et leur description dans le contenu et les réglages SEO du CMS. Une section `robots` peut rendre l’indexation plus restrictive. Le CMS conserve les restrictions d’accès et les consignes d’indexation déjà applicables.
 
 Les composants génériques s’appellent avec `<x-…>`, ceux du panneau avec `<x-admin::…>`. Les fragments réutilisés vont dans les `partials/` de leur ressource ou layout. Les traductions du thème actif utilisent `theme::messages.*`. La configuration utilise son identifiant, par exemple `my-theme::messages.settings.accent`.
 

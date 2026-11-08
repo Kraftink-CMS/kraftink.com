@@ -52,4 +52,4 @@ Dans **Contenus → Médiathèque**, choisissez **Ajouter l’image** pour la r�
 
 Les images de la médiathèque sont publiques, même si vous les insérez dans un contenu réservé. Pour limiter l’accès, ajoutez l’image depuis l’éditeur du contenu en choisissant l’envoi privé lorsqu’il est proposé.
 
-KraftInk retire des nouveaux envois les métadonnées personnelles telles que la localisation enregistrée par un appareil photo. Si les envois échouent, vérifiez auprès de votre hébergeur que PHP peut [exécuter ExifTool](installation.md#hebergement-requis).
+KraftInk utilise automatiquement ExifTool ou l’extension PHP Imagick, selon leur disponibilité, pour retirer les métadonnées des images envoyées, comme la localisation enregistrée par l’appareil photo. Si aucun des deux outils ne peut traiter une image, KraftInk conserve le fichier original.

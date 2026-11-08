@@ -4,13 +4,11 @@ Download the `KraftInk-VERSION.zip` installation archive. It includes the depend
 
 ## Hosting requirements
 
-Use **64-bit PHP 8.4.1 or later**, HTTPS and SQLite, MySQL or MariaDB. The installer checks PHP extensions and write permissions.
+Use **64-bit PHP 8.4.1 or later**, HTTPS and SQLite, MySQL, MariaDB or PostgreSQL. The installer checks PHP extensions and write permissions.
 
-With SQLite, the CMS creates its database during installation. For MySQL or MariaDB, create an empty database and keep its credentials.
+With SQLite, the CMS creates its database during installation. For MySQL, MariaDB or PostgreSQL, create an empty database and keep its credentials. For PostgreSQL, use version 14 or later and enable `pdo_pgsql`. The KraftInk database account must own the database and its `public` schema.
 
 The host must allow `proc_open` and provide command-line PHP matching the version used by the site. If it is not detected, ask your host to set its path in `KRAFT_PHP_BINARY` in `.env`. You also need cron access for [scheduled tasks](operations.md#scheduler).
-
-The installer checks that PHP can run [ExifTool](https://exiftool.org/install.html), which is required to clean uploaded images. If it is not detected, ask your host to install it or set its absolute path in `KRAFT_EXIFTOOL_BINARY` in `.env`.
 
 ## Installation
 
@@ -22,6 +20,14 @@ The installer checks that PHP can run [ExifTool](https://exiftool.org/install.ht
 On Apache, enable rewriting and allow the supplied `.htaccess`. On Nginx, send requests without a matching file to `public/index.php` and allow `public/update-status.php` for update progress.
 
 The suggested plugins and themes are optional. When installation finishes, your owner account is signed into the panel. Continue with [site configuration](configuration.md).
+
+## Docker Compose
+
+From the extracted installation archive, run `docker compose up -d --build` to use SQLite or a database you already run. Open [http://localhost:8080](http://localhost:8080) to finish setup. Set `KRAFTINK_HTTP_PORT` before starting Compose if you need a different web port.
+
+To use the included MariaDB service, set `KRAFTINK_DB_PASSWORD` to a strong password in a `.env` file next to `compose.yaml`. Run `docker compose --profile mariadb up --build --wait`. In the installer, choose **MySQL / MariaDB**, enter `db` as the host and `3306` as the port, then use `kraftink` for both the database name and user. Enter the password you set.
+
+Compose stores KraftInk and the included MariaDB data in separate volumes. Back up both volumes if you use the MariaDB service. The supplied web port listens only on your machine. To host a public site, configure HTTPS in front of the web service.
 
 ## Interrupted installation or access denied
 

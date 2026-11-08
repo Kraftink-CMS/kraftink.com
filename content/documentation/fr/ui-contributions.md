@@ -91,7 +91,7 @@ Utilisez `App\Kraft\System\TableQuery`, `<x-tables.controls>` et une région `da
 
 ## API d’images
 
-Pour une image que votre plugin stocke lui-même, passez l’`UploadedFile` de la requête à `App\Kraft\Media\Images::prepareUpload()` avant de l’enregistrer. Le service vérifie le format et retire les métadonnées personnelles. Vous pouvez d’abord valider vos propres limites avec `validateUpload()`. `maxBytes` s’exprime en octets et `maxPixels` limite le nombre total de pixels.
+Pour une image que votre plugin stocke lui-même, passez l’`UploadedFile` de la requête à `App\Kraft\Media\Images::prepareUpload()` avant de l’enregistrer. Le service vérifie le format et nettoie les métadonnées lorsque c’est possible. Vous pouvez d’abord valider vos propres limites avec `validateUpload()`. `maxBytes` s’exprime en octets et `maxPixels` limite le nombre total de pixels.
 
 ```php
 $file = $request->validate(['image' => ['required', 'file']])['image'];
@@ -161,7 +161,7 @@ return view('example::default.products.show', [
     'product' => $product,
     'seo' => [
         'title' => $product->name,
-        'description' => \App\Kraft\Site\Seo::excerpt($product->description),
+        'excerpt' => $product->description,
     ],
     'seoVariables' => [
         'product_name' => $product->name,
@@ -169,6 +169,6 @@ return view('example::default.products.show', [
 ]);
 ```
 
-Les sections Blade `seo_title` et `seo_description` remplacent les personnalisations du modèle de page. `canonical`, `og_type`, `og_image` et `robots` complètent les métadonnées. Un layout personnalisé conserve `default.layouts.partials.metadata`.
+Transmettez les valeurs brutes. Utilisez `excerpt` pour demander un résumé ou `description` pour fournir la description complète. Déclarez les variables à raccourcir avec l’argument `excerptVariables` de `add()`. Indiquez le nom du paramètre de pagination dans `seo['page_parameter']` si la page utilise un autre nom que `page`. Une page qui possède plusieurs listes paginées peut transmettre leurs noms dans un tableau.
 
-Appliquez vos règles de visibilité au contrôleur et à `CollectingSitemapEntries`. Un contenu réservé sur une route publique doit aussi déclarer `noindex,nofollow`. Les métadonnées ne remplacent pas les contrôles d’accès.
+Appliquez la même règle de visibilité au contrôleur, aux liens de langue et à `CollectingSitemapEntries`. Pour une route toujours exclue, utilisez le middleware `App\Http\Middleware\NoIndex`. Pour un contenu réservé sur une route publique, transmettez `App\Kraft\Site\Seo::NO_INDEX` dans `seo['robots']`. Le CMS rend les liens publics `seo['alternates']`, indexés par langue, et les données structurées `seo['structured_data']` sous forme de tableau PHP.

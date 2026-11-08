@@ -91,7 +91,7 @@ Use `App\Kraft\System\TableQuery`, `<x-tables.controls>` and a `data-ajax-pagina
 
 ## Image API
 
-For images your plugin stores itself, pass the request’s `UploadedFile` to `App\Kraft\Media\Images::prepareUpload()` before saving it. The service checks the format and removes personal metadata. Use `validateUpload()` first to apply your own limits. `maxBytes` is expressed in bytes and `maxPixels` limits the total number of pixels.
+For images your plugin stores itself, pass the request’s `UploadedFile` to `App\Kraft\Media\Images::prepareUpload()` before saving it. The service checks the format and applies metadata cleaning when available. Use `validateUpload()` first to apply your own limits. `maxBytes` is expressed in bytes and `maxPixels` limits the total number of pixels.
 
 ```php
 $file = $request->validate(['image' => ['required', 'file']])['image'];
@@ -161,7 +161,7 @@ return view('example::default.products.show', [
     'product' => $product,
     'seo' => [
         'title' => $product->name,
-        'description' => \App\Kraft\Site\Seo::excerpt($product->description),
+        'excerpt' => $product->description,
     ],
     'seoVariables' => [
         'product_name' => $product->name,
@@ -169,6 +169,6 @@ return view('example::default.products.show', [
 ]);
 ```
 
-Blade sections `seo_title` and `seo_description` override page-pattern customisations. `canonical`, `og_type`, `og_image` and `robots` add metadata. Custom layouts keep `default.layouts.partials.metadata`.
+Pass raw values. Use `excerpt` for a summary or `description` for the full description. Declare variables to shorten with the `excerptVariables` argument to `add()`. Set `seo['page_parameter']` when pagination uses a parameter other than `page`. Pages with multiple paginated lists can pass their parameter names as an array.
 
-Apply visibility rules in the controller and `CollectingSitemapEntries`. Restricted content on a public route must also set `noindex,nofollow`. Metadata does not replace access checks.
+Use the same visibility rule for the controller, language links and `CollectingSitemapEntries`. Use `App\Http\Middleware\NoIndex` for a route that is always excluded. For restricted content on a public route, pass `App\Kraft\Site\Seo::NO_INDEX` in `seo['robots']`. The CMS renders public URLs from `seo['alternates']`, keyed by locale, and structured data from the `seo['structured_data']` PHP array.
