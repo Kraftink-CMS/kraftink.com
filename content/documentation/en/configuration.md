@@ -52,4 +52,4 @@ In **Content → Media library**, choose **Upload image** to reuse it in pages a
 
 Media library images are public, even when inserted into restricted content. To limit access, add the image from the content editor and choose the private upload option where available.
 
-KraftInk removes personal metadata such as a camera’s recorded location from new uploads. If uploads fail, ask your host to check that PHP can [run ExifTool](installation.md#hosting-requirements).
+KraftInk automatically uses ExifTool or the Imagick PHP extension when available to remove metadata such as camera location from uploaded images. If neither tool can process an image, KraftInk keeps the original file.

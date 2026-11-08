@@ -50,6 +50,9 @@ An override keeps the original view’s path:
 Only supplied views are replaced. Remove the generated layout to create a CSS skin of the native appearance, or adapt it for a theme-specific structure. Declare optional plugin compatibility in `integrations`.
 
 Keep forms and their protections, `<x-extensions.slot>` slots, `<x-widgets.zone>` areas, and `@stack('head')` and `@stack('scripts')`. Public layouts retain `default.layouts.partials.metadata` for the title and SEO tags.
+This partial also renders `hreflang` tags from `$pageMetadata['alternates']`. The CMS provides an empty list when there is no other public, indexable version of the page.
+
+Use `canonical`, `og_type` and `og_image` sections to customise the canonical URL and social preview. Plugin pages also support `seo_title` and `seo_description`. Native articles and pages draw their titles and descriptions from their content and the CMS SEO settings. A `robots` section can add indexing restrictions. The CMS retains existing access and indexing restrictions.
 
 Generic components use `<x-…>` and panel components use `<x-admin::…>`. Reusable fragments go in their resource or layout’s `partials/`. Active theme translations use `theme::messages.*`. Configuration uses the theme identifier, such as `my-theme::messages.settings.accent`.
 

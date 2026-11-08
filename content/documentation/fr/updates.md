@@ -13,7 +13,7 @@ Le panneau télécharge la version ou accepte son archive officielle de **mise �
 
 Gardez le canal **Stable** sur un site public. Alpha et Bêta sont des versions d’essai. Revenir au canal Stable attend une version compatible et ne remet pas le site dans un état antérieur.
 
-L’hébergement doit permettre de sauvegarder et restaurer la base. Avec MySQL, il faut `mysqldump` et `mysql`. Avec MariaDB, il faut `mariadb-dump` et `mariadb`.
+L’hébergement doit permettre de sauvegarder et restaurer la base. Avec MySQL, il faut `mysqldump` et `mysql`. Avec MariaDB, il faut `mariadb-dump` et `mariadb`. Avec PostgreSQL, il faut `pg_dump` et `psql` de la même version majeure que le serveur. L’image Docker inclut les outils de MariaDB et de PostgreSQL 17. Ajoutez les outils adaptés à l’image si votre base en a besoin.
 
 ## Données et personnalisations
 

@@ -13,7 +13,7 @@ The panel downloads the release or accepts its official **update archive**. Inst
 
 Keep **Stable** on a public site. Alpha and Beta are trial releases. Switching back to Stable waits for a compatible version and does not restore an earlier site state.
 
-The host must support database backup and restoration. MySQL requires `mysqldump` and `mysql`. MariaDB requires `mariadb-dump` and `mariadb`.
+The host must support database backup and restoration. MySQL requires `mysqldump` and `mysql`. MariaDB requires `mariadb-dump` and `mariadb`. PostgreSQL requires `pg_dump` and `psql` from the same major version as the server. The Docker image includes MariaDB and PostgreSQL 17 tools. Add matching tools to the image if your database requires them.
 
 ## Data and customisations
 
