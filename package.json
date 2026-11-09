@@ -1,6 +1,6 @@
 {
     "name": "kraftink",
-    "version": "1.5.10-dev",
+    "version": "1.6.0",
     "private": true,
     "packageManager": "pnpm@11.25.0",
     "type": "module",
