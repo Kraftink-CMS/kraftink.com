@@ -357,11 +357,7 @@ async function storeMetadata(
     return Boolean(await statement.first());
 }
 
-function cachedPayload(
-    entry: MetadataCacheRow | undefined,
-    key: MetadataSource,
-    url: string | undefined,
-): unknown {
+function cachedPayload(entry: MetadataCacheRow | undefined, key: MetadataSource, url: string | undefined): unknown {
     if (entry?.payload_json) {
         try {
             if (new TextEncoder().encode(entry.payload_json).byteLength > CMS_CATALOGUE_MAX_BYTES) {
