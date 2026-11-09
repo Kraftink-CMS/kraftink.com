@@ -111,9 +111,9 @@ export function ResourcePage() {
         );
     }
     const version = resource.versions[0];
-    const supported = version?.supported_games ?? [];
-    const excluded = version?.excluded_games ?? [];
-    const enhancements = version?.game_enhancements ?? [];
+    const supported = version?.games?.supported.filter((game) => game !== '*') ?? [];
+    const excluded = version?.games?.excluded ?? [];
+    const enhancements = version?.games?.enhancements ?? [];
     const preview = localized(resource.image, locale);
     const otherResources = data.resources.filter(
         (entry) => entry.id !== resource.id && entry.author.id === resource.author.id,

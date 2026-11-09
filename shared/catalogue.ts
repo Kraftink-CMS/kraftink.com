@@ -4,9 +4,7 @@ export interface ResourceSupport {
 }
 
 export interface GameCompatibility {
-    supported_games?: string[];
-    excluded_games?: string[];
-    game_enhancements?: string[];
+    games?: { supported: string[]; excluded?: string[]; enhancements?: string[] };
 }
 
 export interface CatalogueVersion extends GameCompatibility {
@@ -39,37 +37,30 @@ export interface PublicCatalogue {
 }
 
 export function gameCompatibility(value: object, type: unknown): GameCompatibility | null {
-    const fields: GameCompatibility = {};
-    for (const key of ['supported_games', 'excluded_games', 'game_enhancements'] as const) {
-        const list = (value as Record<string, unknown>)[key];
-        if (list === undefined) {
-            continue;
-        }
-        if (
-            type !== 'plugin' ||
-            !Array.isArray(list) ||
-            list.length > 50 ||
-            new Set(list).size !== list.length ||
-            [...list].some((id) => typeof id !== 'string' || id !== id.trim() || !/^[a-z][a-z0-9-]{1,49}$/.test(id))
-        ) {
-            return null;
-        }
-        if (list.length > 0) {
-            fields[key] = list;
-        }
+    if (['supported_games', 'excluded_games', 'game_enhancements'].some((key) => Object.hasOwn(value, key))) {
+        return null;
     }
-    const {
-        supported_games: supported = [],
-        excluded_games: excluded = [],
-        game_enhancements: enhancements = [],
-    } = fields;
+    if (type !== 'plugin') {
+        return Object.hasOwn(value, 'games') ? null : {};
+    }
+    const games = (value as Record<string, unknown>).games;
+    if (!games || typeof games !== 'object' || Array.isArray(games) || Object.keys(games).some((key) => !['supported', 'excluded', 'enhancements'].includes(key))) {
+        return null;
+    }
+    const { supported, excluded = [], enhancements = [] } = games as Record<string, unknown>;
+    const validIds = (list: unknown): list is string[] =>
+        Array.isArray(list) && list.length <= 50 && new Set(list).size === list.length &&
+        [...list].every((id) => typeof id === 'string' && id === id.trim() && /^[a-z][a-z0-9-]{1,49}$/.test(id));
+    const all = Array.isArray(supported) && supported.length === 1 && supported[0] === '*';
     if (
-        (supported.length && excluded.length) ||
-        enhancements.some((id) => (supported.length && !supported.includes(id)) || excluded.includes(id))
+        (!all && (!validIds(supported) || supported.length === 0)) ||
+        !validIds(excluded) || !validIds(enhancements) ||
+        (!all && excluded.length > 0) ||
+        enhancements.some((id) => (!all && !supported.includes(id)) || excluded.includes(id))
     ) {
         return null;
     }
-    return fields;
+    return { games: { supported, ...(excluded.length ? { excluded } : {}), ...(enhancements.length ? { enhancements } : {}) } };
 }
 
 export function validResourceSupport(value: unknown): value is ResourceSupport {

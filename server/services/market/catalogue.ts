@@ -635,10 +635,14 @@ export async function mergedCatalogue(
         const available = !source || release !== null;
         const manifest = release?.manifest ?? (JSON.parse(resource.manifest_json) as ResourceManifest);
         const support = object(manifest.market) ? manifest.market.support : undefined;
+        const games = gameCompatibility(manifest, resource.type);
+        if (!games) {
+            continue;
+        }
         const version: CatalogueVersion = {
             version: release?.version ?? resource.version,
             requirements: release?.requirements ?? (manifest.requires as Record<string, string>),
-            ...gameCompatibility(manifest, resource.type),
+            ...games,
             ...(forCms && purchased && available && resource.archive_key
                 ? {
                       download: {

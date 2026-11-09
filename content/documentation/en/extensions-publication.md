@@ -30,6 +30,8 @@ For the frontend, declare a `build` script producing files under `public/`. Publ
 
 `market.name` and `market.description` define the catalogue presentation. When omitted, publication uses `name` and `description` from the manifest root. Validation requires a description.
 
+For plugins, the Market reads the required [game declaration](developpement-plugins.md#manifest-and-provider) from `games` in the manifest. Each listing shows compatibility and extra features for its latest version.
+
 To add a public support contact to your Market listing, set `market.support.discord` to an HTTPS invite on `discord.gg` or `discord.com/invite`, or set `market.support.email` to a simple email address. You can provide both. The listing links to the KraftInk Discord when no contact is provided.
 
 Choose one of these three formats for each field.

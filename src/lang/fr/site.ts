@@ -267,7 +267,7 @@ export default {
         'kraftLink': {
             'title': 'Télécharger KraftLink',
             'description': 'Reliez votre serveur de jeu à KraftInk. Choisissez le JAR de votre plateforme.',
-            'universal': 'Universel (Bukkit, Velocity, Hytale)',
+            'universal': 'Universel',
             'api': 'API Java pour les développeurs',
             'guide': 'Installer KraftLink',
             'releases': 'Versions de KraftLink sur GitHub',

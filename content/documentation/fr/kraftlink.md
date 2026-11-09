@@ -23,7 +23,7 @@ La connexion rapide en jeu et AuthMe utilisent chacun la liaison choisie dans le
 
 ## Installer le connecteur
 
-Choisissez le fichier de votre plateforme dans les [publications KraftLink](https://github.com/kraftink-cms/KraftLink/releases). Le fichier `KraftLink.jar` couvre Bukkit, Velocity et Hytale.
+Téléchargez le fichier universel `KraftLink.jar` ou la variante de votre plateforme depuis les [publications KraftLink](https://github.com/kraftink-cms/KraftLink/releases). À partir de KraftLink 1.4.1, le JAR universel couvre toutes les plateformes du tableau.
 
 | Plateforme | Variante | Dossier d’installation |
 | --- | --- | --- |
@@ -33,10 +33,14 @@ Choisissez le fichier de votre plateforme dans les [publications KraftLink](http
 | Fabric | `KraftLink-Fabric-VERSION.jar` | `mods/` |
 | Forge | `KraftLink-Forge-VERSION.jar` | `mods/` |
 | NeoForge | `KraftLink-NeoForge-VERSION.jar` | `mods/` |
-| Sponge | `KraftLink-Sponge-VERSION.jar` | `mods/` |
+| Sponge | `KraftLink-Sponge-VERSION.jar` | `mods/plugins/` |
 | Cloudburst Nukkit | `KraftLink-Nukkit-VERSION.jar` | `plugins/` |
 
 Arrêtez le serveur, déposez **un seul JAR KraftLink par instance**, puis redémarrez. La variante Bukkit cible Minecraft depuis la version 1.8.8. Le connecteur Hytale cible le serveur 0.7.4. Fabric, Forge et NeoForge ciblent Minecraft Java 26.1.2 et Java 25. Utilisez au minimum Fabric Loader 0.19.3 avec Fabric API 0.146.1, Forge 64.1.5 ou NeoForge 26.1.2.126 selon votre serveur. Sponge cible SpongeAPI 17 sur Minecraft Java 1.21.10 et Java 21.
+
+Sur SpongeVanilla et SpongeForge, placez l’un des deux JAR dans `mods/plugins/`. Sur SpongeNeo, utilisez la variante Sponge pour que le chargeur NeoForge détecte KraftLink comme plugin Sponge.
+
+Sur Nukkit, le JAR universel charge le plugin et peut signaler un avertissement en cherchant un pack de ressources Bedrock dans le manifeste Hytale. La variante Nukkit évite cet avertissement.
 
 Pour un serveur Cloudburst Nukkit, choisissez **Minecraft Bedrock** dans **Jeux et identités** et installez la variante Nukkit. Elle requiert Nukkit API 1.1. Pour un serveur Bedrock Dedicated Server de Mojang, choisissez le mode **Ping** pour afficher son état. Le JAR Nukkit est un plugin pour Cloudburst Nukkit.
 

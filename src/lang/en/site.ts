@@ -261,7 +261,7 @@ export default {
         'kraftLink': {
             'title': 'Download KraftLink',
             'description': 'Connect your game server to KraftInk. Choose the JAR for your platform.',
-            'universal': 'Universal (Bukkit, Velocity, Hytale)',
+            'universal': 'Universal',
             'api': 'Java API for developers',
             'guide': 'Install KraftLink',
             'releases': 'KraftLink releases on GitHub',

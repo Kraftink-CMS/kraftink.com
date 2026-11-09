@@ -149,7 +149,7 @@ export default {
         archive_expansion: 'Le contenu décompressé de cette archive dépasse les limites autorisées.',
         archive_requirements: 'Vérifiez les exigences de compatibilité du manifeste.',
         archive_game_compatibility:
-            'Vérifiez les jeux compatibles et les fonctions supplémentaires dans le manifeste du plugin.',
+            'Déclarez les jeux compatibles dans games.supported et vérifiez les exclusions et les fonctions supplémentaires.',
         archive_market_support:
             'Indiquez une URL d’invitation Discord valide ou une adresse d’assistance dans le manifeste.',
         archive_metadata: 'Le manifeste doit contenir un nom et une description lisibles pour le Market.',

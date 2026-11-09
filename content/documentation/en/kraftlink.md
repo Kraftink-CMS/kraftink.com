@@ -23,7 +23,7 @@ In-game sign-in and AuthMe each use the connection selected in their settings. W
 
 ## Installing the connector
 
-Choose your platform's file from [KraftLink releases](https://github.com/kraftink-cms/KraftLink/releases). The `KraftLink.jar` file covers Bukkit, Velocity and Hytale.
+Download the universal `KraftLink.jar` or your platform's variant from [KraftLink releases](https://github.com/kraftink-cms/KraftLink/releases). Starting with KraftLink 1.4.1, the universal JAR covers every platform in the table.
 
 | Platform | Variant | Installation directory |
 | --- | --- | --- |
@@ -33,10 +33,14 @@ Choose your platform's file from [KraftLink releases](https://github.com/kraftin
 | Fabric | `KraftLink-Fabric-VERSION.jar` | `mods/` |
 | Forge | `KraftLink-Forge-VERSION.jar` | `mods/` |
 | NeoForge | `KraftLink-NeoForge-VERSION.jar` | `mods/` |
-| Sponge | `KraftLink-Sponge-VERSION.jar` | `mods/` |
+| Sponge | `KraftLink-Sponge-VERSION.jar` | `mods/plugins/` |
 | Cloudburst Nukkit | `KraftLink-Nukkit-VERSION.jar` | `plugins/` |
 
 Stop the server, add **one KraftLink JAR per instance**, then restart. The Bukkit variant targets Minecraft from 1.8.8. The Hytale connector targets server 0.7.4. Fabric, Forge and NeoForge target Minecraft Java 26.1.2 and Java 25. Use Fabric Loader 0.19.3 with Fabric API 0.146.1, Forge 64.1.5 or NeoForge 26.1.2.126 as the minimum for your server. Sponge targets SpongeAPI 17 on Minecraft Java 1.21.10 and Java 21.
+
+On SpongeVanilla and SpongeForge, put either JAR in `mods/plugins/`. On SpongeNeo, use the Sponge variant so the NeoForge loader discovers KraftLink as a Sponge plugin.
+
+On Nukkit, the universal JAR loads the plugin and may log a warning while looking for a Bedrock resource pack in the Hytale manifest. The Nukkit variant avoids that warning.
 
 For a Cloudburst Nukkit server, choose **Minecraft Bedrock** in **Games and identities** and install the Nukkit variant. It requires Nukkit API 1.1. For Mojang's Bedrock Dedicated Server, choose **Ping** to display its status. The Nukkit JAR is a plugin for Cloudburst Nukkit.
 
