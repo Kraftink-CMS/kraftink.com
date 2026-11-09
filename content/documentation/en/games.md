@@ -15,7 +15,7 @@ External avatars receive the player’s public identifier and their browser’s 
 
 ### Require a verified Minecraft account
 
-Enable **Minecraft Java (Microsoft)** sign-in and verify your profile. In **Security and access → Sign-in and registration → General settings**, select **Verified Minecraft account** in the Minecraft settings. With **Java only**, players link their account through Microsoft. With **Verified Java and Bedrock**, also enable **Geyser and Floodgate players**, enter the prefix configured in game and choose the verification server and command. [Set up Bedrock verification](kraftlink.md#enable-bedrock-verification)
+Enable **Minecraft Java (Microsoft)** sign-in and verify your profile. In **Security and access → Sign-in and registration → General settings**, select **Verified Minecraft account** in the Minecraft settings. With **Java only**, players link their account through Microsoft. With **Verified Java and Bedrock**, also enable **Geyser and Floodgate players**, enter the prefix configured in game and choose the verification command. [Set up Bedrock verification](kraftlink.md#enable-bedrock-verification)
 
 Bedrock players copy the one-time command from the website, run it in game and confirm the detected username on the website. Players whose Floodgate session already uses a linked Java identity choose **Minecraft Java (Microsoft)**.
 

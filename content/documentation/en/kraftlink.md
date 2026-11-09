@@ -19,7 +19,7 @@ Create a separate server entry and token for the proxy and for each game server 
 
 KraftLink creates the `instance-id` file on its first start. Keep it during restarts and updates and let each new installation generate its own. If two recent installations use the same token with different identifiers, the CMS rejects the second with status `409`. The binding expires after about two hours of inactivity. Rotating the token lets a new installation connect immediately.
 
-In-game sign-in, AuthMe and Bedrock verification continue to use the connection selected for each feature. When in-game sign-in is configured on Velocity, the proxy can offer it to players on its game servers. Plugins on those servers can use their own connections at the same time.
+In-game sign-in and AuthMe each use the connection selected in their settings. When in-game sign-in is configured on Velocity, the proxy can offer it to players on its game servers. Plugins on those servers can use their own connections at the same time.
 
 ## Installing the connector
 
@@ -51,10 +51,12 @@ The game server must be able to reach the site over HTTPS. No incoming KraftLink
 
 ## Enable Bedrock verification
 
-Install Floodgate and connect KraftLink on the server or proxy used for Bedrock verification. In the CMS Minecraft settings, select that server, then choose the **Bedrock verification command**.
+Players can verify their Bedrock account on any enabled Minecraft server connected to the CMS with KraftLink and running Floodgate. On a Velocity network, you can install both plugins on the proxy so players can verify from any server on the network. The Floodgate prefix must match the one configured in the CMS.
+
+Choose the **Bedrock verification command** in the CMS Minecraft settings.
 
 - `/link` is the default. KraftLink registers it at startup on Velocity and supported versions of Paper and Folia if the name is free.
-- Choose `/kraftlink link` if the server does not support the shortcut or another plugin already uses `/link`.
+- Choose `/kraftlink link` if a server where players can verify does not offer the shortcut or another plugin already uses `/link` there.
 
 ## Set polling intervals
 

@@ -19,7 +19,7 @@ Créez une fiche et un jeton distincts pour le proxy et pour chaque serveur de j
 
 KraftLink génère le fichier `instance-id` au premier démarrage. Conservez-le lors d’un redémarrage ou d’une mise à jour et laissez chaque nouvelle installation générer le sien. Si deux installations récentes utilisent le même jeton avec des identifiants différents, le CMS refuse la seconde avec le statut `409`. L’association expire après environ deux heures d’inactivité. La rotation du jeton permet de relier une nouvelle installation immédiatement.
 
-La connexion rapide, AuthMe et la vérification Bedrock continuent à utiliser la liaison choisie pour chaque fonctionnalité. Quand la connexion rapide est configurée sur Velocity, ce proxy peut la proposer aux joueurs de ses serveurs. Les plugins installés sur ces serveurs peuvent utiliser leurs propres liaisons en parallèle.
+La connexion rapide en jeu et AuthMe utilisent chacun la liaison choisie dans leurs réglages. Quand la connexion rapide est configurée sur Velocity, le proxy peut la proposer aux joueurs de ses serveurs. Les plugins installés sur ces serveurs peuvent utiliser leurs propres liaisons en parallèle.
 
 ## Installer le connecteur
 
@@ -51,10 +51,12 @@ Le serveur de jeu doit pouvoir joindre le site en HTTPS. Aucun port entrant Kraf
 
 ## Activer la vérification Bedrock
 
-Installez Floodgate et reliez KraftLink sur le serveur ou le proxy choisi pour la vérification Bedrock. Dans les réglages Minecraft du CMS, sélectionnez ce serveur, puis choisissez la **Commande de vérification Bedrock**.
+Les joueurs peuvent vérifier leur compte Bedrock sur tout serveur Minecraft actif relié au CMS avec KraftLink et équipé de Floodgate. Sur un réseau Velocity, vous pouvez installer les deux plugins sur le proxy pour que les joueurs puissent valider depuis les serveurs du réseau. Le préfixe Floodgate doit correspondre à celui renseigné dans le CMS.
+
+Choisissez la **Commande de vérification Bedrock** dans les réglages Minecraft du CMS.
 
 - `/link` est proposée par défaut. KraftLink l’enregistre au démarrage sur Velocity et les versions compatibles de Paper et Folia, si le nom est libre.
-- `/kraftlink link` convient si le serveur ne prend pas en charge le raccourci ou si un autre plugin utilise déjà `/link`.
+- Choisissez `/kraftlink link` si un serveur où les joueurs peuvent valider ne propose pas le raccourci ou si un autre plugin y utilise déjà `/link`.
 
 ## Régler les intervalles
 
