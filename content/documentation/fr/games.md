@@ -7,11 +7,21 @@ Choisissez un jeu dans **Jeux et identités**. Un seul jeu est actif à la fois.
 | Jeu | Vérification |
 | --- | --- |
 | Minecraft Java | La recherche Mojang vérifie l’existence du profil. La preuve de possession demande une application Microsoft et l’association depuis le compte du membre |
-| Geyser/Floodgate | Activez la compatibilité et reprenez le `username-prefix` du serveur. Cette recherche ne prouve pas la possession Xbox |
+| Geyser/Floodgate | Activez la compatibilité et reprenez le `username-prefix` du serveur. La recherche publique confirme l’existence du profil. Le mode vérifié peut demander une confirmation en jeu |
 | Jeux Steam | Activez Steam dans les connexions externes. OpenID vérifie le compte, pas la possession du jeu. FiveM utilise ici l’identité Steam |
 | Hytale | Profil déclaré. PlayerDB et les avatars Crafthead sont des services tiers facultatifs |
 
 Les avatars externes reçoivent l’identifiant public du joueur et l’IP de son navigateur. Une image envoyée par le membre reste prioritaire lorsqu’elle est autorisée.
+
+### Exiger un compte Minecraft vérifié
+
+Activez la connexion **Minecraft Java (Microsoft)** et vérifiez votre profil. Dans **Sécurité et accès → Connexion et inscription → Réglages généraux**, choisissez ensuite **Compte Minecraft vérifié** dans les réglages Minecraft. En **Java uniquement**, les joueurs associent leur compte avec Microsoft. En **Java et Bedrock vérifiés**, activez aussi **Joueurs Geyser et Floodgate**, indiquez le préfixe configuré en jeu et choisissez une liaison active. Le serveur ou proxy choisi doit exécuter Floodgate, disposer d’un jeton de liaison et avoir `bedrock_link_enabled` activé dans KraftLink. [Activer la commande de vérification](kraftlink.md#activer-la-verification-bedrock)
+
+Le joueur Bedrock copie la commande à usage unique affichée sur le site, l’exécute en jeu, puis confirme le pseudo détecté sur le site. Si Floodgate utilise déjà son identité Java à la suite d’une liaison, il choisit **Minecraft Java (Microsoft)**.
+
+### Connexion rapide en jeu
+
+Le joueur saisit son pseudo sur le site, puis sélectionne en jeu le numéro affiché dans son navigateur. Le site affiche uniquement l’étape en cours dans la page ou la fenêtre modale déjà ouverte. Si l’inscription demande une adresse e-mail, le champ s’affiche au même endroit après la confirmation. La connexion via Microsoft revient sur une page du site après l’authentification chez le fournisseur.
 
 ## Connecter un serveur
 

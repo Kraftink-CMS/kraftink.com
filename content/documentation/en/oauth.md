@@ -1,6 +1,8 @@
 # External sign-in and Discord
 
-To offer Google, Discord or another sign-in service, create an application with that provider. **External connections** displays its console link and the callback address to register.
+To offer Google, Discord or another sign-in service, create an application with that provider. Open **Security and access → Sign-in and registration → External connections** for the provider’s console link and the callback address to register. Set sign-in mode and registration rules in the [General settings](configuration.md#sign-in-and-registration) tab.
+
+In that tab, **External accounts** lets you allow a KraftInk password. Turn on **Require a password at registration** to make it mandatory when someone creates an account with a provider.
 
 ## Connecting an application
 
@@ -21,7 +23,7 @@ To offer Google, Discord or another sign-in service, create an application with 
 
 For Microsoft, match the directory to the allowed accounts: `common`, `consumers`, `organizations` or your organisation identifier. [Minecraft verification](games.md#verifying-identities) also requires linking the game profile.
 
-An existing member signs into the site first, then links the provider from their account. Matching email addresses do not merge accounts. If the provider does not supply a usable address, the member enters and verifies it in KraftInk.
+An existing member signs into the site first, then links the provider from their account. Matching email addresses do not merge accounts. If the site requires an email address and the provider supplies none, the member enters it in KraftInk. If the site requires a verified address, the member confirms it when the provider has yet to verify it.
 
 ## Removing a sign-in method
 
@@ -33,7 +35,7 @@ Keep your owner session open during testing and check your own recovery option b
 
 Linked roles assign a Discord role based on KraftInk account criteria. They require member consent separate from site sign-in.
 
-1. In **External connections → Discord linked roles**, select the Discord application and enter its bot token.
+1. In **Integrations → Discord linked roles**, select the Discord application and enter its bot token.
 2. Register the callback address in OAuth2 and the verification address in the application’s linked-role settings.
 3. Choose the criteria, enable the service and click **Publish criteria**.
 4. In your Discord server, create a linked role with this application and its conditions.

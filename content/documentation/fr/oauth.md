@@ -1,6 +1,8 @@
 # Connexions externes et Discord
 
-Pour proposer la connexion avec Google, Discord ou un autre service, créez une application chez ce fournisseur. **Connexions externes** affiche le lien de sa console et l’adresse de retour à enregistrer.
+Pour proposer la connexion avec Google, Discord ou un autre service, créez une application chez ce fournisseur. Dans **Sécurité et accès → Connexion et inscription → Connexions externes**, retrouvez le lien vers sa console et l’adresse de retour à enregistrer. Le mode de connexion et les règles d’inscription se règlent dans l’onglet [Réglages généraux](configuration.md#connexion-et-inscription).
+
+Dans cet onglet, la section **Comptes externes** permet d’autoriser un mot de passe KraftInk. Activez **Exiger un mot de passe à l’inscription** pour le rendre obligatoire lors de la création d’un compte avec un fournisseur.
 
 ## Relier une application
 
@@ -21,7 +23,7 @@ Pour proposer la connexion avec Google, Discord ou un autre service, créez une 
 
 Pour Microsoft, faites correspondre l’annuaire aux comptes autorisés : `common`, `consumers`, `organizations` ou l’identifiant de votre organisation. La [vérification Minecraft](games.md#verifier-les-identites) demande aussi l’association du profil de jeu.
 
-Un membre existant se connecte d’abord au site, puis associe le fournisseur depuis son compte. Une même adresse e-mail ne fusionne pas les comptes. Si le service ne fournit pas d’adresse exploitable, le membre doit la renseigner et la confirmer dans KraftInk.
+Un membre existant se connecte d’abord au site, puis associe le fournisseur depuis son compte. Une même adresse e-mail ne fusionne pas les comptes. Si le site exige une adresse et que le service n’en fournit pas, le membre la renseigne dans KraftInk. Si le site exige une adresse vérifiée, le membre la confirme lorsque le fournisseur ne l’a pas déjà vérifiée.
 
 ## Retirer un moyen de connexion
 
@@ -33,7 +35,7 @@ Gardez votre session de propriétaire ouverte pendant les essais et vérifiez vo
 
 Les rôles liés attribuent un rôle Discord selon les critères du compte KraftInk. Ils demandent une autorisation du membre distincte de la connexion au site.
 
-1. Dans **Connexions externes → Rôles liés Discord**, sélectionnez l’application Discord et renseignez le jeton de son bot.
+1. Dans **Intégrations → Rôles liés Discord**, sélectionnez l’application Discord et renseignez le jeton de son bot.
 2. Enregistrez l’adresse de retour dans OAuth2 et l’adresse de vérification dans les paramètres des rôles liés de l’application.
 3. Choisissez les critères, activez le service et cliquez sur **Publier les critères**.
 4. Dans le serveur Discord, créez le rôle lié avec cette application et ses conditions.

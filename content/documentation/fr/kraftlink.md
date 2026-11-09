@@ -13,6 +13,14 @@ Créez une fiche et un jeton par serveur. Le choix du serveur par défaut sert a
 
 Sur Velocity, les commandes s’exécutent sur le proxy. Pour agir sur un serveur Paper, installez KraftLink sur ce serveur et ciblez sa liaison.
 
+### Relier un proxy et ses serveurs
+
+Créez une fiche et un jeton distincts pour le proxy et pour chaque serveur de jeu qui utilise KraftLink. Chaque installation utilise son propre dossier de données. Une commande ou une opération de plugin destinée à une fiche est remise au connecteur de cette fiche.
+
+KraftLink génère le fichier `instance-id` au premier démarrage. Conservez-le lors d’un redémarrage ou d’une mise à jour et laissez chaque nouvelle installation générer le sien. Si deux installations récentes utilisent le même jeton avec des identifiants différents, le CMS refuse la seconde avec le statut `409`. L’association expire après environ deux heures d’inactivité. La rotation du jeton permet de relier une nouvelle installation immédiatement.
+
+La connexion rapide, AuthMe et la vérification Bedrock continuent à utiliser la liaison choisie pour chaque fonctionnalité. Quand la connexion rapide est configurée sur Velocity, ce proxy peut la proposer aux joueurs de ses serveurs. Les plugins installés sur ces serveurs peuvent utiliser leurs propres liaisons en parallèle.
+
 ## Installer le connecteur
 
 Téléchargez `KraftLink.jar` depuis les [publications KraftLink](https://github.com/kraftink-cms/KraftLink/releases). Vous pouvez aussi choisir une variante :
@@ -37,9 +45,25 @@ Ouvrez `plugins/KraftLink/config.json` sur Bukkit, ou le `config.json` du dossie
 
 - `cms_url` est l’adresse HTTPS du site, avec son éventuel sous-dossier, sans `/admin` ni `/api/link`.
 - `token` est le jeton de liaison, sans préfixe `Bearer`. Les clés d’accès aux comptes et soldes sont distinctes.
-- `allowed_command_roots` contient les commandes autorisées, sans `/` ni arguments. Une liste vide autorise seulement l’état. Pour `minecraft:give`, ajoutez cette racine exacte.
+- `allowed_command_roots` contient les commandes autorisées, sans `/` ni arguments. Une liste vide désactive la récupération des commandes. Pour `minecraft:give`, ajoutez cette racine exacte.
 
 Le serveur de jeu doit pouvoir joindre le site en HTTPS. Aucun port entrant KraftLink n’est à ouvrir. Rechargez avec `kraftlink reload` dans la console, puis vérifiez `kraftlink status` : l’état attendu est `connected`.
+
+## Activer la vérification Bedrock
+
+Sur le serveur ou proxy Floodgate choisi pour la vérification Bedrock dans le CMS, réglez `"bedrock_link_enabled": true` dans le `config.json` de KraftLink, puis lancez `kraftlink reload`. La commande `/kraftlink link <code>` est désactivée par défaut.
+
+## Régler les intervalles
+
+Les intervalles de `config.json` sont exprimés en secondes. KraftLink regroupe les opérations qui arrivent à échéance ensemble.
+
+| Réglage | Opération | Par défaut | Plage |
+| --- | --- | --- | --- |
+| `heartbeat_seconds` | Mise à jour de l’état du serveur | 30 s | 10 à 3 600 s |
+| `poll_seconds` | Récupération des commandes | 5 s | 1 à 300 s |
+| `sign_in_poll_seconds` | Récupération des demandes de connexion rapide en jeu | 3 s | 1 à 30 s |
+
+`operation_poll_seconds` permet de remplacer l’intervalle d’une opération ajoutée par une extension. Indiquez son nom et une valeur entre 1 et 300, par exemple `"operation_poll_seconds": {"example.status": 20}`. [Protocole et intégration des extensions](developpement-kraftlink.md)
 
 ## Tester une commande
 

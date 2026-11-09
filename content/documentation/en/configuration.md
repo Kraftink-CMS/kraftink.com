@@ -18,6 +18,20 @@ Network is bundled and enabled by default. Disabling it restores direct connecti
 
 When changing domains, also update the callback addresses for [external sign-in](oauth.md) and [payments](shop-administration.md).
 
+## Sign-in and registration
+
+In **Security and access → Sign-in and registration → General settings**, choose the sign-in mode, password rules, whether to allow new accounts, and how to display the forms. By default, forms open on separate pages and passkeys are allowed.
+
+**Require an email address** is on by default. It reveals **Require a verified email address**, which asks members to confirm their address before accessing the site. When email is optional, members can add an address later under **My account**.
+
+Under **External accounts**, **Allow setting a password** is on by default. It reveals **Require a password at registration**, which is off by default. Turn on the second option to have new members choose a KraftInk password when they sign up with a provider.
+
+When forms open in modal dialogs, password recovery and two-factor authentication can continue there. Links from an email and returns from a sign-in provider open a page. Manage providers and account recovery in the [External connections](oauth.md) tab.
+
+When Minecraft is the active game, its sign-in settings carry a **Minecraft** badge. **In-game sign-in** is disabled by default. Install and link KraftLink on the selected server. On a Velocity network, installing it on the proxy covers the servers on that network. Number confirmation and any remaining registration fields stay on the page or in the dialog already open. [In-game sign-in](games.md#in-game-sign-in)
+
+The **AuthMe integration** is disabled by default. Select the server running both AuthMe and KraftLink. When a player registers in the game with an AuthMe password, KraftInk creates their account with the same username and password. If the site requires an email address, players provide it on their first visit. Subsequent password changes are managed separately.
+
 ## Game connection address
 
 In **Game servers**, add the server to show on your website, then use its **Set as primary server** button in the list. The homepage and themes use its address and player count. On a network, this will usually be the proxy that knows the total number of connected players.

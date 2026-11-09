@@ -22,6 +22,8 @@ config(['games.adapters.my-game' => GameAdapter::class]);
 
 Keep game-specific rules in the adapter and its flows in package routes and views. The provider must boot before any database is installed. Dependencies and migrations follow the [shared contract](architecture-extensions.md).
 
+If your module supplies verification steps that can continue in an open modal, declare their route names under `games.auth_steps.my-game` in its provider. Each route renders its form with `App\Kraft\Auth\AuthForms` to follow the site's presentation mode.
+
 ## Profiles, avatars and identities
 
 Optional contracts serve distinct purposes:

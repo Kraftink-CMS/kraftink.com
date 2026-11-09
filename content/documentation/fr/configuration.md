@@ -18,6 +18,20 @@ Network est fourni et activé par défaut. Le désactiver rétablit la connexion
 
 Lors d’un changement de domaine, adaptez aussi les adresses de retour des [connexions externes](oauth.md) et des [paiements](shop-administration.md).
 
+## Connexion et inscription
+
+Dans **Sécurité et accès → Connexion et inscription → Réglages généraux**, choisissez le mode de connexion, les règles de mot de passe, l’ouverture des inscriptions et la présentation des formulaires. Par défaut, les formulaires s’affichent sur des pages séparées et les clés d’accès sont autorisées.
+
+**Exiger une adresse e-mail** est activé par défaut. Ce réglage affiche l’option **Exiger une adresse vérifiée**, qui demande aux membres de confirmer leur adresse pour accéder au site. Si l’adresse est facultative, le membre peut l’ajouter plus tard depuis **Mon compte**.
+
+Sous **Comptes externes**, **Autoriser la configuration d’un mot de passe** est activé par défaut. Ce réglage affiche **Exiger un mot de passe à l’inscription**, désactivé par défaut. Activez cette seconde option pour que les nouveaux membres choisissent un mot de passe KraftInk lorsqu’ils s’inscrivent avec un fournisseur.
+
+Lorsque les formulaires s’ouvrent dans des fenêtres modales, la récupération du mot de passe et la double authentification peuvent s’y poursuivre. Les liens reçus par e-mail et les retours depuis un fournisseur de connexion s’affichent sur une page. Gérez les fournisseurs et la récupération des comptes dans l’onglet [Connexions externes](oauth.md).
+
+Si Minecraft est le jeu actif, ses réglages de connexion portent le badge **Minecraft**. La **Connexion rapide en jeu** est désactivée par défaut. Installez et reliez KraftLink sur le serveur choisi. Sur un réseau Velocity, l’installation sur le proxy couvre les serveurs du réseau. La confirmation du numéro et les champs encore nécessaires à l’inscription restent sur la page ou dans la fenêtre déjà ouverte. [Connexion rapide en jeu](games.md#connexion-rapide-en-jeu)
+
+L’**intégration AuthMe** est désactivée par défaut. Choisissez le serveur qui exécute AuthMe et KraftLink. Lorsqu’un joueur s’inscrit en jeu avec un mot de passe AuthMe, KraftInk crée son compte avec le même pseudo et le même mot de passe. Si le site exige une adresse e-mail, le joueur la renseigne au premier accès. Les changements de mot de passe se gèrent ensuite séparément.
+
 ## Adresse de connexion au jeu
 
 Dans **Serveurs de jeux**, ajoutez le serveur à afficher sur votre site, puis utilisez son bouton **Définir comme serveur principal** dans la liste. L’accueil et les thèmes utilisent son adresse et son nombre de joueurs. Sur un réseau, choisissez généralement le proxy qui connaît l’ensemble des joueurs connectés.

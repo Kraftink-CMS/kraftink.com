@@ -22,6 +22,8 @@ config(['games.adapters.my-game' => GameAdapter::class]);
 
 Gardez les règles de votre jeu dans l’adaptateur, et ses parcours spécifiques dans les routes et vues du paquet. Le fournisseur doit démarrer avant toute base installée. Les dépendances et migrations suivent le [contrat commun](architecture-extensions.md).
 
+Si le module fournit des étapes de vérification à afficher dans une modale déjà ouverte, déclarez leurs noms de route sous `games.auth_steps.my-game` dans son fournisseur. Chaque route rend son formulaire avec `App\Kraft\Auth\AuthForms` pour suivre le mode de présentation choisi sur le site.
+
 ## Profils, avatars et identités
 
 Les contrats facultatifs répondent à des besoins distincts :

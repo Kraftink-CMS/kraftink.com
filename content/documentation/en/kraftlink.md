@@ -13,6 +13,14 @@ Create a record and token per server. The default server receives rewards withou
 
 On Velocity, commands execute on the proxy. To act on a Paper server, install KraftLink there and target its connection.
 
+### Connect a proxy and its game servers
+
+Create a separate server entry and token for the proxy and for each game server that uses KraftLink. Each installation uses its own data directory. A command or plugin operation intended for a server entry is delivered to that entry's connector.
+
+KraftLink creates the `instance-id` file on its first start. Keep it during restarts and updates and let each new installation generate its own. If two recent installations use the same token with different identifiers, the CMS rejects the second with status `409`. The binding expires after about two hours of inactivity. Rotating the token lets a new installation connect immediately.
+
+In-game sign-in, AuthMe and Bedrock verification continue to use the connection selected for each feature. When in-game sign-in is configured on Velocity, the proxy can offer it to players on its game servers. Plugins on those servers can use their own connections at the same time.
+
 ## Installing the connector
 
 Download `KraftLink.jar` from [KraftLink releases](https://github.com/kraftink-cms/KraftLink/releases). You can also choose a dedicated variant:
@@ -37,9 +45,25 @@ Open `plugins/KraftLink/config.json` on Bukkit, or the generated KraftLink data 
 
 - `cms_url` is the site’s HTTPS address, including any subdirectory, without `/admin` or `/api/link`.
 - `token` is the connection token without a `Bearer` prefix. Account and balance access keys are separate.
-- `allowed_command_roots` lists allowed commands without `/` or arguments. An empty list only allows status updates. To use `minecraft:give`, add that exact root.
+- `allowed_command_roots` lists allowed commands without `/` or arguments. An empty list disables command polling. To use `minecraft:give`, add that exact root.
 
 The game server must be able to reach the site over HTTPS. No incoming KraftLink port is required. Run `kraftlink reload` in the console, then check `kraftlink status`: the expected state is `connected`.
+
+## Enable Bedrock verification
+
+On the Floodgate server or proxy selected for Bedrock verification in the CMS, set `"bedrock_link_enabled": true` in KraftLink’s `config.json` and run `kraftlink reload`. The `/kraftlink link <code>` command is disabled by default.
+
+## Set polling intervals
+
+Intervals in `config.json` are in seconds. KraftLink batches operations that are due at the same time.
+
+| Setting | Operation | Default | Range |
+| --- | --- | --- | --- |
+| `heartbeat_seconds` | Update server status | 30 s | 10 to 3,600 s |
+| `poll_seconds` | Claim commands | 5 s | 1 to 300 s |
+| `sign_in_poll_seconds` | Poll for in-game sign-in requests | 3 s | 1 to 30 s |
+
+Use `operation_poll_seconds` to override the interval of an operation added by an extension. Set its name to a value between 1 and 300, for example `"operation_poll_seconds": {"example.status": 20}`. [Protocol and extension integration](developpement-kraftlink.md)
 
 ## Testing a command
 
