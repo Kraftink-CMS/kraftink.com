@@ -41,8 +41,12 @@ export function ResourceDetails({ resource }: { resource: CatalogueResource }) {
 
     return (
         <section className="card">
-            <div className="card-header">
-                <div className="nav nav-tabs card-header-tabs" role="tablist" aria-label={text.resourceDetails}>
+            <div className="card-header pb-0">
+                <div
+                    className="nav nav-tabs card-header-tabs resource-tabs flex-nowrap mb-0"
+                    role="tablist"
+                    aria-label={text.resourceDetails}
+                >
                     {tabs.map((tab) => (
                         <button
                             className={`nav-link${active === tab ? ' active' : ''}`}

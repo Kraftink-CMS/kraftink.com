@@ -125,10 +125,11 @@ export function ResourcePage() {
     const free = resource.commercial.kind === 'free';
     const downloadUrl = free ? version?.download?.url : undefined;
     const repositoryUnavailable = resource.access?.code === 'repository_unavailable';
+    const installLabel = resource.manual_only ? text.manualInstallation : text.installInCms;
     const downloadButton = downloadUrl && !repositoryUnavailable && (
         <button className="btn btn-primary w-100" type="button" onClick={() => setDownloadOpen(true)}>
             <i className="bi bi-download me-2" aria-hidden="true" />
-            {common.download}
+            {installLabel}
         </button>
     );
     const actionUrl = free ? resource.repository : (resource.commercial.url ?? resource.repository);
@@ -149,8 +150,8 @@ export function ResourcePage() {
                 </div>
             </header>
             {downloadButton && <div className="d-lg-none mb-4">{downloadButton}</div>}
-            <div className="row g-4">
-                <div className="col-lg-8 resource-content">
+            <div className="resource-layout">
+                <div className="resource-content">
                     {preview && (
                         <img
                             className="resource-hero-image rounded border mb-4"
@@ -165,114 +166,127 @@ export function ResourcePage() {
                         />
                     )}
                     <ResourceDetails key={resource.id} resource={resource} />
-                    {otherResources.length > 0 && (
-                        <div className="mt-4">
-                            <Card title={text.moreFromAuthor}>
-                                <ul className="list-unstyled d-flex flex-wrap gap-3 mb-0">
-                                    {otherResources.map((entry) => (
-                                        <li key={entry.id}>
-                                            <Link
-                                                to={`${path('/market/resource')}/${encodeURIComponent(entry.resourceId ?? entry.id)}`}
-                                            >
-                                                {localized(entry.name, locale)}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </Card>
-                        </div>
-                    )}
                 </div>
-                <aside className="col-lg-4">
-                    <div className="vstack gap-4">
-                        <Card
-                            className={downloadButton ? 'd-none d-lg-block' : undefined}
-                            title={
-                                free
-                                    ? common.free
-                                    : resource.resourceId && resource.access?.allowed
-                                      ? common.purchased
-                                      : resourcePrice(resource, locale)
-                            }
-                        >
+                <aside className="resource-aside">
+                    <div className="vstack gap-3">
+                        <Card>
+                            <div className="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-2">
+                                <h2 className="card-title">
+                                    {free
+                                        ? common.free
+                                        : resource.resourceId && resource.access?.allowed
+                                          ? common.purchased
+                                          : resourcePrice(resource, locale)}
+                                </h2>
+                                {version?.version && (
+                                    <span className="badge text-bg-light text-wrap text-break">
+                                        {text.releaseVersion.replace('{version}', version.version)}
+                                    </span>
+                                )}
+                            </div>
+                            <p className="small text-body-secondary mb-3 text-break">
+                                {common.author} ·{' '}
+                                {resource.author.url ? (
+                                    <a
+                                        href={resource.author.url}
+                                        target="_blank"
+                                        rel={externalLinkRel(resource.author.url)}
+                                    >
+                                        {resource.author.name}
+                                    </a>
+                                ) : (
+                                    resource.author.name
+                                )}
+                            </p>
                             <ErrorNotice error={failure} />
                             {repositoryUnavailable ? (
                                 <p className="alert alert-warning mb-0" role="status">
                                     {text.resourceUnavailable}
                                 </p>
-                            ) : (
-                                downloadButton ||
-                                (free || !resource.resourceId ? (
-                                    actionUrl ? (
-                                        <a
-                                            className="btn btn-primary w-100"
-                                            href={actionUrl}
-                                            target="_blank"
-                                            rel={externalLinkRel(actionUrl)}
-                                        >
-                                            {free ? text.source : text.external}
-                                        </a>
-                                    ) : (
-                                        <>
-                                            <p>{free ? text.downloadUnavailable : text.purchaseLinkUnavailable}</p>
-                                            <a href="#resource-support" className="btn btn-outline-secondary w-100">
-                                                {text.contactSupport}
-                                            </a>
-                                        </>
-                                    )
-                                ) : resource.access?.allowed ? (
-                                    <>
-                                        <p>{text.boughtHelp}</p>
-                                        <Link to={path('/account')} className="btn btn-primary w-100">
-                                            {common.purchases}
-                                        </Link>
-                                    </>
+                            ) : downloadButton ? (
+                                <div className="d-none d-lg-block">{downloadButton}</div>
+                            ) : free || !resource.resourceId ? (
+                                actionUrl ? (
+                                    <a
+                                        className="btn btn-primary w-100"
+                                        href={actionUrl}
+                                        target="_blank"
+                                        rel={externalLinkRel(actionUrl)}
+                                    >
+                                        {free ? text.source : text.external}
+                                    </a>
                                 ) : (
                                     <>
-                                        <p>{text.checkoutHelp}</p>
-                                        <LegalNotice context="purchase" />
-                                        {user ? (
-                                            <form onSubmit={checkout}>
-                                                <button className="btn btn-primary w-100" disabled={busy} type="submit">
-                                                    {busy ? common.loading : text.confirmBuy}
-                                                </button>
-                                            </form>
-                                        ) : (
-                                            <Link
-                                                className="btn btn-primary w-100"
-                                                to={`${path('/login')}?next=${encodeURIComponent(path('/market/resource') + '?resource=' + resource.resourceId)}`}
-                                            >
-                                                {common.login}
-                                            </Link>
-                                        )}
+                                        <p>{free ? text.downloadUnavailable : text.purchaseLinkUnavailable}</p>
+                                        <a href="#resource-support" className="btn btn-outline-secondary w-100">
+                                            {text.contactSupport}
+                                        </a>
                                     </>
-                                ))
+                                )
+                            ) : resource.access?.allowed ? (
+                                <>
+                                    <p>{text.boughtHelp}</p>
+                                    <Link to={path('/account')} className="btn btn-primary w-100">
+                                        {common.purchases}
+                                    </Link>
+                                </>
+                            ) : (
+                                <>
+                                    <p>{text.checkoutHelp}</p>
+                                    <LegalNotice context="purchase" />
+                                    {user ? (
+                                        <form onSubmit={checkout}>
+                                            <button className="btn btn-primary w-100" disabled={busy} type="submit">
+                                                {busy ? common.loading : text.confirmBuy}
+                                            </button>
+                                        </form>
+                                    ) : (
+                                        <Link
+                                            className="btn btn-primary w-100"
+                                            to={`${path('/login')}?next=${encodeURIComponent(path('/market/resource') + '?resource=' + resource.resourceId)}`}
+                                        >
+                                            {common.login}
+                                        </Link>
+                                    )}
+                                </>
                             )}
                         </Card>
-                        <Card title={text.compatibility}>
-                            <dl className="metadata-list">
-                                <div>
-                                    <dt>{common.author}</dt>
-                                    <dd>
-                                        {resource.author.url ? (
-                                            <a
-                                                href={resource.author.url}
-                                                target="_blank"
-                                                rel={externalLinkRel(resource.author.url)}
-                                            >
-                                                {resource.author.name}
-                                            </a>
-                                        ) : (
-                                            resource.author.name
-                                        )}
-                                    </dd>
-                                </div>
-                                {version?.version && (
-                                    <div>
-                                        <dt>{common.version}</dt>
-                                        <dd>{version.version}</dd>
-                                    </div>
+                        <Card>
+                            <h2 className="card-title mb-3">{text.resourcesAndSupport}</h2>
+                            <div id="resource-support" className="d-flex flex-wrap gap-2">
+                                {resource.repository && (
+                                    <a
+                                        className="btn btn-outline-secondary flex-fill"
+                                        href={resource.repository}
+                                        target="_blank"
+                                        rel={externalLinkRel(resource.repository)}
+                                    >
+                                        <i className="bi bi-github me-2" aria-hidden="true" />
+                                        {text.source}
+                                    </a>
                                 )}
+                                {discord && (
+                                    <a
+                                        className="btn btn-outline-secondary flex-fill"
+                                        href={discord}
+                                        target="_blank"
+                                        rel={externalLinkRel(discord)}
+                                    >
+                                        <i className="bi bi-discord me-2" aria-hidden="true" />
+                                        {text.contactDiscord}
+                                    </a>
+                                )}
+                                {email && (
+                                    <a className="btn btn-outline-secondary flex-fill" href={`mailto:${email}`}>
+                                        <i className="bi bi-envelope me-2" aria-hidden="true" />
+                                        {text.contactEmail}
+                                    </a>
+                                )}
+                            </div>
+                        </Card>
+                        <Card className="resource-compatibility">
+                            <h2 className="card-title mb-2">{text.compatibility}</h2>
+                            <dl className="metadata-list">
                                 {Object.entries(version?.requirements ?? {}).map(([key, value]) => (
                                     <div key={key}>
                                         <dt>{key === 'cms' ? text.cms : key === 'php' ? text.php : key}</dt>
@@ -306,31 +320,25 @@ export function ResourcePage() {
                                         </dd>
                                     </div>
                                 )}
-                                <div id="resource-support">
-                                    <dt>{text.supportContact}</dt>
-                                    <dd className="d-flex flex-wrap gap-3">
-                                        {discord && (
-                                            <a href={discord} target="_blank" rel={externalLinkRel(discord)}>
-                                                Discord
-                                            </a>
-                                        )}
-                                        {email && <a href={`mailto:${email}`}>{text.contactEmail}</a>}
-                                    </dd>
-                                </div>
                             </dl>
-                            {resource.repository && (
-                                <a
-                                    className="btn btn-outline-secondary"
-                                    href={resource.repository}
-                                    target="_blank"
-                                    rel={externalLinkRel(resource.repository)}
-                                >
-                                    {text.source} ↗
-                                </a>
-                            )}
                         </Card>
                     </div>
                 </aside>
+                {otherResources.length > 0 && (
+                    <Card title={text.moreFromAuthor} className="resource-related">
+                        <ul className="list-unstyled d-flex flex-wrap gap-3 mb-0">
+                            {otherResources.map((entry) => (
+                                <li key={entry.id}>
+                                    <Link
+                                        to={`${path('/market/resource')}/${encodeURIComponent(entry.resourceId ?? entry.id)}`}
+                                    >
+                                        {localized(entry.name, locale)}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </Card>
+                )}
             </div>
             {downloadUrl && (
                 <Modal
@@ -342,7 +350,7 @@ export function ResourcePage() {
                     <div className="modal-content">
                         <div className="modal-header">
                             <h2 id="resource-download-title" className="modal-title h5">
-                                {resource.manual_only ? text.manualInstallation : text.installInCms}
+                                {installLabel}
                             </h2>
                             <button
                                 type="button"
