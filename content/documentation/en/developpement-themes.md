@@ -88,6 +88,22 @@ Keep fonts locally under `public/fonts/`, retain their licences and use relative
 
 Advertise only supported palettes. `auto` requires `light` and `dark`. Layouts receive `data-bs-theme="light"` or `"dark"`. Custom public layouts can reuse `default.layouts.partials.appearance-head` and `appearance-menu`.
 
+### Rich text editor appearance
+
+The optional `editor` section lets a site or administration theme style the rich text editor on its own pages.
+
+```json
+"editor": {
+    "appearance": "auto",
+    "light": {"ui": "editor/light-ui.css"},
+    "dark": {"ui": "editor/dark-ui.css", "content": "editor/dark-content.css"}
+}
+```
+
+`auto` follows the layout’s effective appearance. `light` and `dark` select a palette for the editor independently of the page. `ui` styles buttons, menus and dialogs. `content` styles the writing area. Each stylesheet is optional and extends the TinyMCE styles for the chosen palette.
+
+Place the CSS files in `public/` and declare their relative paths only in `editor`. The CMS loads them with the editor. Content styles stay in the writing area and do not become part of the saved text. If your layout defines its own `<head>`, include `partials.layout.editor-appearance` to pass the configuration to the editor.
+
 ## Theme settings
 
 The CMS can generate a form from `configuration.schema`:

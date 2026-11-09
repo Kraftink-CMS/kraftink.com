@@ -71,7 +71,7 @@ Choisissez la **Commande de vérification Bedrock** dans les réglages Minecraft
 
 ## Synchroniser les skins Minecraft Java
 
-Installez SkinsRestorer 15.12.6 ou une version compatible de la branche 15 sur un serveur Bukkit, Paper ou Folia qui dispose de KraftLink. Dans la page **Skins et capes**, ouvrez **Textures en jeu** et sélectionnez ce serveur. Connectez-vous au serveur avec le compte Minecraft Java vérifié associé à votre compte KraftInk. [Utiliser les skins et capes](skins.md)
+Installez SkinsRestorer 15.12.6 ou une version compatible de la branche 15 sur un serveur Bukkit, Paper ou Folia qui dispose de KraftLink. Dans **Extensions → Skins et capes**, vérifiez l’intégration et autorisez l’application automatique pour ce serveur. Les membres enregistrent leur skin dans leur profil, puis rejoignent le serveur avec leur compte Minecraft Java vérifié. [Utiliser les skins et capes](skins.md)
 
 ## Régler les intervalles
 

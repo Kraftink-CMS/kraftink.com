@@ -71,7 +71,7 @@ Choose the **Bedrock verification command** in the CMS Minecraft settings.
 
 ## Sync Minecraft Java skins
 
-Install SkinsRestorer 15.12.6 or a compatible version from the 15 series on a Bukkit, Paper or Folia server running KraftLink. Open **In-game textures** on the **Skins and capes** page and select that server. Join the server with the verified Minecraft Java account linked to your KraftInk account. [Use skins and capes](skins.md)
+Install SkinsRestorer 15.12.6 or a compatible version from the 15 series on a Bukkit, Paper or Folia server running KraftLink. In **Extensions → Skins and capes**, check the integration and allow automatic application for that server. Members save their skin in their profile, then join with their verified Minecraft Java account. [Use skins and capes](skins.md)
 
 ## Set polling intervals
 
