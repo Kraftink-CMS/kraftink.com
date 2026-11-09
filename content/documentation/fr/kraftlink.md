@@ -64,16 +64,18 @@ Le serveur de jeu doit pouvoir joindre le site en HTTPS. Aucun port entrant Kraf
 
 Les joueurs Bedrock qui rejoignent un serveur Minecraft Java via Geyser peuvent vérifier leur compte sur Bukkit, Paper, Folia ou Velocity avec KraftLink et Floodgate. Sur un réseau Velocity, vous pouvez installer les deux plugins sur le proxy pour que les joueurs puissent valider depuis les serveurs du réseau. Le préfixe Floodgate doit correspondre à celui renseigné dans le CMS.
 
-Choisissez la **Commande de vérification Bedrock** dans les réglages Minecraft du CMS.
+Dans les réglages Minecraft du CMS, **Commande de vérification** choisit la commande que le site affiche aux joueurs.
 
-- `/link` est proposée par défaut. KraftLink l’enregistre au démarrage sur Velocity et les versions compatibles de Paper et Folia, si le nom est libre.
-- `/kraftlink link` convient si le serveur ne prend pas en charge le raccourci ou si un autre plugin utilise déjà `/link`.
+- `/link CODE` est affichée par défaut. KraftLink enregistre le raccourci au démarrage sur Velocity et les versions compatibles de Paper et Folia si le nom est libre.
+- `/kraftlink link CODE` fonctionne sur les serveurs compatibles avec la vérification Floodgate. Affichez cette commande si le raccourci est indisponible ou si un autre plugin utilise déjà `/link`.
 
 ## Vérifier les comptes sur Minecraft Bedrock
 
 Activez l’authentification Xbox sur votre serveur Cloudburst Nukkit et reliez-le au site avec KraftLink. Une fois le serveur connecté, ouvrez **Jeux et identités**, activez **Vérification en jeu** dans les réglages **Minecraft Bedrock** et sélectionnez-le dans **Serveur de vérification**.
 
-Pour associer son profil, le membre rejoint ce serveur avec son compte Xbox et exécute `/kraftlink link CODE` avec le code affiché sur le site. Le site lui demande ensuite de confirmer le gamertag détecté. Le mode **Ping** du Bedrock Dedicated Server affiche l’état du serveur.
+Dans **Commande de vérification**, choisissez la commande affichée sur le site. KraftLink accepte `/link CODE` quand le raccourci est libre sur Nukkit et `/kraftlink link CODE` dans tous les cas. Le site affiche `/link CODE` par défaut. Si un autre plugin utilise déjà `/link`, choisissez `/kraftlink link CODE`.
+
+Le membre rejoint ce serveur avec son compte Xbox, exécute la commande affichée, puis confirme sur le site le gamertag détecté. Le mode **Ping** du Bedrock Dedicated Server affiche l’état du serveur.
 
 Mettez à jour KraftLink sur chaque serveur Nukkit qui doit recevoir des commandes destinées à un profil vérifié. Ces commandes restent en attente tant que le connecteur ne peut pas contrôler le XUID du joueur.
 

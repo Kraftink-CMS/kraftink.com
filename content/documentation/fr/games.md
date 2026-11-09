@@ -17,13 +17,13 @@ Les avatars externes reçoivent l’identifiant public du joueur et l’IP de so
 
 ### Exiger un compte Minecraft vérifié
 
-Activez la connexion **Minecraft Java (Microsoft)** et vérifiez votre profil. Dans **Sécurité et accès → Connexion et inscription → Réglages généraux**, choisissez ensuite **Compte Minecraft vérifié** dans les réglages Minecraft. En **Java uniquement**, les joueurs associent leur compte avec Microsoft. En **Java et Bedrock vérifiés**, activez aussi **Joueurs Geyser et Floodgate**, indiquez le préfixe configuré en jeu et choisissez la commande de vérification. [Configurer la vérification Bedrock](kraftlink.md#activer-la-verification-bedrock)
+Activez la connexion **Minecraft Java (Microsoft)** et vérifiez votre profil. Dans **Sécurité et accès → Connexion et inscription → Réglages généraux**, choisissez ensuite **Compte Minecraft vérifié** dans les réglages Minecraft. En **Java uniquement**, les joueurs associent leur compte avec Microsoft. En **Java et Bedrock vérifiés**, activez aussi **Joueurs Geyser et Floodgate**, indiquez le préfixe configuré en jeu et choisissez la syntaxe affichée dans **Commande de vérification**. [Configurer la vérification Bedrock](kraftlink.md#activer-la-verification-bedrock)
 
 Le joueur Bedrock copie la commande à usage unique affichée sur le site, l’exécute en jeu, puis confirme le pseudo détecté sur le site. Si Floodgate utilise déjà son identité Java à la suite d’une liaison, il choisit **Minecraft Java (Microsoft)**.
 
 ### Vérifier un compte sur Minecraft Bedrock
 
-Sur un site configuré pour **Minecraft Bedrock**, activez **Vérification en jeu** et choisissez le [serveur de vérification Nukkit](kraftlink.md#verifier-les-comptes-sur-minecraft-bedrock) dans **Jeux et identités**. Les membres génèrent un code à usage unique depuis **Mes profils de jeu**, exécutent `/kraftlink link CODE` en jeu, puis confirment sur le site le gamertag renvoyé par le serveur. Cette étape associe le profil du joueur à son compte Xbox authentifié en jeu.
+Sur un site configuré pour **Minecraft Bedrock**, activez **Vérification en jeu** et choisissez le [serveur de vérification Nukkit](kraftlink.md#verifier-les-comptes-sur-minecraft-bedrock) dans **Jeux et identités**. Le réglage **Commande de vérification** choisit la syntaxe affichée, `/link CODE` par défaut ou `/kraftlink link CODE`. Les membres génèrent un code à usage unique depuis **Mes profils de jeu**, exécutent la commande en jeu, puis confirment sur le site le gamertag renvoyé par le serveur. Cette étape associe le profil du joueur à son compte Xbox authentifié en jeu.
 
 Le réglage **Recherche publique des gamertags** est facultatif et désactivé par défaut. Si vous l’activez, KraftInk interroge le service public de Geyser lors de la déclaration d’un gamertag pour vérifier son existence. Le profil reste déclaré jusqu’à la fin de la vérification.
 
