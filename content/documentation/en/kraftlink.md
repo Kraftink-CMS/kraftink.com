@@ -56,7 +56,7 @@ Players can verify their Bedrock account on any enabled Minecraft server connect
 Choose the **Bedrock verification command** in the CMS Minecraft settings.
 
 - `/link` is the default. KraftLink registers it at startup on Velocity and supported versions of Paper and Folia if the name is free.
-- Choose `/kraftlink link` if a server where players can verify does not offer the shortcut or another plugin already uses `/link` there.
+- Use `/kraftlink link` if the server does not support the shortcut or if another plugin already uses `/link`.
 
 ## Set polling intervals
 

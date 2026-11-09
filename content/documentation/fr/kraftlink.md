@@ -56,7 +56,7 @@ Les joueurs peuvent vérifier leur compte Bedrock sur tout serveur Minecraft act
 Choisissez la **Commande de vérification Bedrock** dans les réglages Minecraft du CMS.
 
 - `/link` est proposée par défaut. KraftLink l’enregistre au démarrage sur Velocity et les versions compatibles de Paper et Folia, si le nom est libre.
-- Choisissez `/kraftlink link` si un serveur où les joueurs peuvent valider ne propose pas le raccourci ou si un autre plugin y utilise déjà `/link`.
+- `/kraftlink link` convient si le serveur ne prend pas en charge le raccourci ou si un autre plugin utilise déjà `/link`.
 
 ## Régler les intervalles
 
