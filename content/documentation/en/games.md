@@ -7,11 +7,21 @@ Select a game in **Games and identities**. Only one game is active at a time. Sw
 | Game | Verification |
 | --- | --- |
 | Minecraft Java | Mojang lookup checks profile existence. Ownership verification requires a Microsoft application and linking from the member’s account |
-| Geyser/Floodgate | Enable compatibility and match the server’s `username-prefix`. Lookup does not prove Xbox ownership |
+| Geyser/Floodgate | Enable compatibility and match the server’s `username-prefix`. The public lookup confirms that the profile exists. Verified mode can require in-game confirmation |
 | Steam games | Enable Steam in external connections. OpenID verifies the account, not game ownership. FiveM uses the Steam identity here |
 | Hytale | Declared profile. PlayerDB and Crafthead avatars are optional third-party services |
 
 External avatars receive the player’s public identifier and their browser’s IP address. A member-uploaded image takes priority when allowed.
+
+### Require a verified Minecraft account
+
+Enable **Minecraft Java (Microsoft)** sign-in and verify your profile. In **Security and access → Sign-in and registration → General settings**, select **Verified Minecraft account** in the Minecraft settings. With **Java only**, players link their account through Microsoft. With **Verified Java and Bedrock**, also enable **Geyser and Floodgate players**, enter the prefix configured in game and select an enabled connection. The selected server or proxy must run Floodgate, have a connection token and enable `bedrock_link_enabled` in KraftLink. [Enable the verification command](kraftlink.md#enable-bedrock-verification)
+
+Bedrock players copy the one-time command from the website, run it in game and confirm the detected username on the website. Players whose Floodgate session already uses a linked Java identity choose **Minecraft Java (Microsoft)**.
+
+### In-game sign-in
+
+Players enter their username on the website, then select the number shown in their browser from within the game. The website shows only the current step on the page or in the modal dialog already open. If registration requires an email address, the field appears there after confirmation. Microsoft sign-in returns to a website page after authentication with the provider.
 
 ## Connecting a server
 
