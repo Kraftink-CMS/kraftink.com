@@ -69,6 +69,14 @@ Choose the **Bedrock verification command** in the CMS Minecraft settings.
 - `/link` is the default. KraftLink registers it at startup on Velocity and supported versions of Paper and Folia if the name is free.
 - Use `/kraftlink link` if the server does not support the shortcut or if another plugin already uses `/link`.
 
+## Verify accounts on Minecraft Bedrock
+
+Enable Xbox authentication on your Cloudburst Nukkit server and connect it to the site with KraftLink. Once the server is connected, open **Games and identities**, enable **In-game verification** in the **Minecraft Bedrock** settings and select the server under **Verification server**.
+
+To link their profile, members join that server with their Xbox account and run `/kraftlink link CODE` using the code shown on the website. The site then asks them to confirm the detected gamertag. **Ping** mode for Bedrock Dedicated Server shows server status.
+
+Update KraftLink on every Nukkit server that should receive commands for a verified profile. These commands stay queued until the connector can check the player's XUID.
+
 ## Sync Minecraft Java skins
 
 Install SkinsRestorer 15.12.6 or a compatible version from the 15 series on a Bukkit, Paper or Folia server running KraftLink. In **Extensions → Skins and capes**, check the integration and allow automatic application for that server. Members save their skin in their profile, then join with their verified Minecraft Java account. [Use skins and capes](skins.md)
