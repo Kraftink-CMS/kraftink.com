@@ -148,6 +148,10 @@ export default {
         archive_manifest: 'Un manifeste valide doit se trouver directement à la racine du ZIP.',
         archive_expansion: 'Le contenu décompressé de cette archive dépasse les limites autorisées.',
         archive_requirements: 'Vérifiez les exigences de compatibilité du manifeste.',
+        archive_game_compatibility:
+            'Vérifiez les jeux compatibles et les fonctions supplémentaires dans le manifeste du plugin.',
+        archive_market_support:
+            'Indiquez une URL d’invitation Discord valide ou une adresse d’assistance dans le manifeste.',
         archive_metadata: 'Le manifeste doit contenir un nom et une description lisibles pour le Market.',
         archive_image:
             'L’image du manifeste doit être un fichier PNG, JPEG ou WebP valide présent dans le ZIP, de 2 Mio au maximum.',

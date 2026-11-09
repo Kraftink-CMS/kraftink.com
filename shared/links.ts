@@ -1,4 +1,5 @@
 export const discordUrl = 'https://discord.kraftink.com';
+export const kraftLinkRepository = 'kraftink-cms/KraftLink';
 
 export function externalLinkRel(href: string | undefined): string {
     const safe = 'noopener noreferrer';

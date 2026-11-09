@@ -264,6 +264,15 @@ export default {
         'guide': 'Le guide d’installation complet',
         'extensions': 'À la recherche d’un plugin ou d’un thème ?',
         'browse': 'Les retrouver sur le market',
+        'kraftLink': {
+            'title': 'Télécharger KraftLink',
+            'description': 'Reliez votre serveur de jeu à KraftInk. Choisissez le JAR de votre plateforme.',
+            'universal': 'Universel (Bukkit, Velocity, Hytale)',
+            'api': 'API Java pour les développeurs',
+            'guide': 'Installer KraftLink',
+            'releases': 'Versions de KraftLink sur GitHub',
+            'checksums': 'Sommes de contrôle SHA-256',
+        },
     },
     'docs': {
         'groups': {

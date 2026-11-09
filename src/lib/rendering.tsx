@@ -11,6 +11,7 @@ export interface PublicPageData {
     catalogueIdentity?: string;
     sources?: unknown;
     releases?: unknown;
+    kraftLink?: unknown;
 }
 
 export interface PageData extends PublicPageData {

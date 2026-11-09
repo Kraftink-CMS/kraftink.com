@@ -1,6 +1,7 @@
 import { Inflate } from 'fflate';
 import { valid, gt } from 'semver';
 import { requirements } from '../compatibility';
+import { gameCompatibility, validResourceSupport } from '../catalogue';
 import { inspectRaster, maxPreviewBytes, type RasterInfo } from './raster';
 import { parseStaticTranslations, type StaticTranslations } from './php-translations';
 
@@ -499,6 +500,9 @@ export function inspectArchive(
     if (!requirements(manifest.requires)) {
         fail('archive_requirements');
     }
+    if (!gameCompatibility(manifest, manifest.type)) {
+        fail('archive_game_compatibility');
+    }
     if (
         manifest.builtin ||
         manifest.default ||
@@ -511,6 +515,9 @@ export function inspectArchive(
         fail('archive_metadata');
     }
     const market = object(manifest.market) ? manifest.market : {};
+    if (market.support !== undefined && !validResourceSupport(market.support)) {
+        fail('archive_market_support');
+    }
     const languageFiles = new Map<string, StaticTranslations>();
     const languageCodes = new Set<string>();
     let textBytes = manifestEntry.expanded;

@@ -6,6 +6,7 @@ import { api } from '../../lib/api';
 import { useLocale, useSiteCopy } from '../../lib/i18n';
 import { publicMessages } from '../../lib/translations';
 import { usePublicPageData } from '../../lib/rendering';
+import { KraftLinkDownloads } from './KraftLinkDownloads';
 import {
     installationReleases,
     releaseSource,
@@ -261,6 +262,7 @@ export function DownloadsPage() {
                     </section>
                 </aside>
             </div>
+            <KraftLinkDownloads />
         </>
     );
 }

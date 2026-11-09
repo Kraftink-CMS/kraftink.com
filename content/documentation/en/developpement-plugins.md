@@ -46,6 +46,12 @@ The generated provider loads routes, views and translations. Register services i
 
 Declare required dependencies in `requires`, such as `"plugin:shop": ">=0.0.1"`. Optional integrations belong in `integrations`. Package libraries and migrations follow the [shared contract](architecture-extensions.md).
 
+At the root of `manifest.json`, use `supported_games` to list the only compatible games or `excluded_games` to list games the plugin does not support. Leave both fields empty or omit them if the plugin works with all games. Use at most one of the two lists with entries.
+
+Use `game_enhancements` to list compatible games that get extra features. This field never changes which games can install the plugin. For example, `"game_enhancements": ["minecraft"]` on its own means the plugin works with all games and has extra features for Minecraft.
+
+Each list accepts up to fifty distinct game module IDs. An ID starts with a lowercase letter and contains two to fifty lowercase letters, digits or hyphens. The Market publishes these declarations for each version.
+
 ## Data and translations
 
 Prefix tables with `example__`. Each business table has an Eloquent model with `protected $table`, relations and casts. Use an appropriate `Pivot` for join tables. Services coordinate transactions and integrations by reusing these models.

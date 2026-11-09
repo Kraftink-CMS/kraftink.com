@@ -30,6 +30,8 @@ Pour le frontend, déclarez un script `build` produisant les fichiers sous `publ
 
 `market.name` et `market.description` définissent la présentation du catalogue. Sans ces champs, la publication reprend `name` et `description` à la racine du manifeste. Une description est nécessaire à la validation.
 
+Pour afficher un contact d’assistance sur votre fiche Market, renseignez `market.support.discord` avec une invitation HTTPS sur `discord.gg` ou `discord.com/invite`, ou `market.support.email` avec une adresse e-mail simple. Vous pouvez renseigner les deux. La fiche propose le Discord de KraftInk lorsqu’aucun contact n’est renseigné.
+
 Choisissez l’une des trois formes suivantes pour chaque champ.
 
 ### Réutiliser les traductions du paquet

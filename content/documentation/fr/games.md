@@ -8,7 +8,9 @@ Choisissez un jeu dans **Jeux et identités**. Un seul jeu est actif à la fois.
 | --- | --- |
 | Minecraft Java | La recherche Mojang vérifie l’existence du profil. La preuve de possession demande une application Microsoft et l’association depuis le compte du membre |
 | Geyser/Floodgate | Activez la compatibilité et reprenez le `username-prefix` du serveur. La recherche publique confirme l’existence du profil. Le mode vérifié peut demander une confirmation en jeu |
-| Jeux Steam | Activez Steam dans les connexions externes. OpenID vérifie le compte, pas la possession du jeu. FiveM utilise ici l’identité Steam |
+| Jeux Steam | Activez Steam dans les connexions externes. OpenID vérifie le compte, pas la possession du jeu |
+| Minecraft Bedrock | Les joueurs renseignent leur gamertag Xbox dans leur profil de jeu. Cette identité est déclarative |
+| FiveM | Cfx.re est utilisé par défaut. Choisissez Steam dans les réglages du jeu si votre serveur identifie les joueurs par Steam |
 | Hytale | Profil déclaré. PlayerDB et les avatars Crafthead sont des services tiers facultatifs |
 
 Les avatars externes reçoivent l’identifiant public du joueur et l’IP de son navigateur. Une image envoyée par le membre reste prioritaire lorsqu’elle est autorisée.
@@ -22,6 +24,10 @@ Le joueur Bedrock copie la commande à usage unique affichée sur le site, l’e
 ### Connexion rapide en jeu
 
 Le joueur saisit son pseudo sur le site, puis sélectionne en jeu le numéro affiché dans son navigateur. Le site affiche uniquement l’étape en cours dans la page ou la fenêtre modale déjà ouverte. Si l’inscription demande une adresse e-mail, le champ s’affiche au même endroit après la confirmation. La connexion via Microsoft revient sur une page du site après l’authentification chez le fournisseur.
+
+### Choisir le fournisseur d’identité de FiveM
+
+Sélectionnez **FiveM** dans les réglages du jeu, puis choisissez **Cfx.re** ou **Steam** dans **Identité des joueurs**. Activez la connexion correspondante dans **Sécurité et accès → Connexion et inscription → Connexions externes**. Cfx.re demande un site en HTTPS et ne demande pas de secret client. Associez votre propre compte avant d’exiger un compte de jeu vérifié. Pour changer de fournisseur si la vérification est obligatoire, ouvrez d’abord l’accès, sélectionnez le nouveau fournisseur, associez votre compte puis réactivez la vérification. Les membres doivent associer leur profil au nouveau fournisseur.
 
 ## Connecter un serveur
 
@@ -41,6 +47,11 @@ Pour Minecraft ou Hytale avec le connecteur, suivez [KraftLink](kraftlink.md). P
 | Palworld | `RESTAPIEnabled`, port REST et mot de passe administrateur |
 | Satisfactory | API HTTPS et jeton généré par `server.GenerateAPIToken` |
 | Hytale | [KraftLink](kraftlink.md), avec une version de serveur compatible |
+| Minecraft Bedrock | Port de jeu UDP (généralement `19132`) pour l’état, ou [KraftLink sur Nukkit](kraftlink.md) pour l’état, la présence et les commandes |
+
+### Serveurs Minecraft Bedrock
+
+Choisissez **Minecraft Bedrock** comme jeu du site. Pour un Bedrock Dedicated Server, renseignez l’hôte et le port UDP du jeu afin d’afficher son état. Sur Nukkit, choisissez **KraftLink** pour envoyer des commandes et attendre la présence des joueurs. Utilisez `{player}` pour cibler le gamertag du joueur, y compris s’il contient des espaces.
 
 Les ports de jeu, de requête et de console peuvent différer. Autorisez les protocoles nécessaires dans le pare-feu. Une console sans chiffrement demande un réseau de confiance ou un tunnel.
 

@@ -95,17 +95,21 @@ async function publicData(env: Env, locale: string, relative: string, userId: st
         );
         data.catalogueIdentity = userId ?? 'public';
     } else if (relative === 'downloads') {
-        const result = await bounded(async (signal) => {
-            const [sources, metadata] = await Promise.all([
-                assetJson(env, '/generated/sources.json', signal),
-                cachedMetadata(env, 'releases', { persistMetadata: false, signal }),
-            ]);
-            return { sources, releases: metadata.data };
-        });
+        const [result, kraftLink] = await Promise.all([
+            bounded(async (signal) => {
+                const [sources, metadata] = await Promise.all([
+                    assetJson(env, '/generated/sources.json', signal),
+                    cachedMetadata(env, 'releases', { persistMetadata: false, signal }),
+                ]);
+                return { sources, releases: metadata.data };
+            }),
+            bounded((signal) => cachedMetadata(env, 'kraftlink', { persistMetadata: false, signal })),
+        ]);
         if (result) {
             data.sources = result.sources;
             data.releases = result.releases;
         }
+        data.kraftLink = kraftLink?.data;
     }
     return data;
 }

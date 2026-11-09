@@ -46,6 +46,12 @@ Le fournisseur généré charge les routes, vues et traductions. Enregistrez vos
 
 Déclarez les dépendances obligatoires dans `requires`, par exemple `"plugin:shop": ">=0.0.1"`. Les intégrations facultatives vont dans `integrations`. Les bibliothèques du paquet et ses migrations suivent le [contrat commun](architecture-extensions.md).
 
+À la racine de `manifest.json`, utilisez `supported_games` pour énumérer les seuls jeux compatibles ou `excluded_games` pour énumérer les jeux incompatibles. Pour un plugin qui fonctionne avec tous les jeux, laissez les deux champs vides ou omettez-les. Une seule de ces deux listes peut contenir des jeux.
+
+Utilisez `game_enhancements` pour signaler les jeux compatibles qui disposent de fonctions supplémentaires. Ce champ ne change pas les jeux sur lesquels le plugin peut être installé. Par exemple, `"game_enhancements": ["minecraft"]` seul indique un plugin utilisable avec tous les jeux, avec des fonctions supplémentaires pour Minecraft.
+
+Chaque liste accepte jusqu’à cinquante identifiants de modules distincts. Un identifiant commence par une lettre minuscule et contient de deux à cinquante lettres minuscules, chiffres ou tirets. Le Market publie ces déclarations pour chaque version.
+
 ## Données et traductions
 
 Préfixez les tables par `example__`. Chaque table métier possède un modèle Eloquent avec `protected $table`, ses relations et ses casts. Utilisez un `Pivot` adapté pour les liaisons. Les services coordonnent les transactions et les intégrations en réutilisant ces modèles.
