@@ -44,23 +44,37 @@ export function gameCompatibility(value: object, type: unknown): GameCompatibili
         return Object.hasOwn(value, 'games') ? null : {};
     }
     const games = (value as Record<string, unknown>).games;
-    if (!games || typeof games !== 'object' || Array.isArray(games) || Object.keys(games).some((key) => !['supported', 'excluded', 'enhancements'].includes(key))) {
+    if (
+        !games ||
+        typeof games !== 'object' ||
+        Array.isArray(games) ||
+        Object.keys(games).some((key) => !['supported', 'excluded', 'enhancements'].includes(key))
+    ) {
         return null;
     }
     const { supported, excluded = [], enhancements = [] } = games as Record<string, unknown>;
     const validIds = (list: unknown): list is string[] =>
-        Array.isArray(list) && list.length <= 50 && new Set(list).size === list.length &&
+        Array.isArray(list) &&
+        list.length <= 50 &&
+        new Set(list).size === list.length &&
         [...list].every((id) => typeof id === 'string' && id === id.trim() && /^[a-z][a-z0-9-]{1,49}$/.test(id));
     const all = Array.isArray(supported) && supported.length === 1 && supported[0] === '*';
     if (
         (!all && (!validIds(supported) || supported.length === 0)) ||
-        !validIds(excluded) || !validIds(enhancements) ||
+        !validIds(excluded) ||
+        !validIds(enhancements) ||
         (!all && excluded.length > 0) ||
         enhancements.some((id) => (!all && !supported.includes(id)) || excluded.includes(id))
     ) {
         return null;
     }
-    return { games: { supported, ...(excluded.length ? { excluded } : {}), ...(enhancements.length ? { enhancements } : {}) } };
+    return {
+        games: {
+            supported,
+            ...(excluded.length ? { excluded } : {}),
+            ...(enhancements.length ? { enhancements } : {}),
+        },
+    };
 }
 
 export function validResourceSupport(value: unknown): value is ResourceSupport {
