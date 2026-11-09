@@ -51,7 +51,9 @@ Le serveur de jeu doit pouvoir joindre le site en HTTPS. Aucun port entrant Kraf
 
 ## Activer la vérification Bedrock
 
-Sur le serveur ou proxy Floodgate choisi pour la vérification Bedrock dans le CMS, réglez `"bedrock_link_enabled": true` dans le `config.json` de KraftLink, puis lancez `kraftlink reload`. La commande `/kraftlink link <code>` est désactivée par défaut.
+Sur le serveur ou proxy Floodgate choisi dans le CMS, réglez `"bedrock_link_enabled": true` dans le `config.json` de KraftLink, puis redémarrez-le. La liaison Bedrock est désactivée par défaut.
+
+Sur Velocity et sur les versions de Paper et Folia qui prennent en charge l’enregistrement dynamique des commandes, le joueur saisit `/link <code>` en jeu. Si un autre plugin utilise déjà `/link` sur cette instance ou si le raccourci est indisponible, le joueur peut saisir `/kraftlink link <code>` avec le même code.
 
 ## Régler les intervalles
 

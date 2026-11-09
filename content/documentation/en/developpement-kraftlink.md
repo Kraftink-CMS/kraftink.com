@@ -83,37 +83,19 @@ The companion can send events to the site with `request()`, register periodic po
 
 ### Find the API
 
-Add `fr.nivcoo.kraftink:KraftLink-API` as a compile-time dependency with Maven scope `provided` or Gradle `compileOnly`. `KraftLinkApi` and `KraftLinkProvider` are in the `fr.nivcoo.kraftlink.api` package. The KraftLink instance installed on your server provides these classes at runtime. Keep the API JAR out of your plugin JAR and the server's plugin directory.
-
-**Bukkit, Spigot, Paper and Folia.** Add `depend: [KraftLink]` to `plugin.yml` and load the service in `onEnable()`.
+Compile against `fr.nivcoo.kraftink:KraftLink-API` with Maven scope `provided` or Gradle `compileOnly`. Use the API JAR that matches your installed version of KraftLink and keep it out of your plugin JAR. On every platform, retrieve the API after KraftLink starts.
 
 ```java
-KraftLinkApi api = getServer().getServicesManager().load(KraftLinkApi.class);
+import fr.nivcoo.kraftlink.api.KraftLinkApi;
+
+KraftLinkApi api = KraftLinkApi.get();
 ```
 
-If your plugin uses `paper-plugin.yml`, declare `dependencies.server.KraftLink` with `load: BEFORE`, `required: true` and `join-classpath: true`. The service lookup returns `null` if KraftLink failed to start.
+`get()` throws if the API is unavailable. For an optional integration, declare the dependency as optional and check that KraftLink is loaded before calling `KraftLinkApi.find()`. The API returns the instance on the server or proxy where your plugin runs.
 
-**Velocity.** Add `@Dependency(id = "kraftlink")` to `@Plugin`, or the equivalent `{"id":"kraftlink","optional":false}` to the dependencies in `velocity-plugin.json`. Look up the provider in a `ProxyInitializeEvent` listener at the default priority.
-
-```java
-Optional<KraftLinkApi> api = proxy.getPluginManager().getPlugin("kraftlink")
-        .flatMap(PluginContainer::getInstance)
-        .filter(KraftLinkProvider.class::isInstance)
-        .map(KraftLinkProvider.class::cast)
-        .flatMap(KraftLinkProvider::api);
-```
-
-**Hytale.** Add `"fr.nivcoo.kraftink:KraftLink": "*"` to `Dependencies` in `manifest.json`. Look up the provider in `start()`.
-
-```java
-PluginIdentifier id = new PluginIdentifier("fr.nivcoo.kraftink", "KraftLink");
-Optional<KraftLinkApi> api = Optional.ofNullable(PluginManager.get().getPlugin(id))
-        .filter(KraftLinkProvider.class::isInstance)
-        .map(KraftLinkProvider.class::cast)
-        .flatMap(KraftLinkProvider::api);
-```
-
-On Velocity and Hytale, an empty result means KraftLink has not started or has stopped.
+- **Bukkit, Spigot, Paper and Folia.** Declare `depend: [KraftLink]` in `plugin.yml` and access the API from `onEnable()`. With `paper-plugin.yml`, declare `dependencies.server.KraftLink` with `load: BEFORE`, `required: true` and `join-classpath: true`.
+- **Velocity.** Declare `@Dependency(id = "kraftlink")` in `@Plugin`, or `{"id":"kraftlink","optional":false}` in the dependencies in `velocity-plugin.json`. Access the API from `ProxyInitializeEvent` at the default priority.
+- **Hytale.** Declare `"fr.nivcoo.kraftink:KraftLink": "*"` in `Dependencies` in `manifest.json` and access the API from `start()`.
 
 ## Claim a delivery
 

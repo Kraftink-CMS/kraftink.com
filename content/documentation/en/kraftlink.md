@@ -51,7 +51,9 @@ The game server must be able to reach the site over HTTPS. No incoming KraftLink
 
 ## Enable Bedrock verification
 
-On the Floodgate server or proxy selected for Bedrock verification in the CMS, set `"bedrock_link_enabled": true` in KraftLink’s `config.json` and run `kraftlink reload`. The `/kraftlink link <code>` command is disabled by default.
+On the Floodgate server or proxy selected in the CMS, set `"bedrock_link_enabled": true` in KraftLink’s `config.json` and restart it. Bedrock linking is disabled by default.
+
+On Velocity and versions of Paper and Folia that support dynamic command registration, the player enters `/link <code>` in game. If another plugin on that instance already uses `/link` or the shortcut is unavailable, the player can enter `/kraftlink link <code>` with the same code.
 
 ## Set polling intervals
 
