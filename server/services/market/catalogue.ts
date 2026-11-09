@@ -1,6 +1,13 @@
 import { and, asc, eq, exists, inArray, isNull, or, sql } from 'drizzle-orm';
+import { rcompare, valid } from 'semver';
 import { normalizedVersion, requirements } from '../../../shared/compatibility';
-import type { CatalogueResource, PublicCatalogue } from '../../../shared/catalogue';
+import {
+    gameCompatibility,
+    validResourceSupport,
+    type CatalogueResource,
+    type CatalogueVersion,
+    type PublicCatalogue,
+} from '../../../shared/catalogue';
 import { database } from '../../database';
 import { users } from '../../models/accounts';
 import { entitlements, orders } from '../../models/commerce';
@@ -11,6 +18,8 @@ import { now } from '../../lib/time';
 import { fail } from '../../http';
 import type { Env } from '../../types';
 import { parseRepositorySource } from '../../../shared/packages/repository';
+import type { ResourceManifest } from '../../../shared/packages/zip';
+import { kraftLinkRepository } from '../../../shared/links';
 import { cachedRepositoryRelease } from '../resources/repository-updates';
 
 const slugPattern = /^[a-z][a-z0-9-]{1,49}$/;
@@ -168,6 +177,9 @@ export function validatePublicCatalogue(value: unknown, trustedEndpoint?: string
         ) {
             throw new Error('Invalid public image');
         }
+        if ('support' in candidate && !validResourceSupport(candidate.support)) {
+            throw new Error('Invalid public support contact');
+        }
         if (
             'price' in candidate.commercial &&
             (!object(candidate.commercial.price) ||
@@ -181,7 +193,12 @@ export function validatePublicCatalogue(value: unknown, trustedEndpoint?: string
         const versions = new Set<string>();
         for (const version of resource.versions) {
             const normalized = object(version) ? normalizedVersion(version.version) : null;
-            if (!normalized || versions.has(normalized) || !requirements(version.requirements)) {
+            if (
+                !normalized ||
+                versions.has(normalized) ||
+                !requirements(version.requirements) ||
+                !gameCompatibility(version, resource.type)
+            ) {
                 throw new Error('Invalid public resource version');
             }
             versions.add(normalized);
@@ -209,6 +226,15 @@ export function validatePublicCatalogue(value: unknown, trustedEndpoint?: string
         if (resource.repository != null) {
             resource.repository = new URL(resource.repository).href.replace(/\/$/, '');
         }
+        resource.versions = resource.versions
+            .map((entry) => ({ entry, version: valid(entry.version) }))
+            .sort((a, b) => {
+                if (a.version && b.version) {
+                    return rcompare(a.version, b.version);
+                }
+                return Number(Boolean(b.version)) - Number(Boolean(a.version));
+            })
+            .map(({ entry }) => entry);
         return resource;
     });
 }
@@ -260,9 +286,15 @@ async function boundedJson(response: Response, maximum = CMS_CATALOGUE_MAX_BYTES
     return JSON.parse(new TextDecoder().decode(bytes));
 }
 
-function metadataValue(key: 'catalogue' | 'releases', value: unknown, endpoint?: string): unknown {
+type MetadataSource = 'catalogue' | 'releases' | 'kraftlink';
+
+function metadataValue(key: MetadataSource, value: unknown, endpoint?: string): unknown {
     if (key === 'catalogue') {
         validatePublicCatalogue(value, endpoint);
+    } else if (key === 'kraftlink') {
+        if (!object(value) || value.draft !== false || value.prerelease !== false || !Array.isArray(value.assets)) {
+            throw new Error('Invalid KraftLink release');
+        }
     } else if (!Array.isArray(value)) {
         throw new Error('Invalid releases');
     }
@@ -302,7 +334,7 @@ async function githubJson(
 
 async function storeMetadata(
     env: Env,
-    key: 'catalogue' | 'releases',
+    key: MetadataSource,
     expected: MetadataCacheRow | undefined,
     payload: string,
     timestamp: number,
@@ -325,11 +357,7 @@ async function storeMetadata(
     return Boolean(await statement.first());
 }
 
-function cachedPayload(
-    entry: MetadataCacheRow | undefined,
-    key: 'catalogue' | 'releases',
-    url: string | undefined,
-): unknown {
+function cachedPayload(entry: MetadataCacheRow | undefined, key: MetadataSource, url: string | undefined): unknown {
     if (entry?.payload_json) {
         try {
             if (new TextEncoder().encode(entry.payload_json).byteLength > CMS_CATALOGUE_MAX_BYTES) {
@@ -345,7 +373,7 @@ function cachedPayload(
 
 async function currentMetadata(
     env: Env,
-    key: 'catalogue' | 'releases',
+    key: MetadataSource,
     url: string | undefined,
 ): Promise<{ data: unknown; state: PublicCatalogue['state']; fetchedAt: number | null }> {
     const entry = await database(env.DB).select().from(metadataCache).where(eq(metadataCache.key, key)).get();
@@ -420,10 +448,15 @@ export async function refreshPublicCatalogue(env: Env, commit: string): Promise<
 
 export async function cachedMetadata(
     env: Env,
-    key: 'catalogue' | 'releases',
+    key: MetadataSource,
     options: MetadataOptions = {},
 ): Promise<{ data: unknown; state: PublicCatalogue['state']; fetchedAt: number | null }> {
-    const url = key === 'catalogue' ? env.GITHUB_CATALOGUE_URL : env.GITHUB_RELEASES_URL;
+    const url =
+        key === 'catalogue'
+            ? env.GITHUB_CATALOGUE_URL
+            : key === 'releases'
+              ? env.GITHUB_RELEASES_URL
+              : `https://api.github.com/repos/${kraftLinkRepository}/releases/latest`;
     const db = database(env.DB);
     const entry = await db.select().from(metadataCache).where(eq(metadataCache.key, key)).get();
     const timestamp = now();
@@ -584,7 +617,6 @@ export async function mergedCatalogue(
             continue;
         }
         const author = `creator-${resource.author_id}`;
-        const manifest = JSON.parse(resource.manifest_json) as { requires: Record<string, string> };
         const metadata = JSON.parse(resource.metadata_json) as {
             name?: CatalogueResource['name'];
             description?: CatalogueResource['description'];
@@ -597,9 +629,16 @@ export async function mergedCatalogue(
               )
             : null;
         const available = !source || release !== null;
-        const version = {
+        const manifest = release?.manifest ?? (JSON.parse(resource.manifest_json) as ResourceManifest);
+        const support = object(manifest.market) ? manifest.market.support : undefined;
+        const games = gameCompatibility(manifest, resource.type);
+        if (!games) {
+            continue;
+        }
+        const version: CatalogueVersion = {
             version: release?.version ?? resource.version,
-            requirements: release?.requirements ?? manifest.requires,
+            requirements: release?.requirements ?? (manifest.requires as Record<string, string>),
+            ...games,
             ...(forCms && purchased && available && resource.archive_key
                 ? {
                       download: {
@@ -622,6 +661,7 @@ export async function mergedCatalogue(
                 ? { image: `${origin}/api/market/resources/${resource.id}/images/${resource.version_id}` }
                 : {}),
             author: { id: author, name: resource.author_name },
+            ...(validResourceSupport(support) ? { support } : {}),
             ...(source ? { repository: source.repository } : {}),
             commercial: {
                 kind: 'paid',

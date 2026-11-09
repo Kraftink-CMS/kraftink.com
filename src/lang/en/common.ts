@@ -144,6 +144,9 @@ export default {
         archive_manifest: 'A valid manifest must be directly at the ZIP root.',
         archive_expansion: 'The expanded archive exceeds the allowed limits.',
         archive_requirements: 'Check the manifest compatibility requirements.',
+        archive_game_compatibility:
+            'Declare the supported games in games.supported and check any exclusions or extra features.',
+        archive_market_support: 'Enter a valid Discord invite URL or a simple support email in the manifest.',
         archive_metadata: 'The manifest must include a readable Market name and description.',
         archive_image: 'The manifest image must be a valid PNG, JPEG or WebP file included in the ZIP, up to 2 MiB.',
         archive_provider: 'Check the package namespace, provider and PHP entry file.',

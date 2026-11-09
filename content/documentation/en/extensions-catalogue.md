@@ -6,6 +6,8 @@ Install extensions from the catalogue or an author’s ZIP in **Plugins**, **The
 
 Choose the package, check its displayed requirements and confirm installation. A plugin is enabled after validation. A theme or game module becomes available without changing the current selection.
 
+A plugin’s Market listing shows the supported games for its latest version and any games that get extra features. Extra features do not limit where the plugin can be installed. The CMS offers versions compatible with the active game. If none are compatible, a purchased plugin stays visible without an installation option.
+
 The public site and panel each have their own theme. **Use** selects a theme for its target. **Default** restores the native appearance of that target. Changing themes keeps settings and content.
 
 For manual installation, use a ready-to-install archive. GitHub “Source code” archives do not always contain the required dependencies and compiled assets.

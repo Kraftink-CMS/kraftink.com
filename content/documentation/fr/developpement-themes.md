@@ -88,6 +88,22 @@ Conservez les polices localement sous `public/fonts/`, leurs licences et des URL
 
 Annoncez seulement les palettes prises en charge. `auto` exige `light` et `dark`. Le layout reçoit `data-bs-theme="light"` ou `"dark"`. Un layout public personnalisé peut réutiliser les partiels `default.layouts.partials.appearance-head` et `appearance-menu`.
 
+### Apparence de l’éditeur de texte
+
+La section facultative `editor` du manifeste permet à un thème de site ou d’administration de personnaliser l’éditeur de texte sur sa propre interface.
+
+```json
+"editor": {
+    "appearance": "auto",
+    "light": {"ui": "editor/light-ui.css"},
+    "dark": {"ui": "editor/dark-ui.css", "content": "editor/dark-content.css"}
+}
+```
+
+`auto` suit l’apparence effective du layout. `light` et `dark` imposent une palette à l’éditeur, indépendamment du reste de la page. `ui` habille les boutons, menus et dialogues. `content` habille la zone de rédaction. Chaque feuille est facultative et complète le style TinyMCE fourni pour la palette choisie.
+
+Placez les fichiers CSS dans `public/` et déclarez leurs chemins relatifs uniquement dans `editor`. Le CMS les charge avec l’éditeur. Le CSS de la zone de rédaction reste dans l’éditeur et ne fait pas partie du texte enregistré. Si votre layout définit son propre `<head>`, incluez `partials.layout.editor-appearance` pour transmettre cette configuration.
+
 ## Réglages du thème
 
 Le CMS peut générer le formulaire à partir de `configuration.schema` :

@@ -81,7 +81,7 @@ routes.get('/market/resources/:id/images/:versionId', async (c) => {
 routes.get('/metadata', async (c) => {
     await rateLimit(c, 'market.metadata', 60, 60);
     const key = c.req.query('source');
-    if (key !== 'releases' && key !== 'catalogue') {
+    if (key !== 'releases' && key !== 'catalogue' && key !== 'kraftlink') {
         fail(400, 'invalid_metadata_source');
     }
     const metadata = await cachedMetadata(c.env, key);

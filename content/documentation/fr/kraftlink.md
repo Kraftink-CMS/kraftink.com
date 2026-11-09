@@ -1,6 +1,6 @@
 # Relier un serveur avec KraftLink
 
-KraftLink transmet l’état et les joueurs présents d’un serveur à KraftInk, puis récupère les commandes à exécuter. Il fonctionne sur Bukkit, Spigot, Paper, Folia, Velocity et Hytale. Pour les autres connexions, consultez les [serveurs de jeu](games.md).
+KraftLink transmet l’état et les joueurs présents d’un serveur à KraftInk, puis récupère les commandes à exécuter. Il relie les serveurs Minecraft Java, les serveurs Bedrock sous Nukkit et les serveurs Hytale. Pour les autres connexions, consultez les [serveurs de jeu](games.md).
 
 ## Créer la liaison dans le CMS
 
@@ -23,17 +23,28 @@ La connexion rapide en jeu et AuthMe utilisent chacun la liaison choisie dans le
 
 ## Installer le connecteur
 
-Téléchargez `KraftLink.jar` depuis les [publications KraftLink](https://github.com/kraftink-cms/KraftLink/releases). Vous pouvez aussi choisir une variante :
+Téléchargez le fichier universel `KraftLink.jar` ou la variante de votre plateforme depuis les [publications KraftLink](https://github.com/kraftink-cms/KraftLink/releases). À partir de KraftLink 1.4.1, le JAR universel couvre toutes les plateformes du tableau.
 
 | Plateforme | Variante | Dossier d’installation |
 | --- | --- | --- |
 | Bukkit, Spigot, Paper, Folia | `KraftLink-Bukkit-VERSION.jar` | `plugins/` |
 | Velocity | `KraftLink-Velocity-VERSION.jar` | `plugins/` |
 | Hytale | `KraftLink-Hytale-VERSION.jar` | `mods/` |
+| Fabric | `KraftLink-Fabric-VERSION.jar` | `mods/` |
+| Forge | `KraftLink-Forge-VERSION.jar` | `mods/` |
+| NeoForge | `KraftLink-NeoForge-VERSION.jar` | `mods/` |
+| Sponge | `KraftLink-Sponge-VERSION.jar` | `mods/plugins/` |
+| Cloudburst Nukkit | `KraftLink-Nukkit-VERSION.jar` | `plugins/` |
 
-Arrêtez le serveur, déposez **un seul JAR KraftLink par instance**, puis redémarrez. La variante Bukkit cible Minecraft 1.8.x à partir de 1.8.8. Le connecteur Hytale cible le serveur 0.7.4. Respectez la version Java requise par votre serveur et les compatibilités annoncées dans la publication.
+Arrêtez le serveur, déposez **un seul JAR KraftLink par instance**, puis redémarrez. La variante Bukkit cible Minecraft depuis la version 1.8.8. Le connecteur Hytale cible le serveur 0.7.4. Fabric, Forge et NeoForge ciblent Minecraft Java 26.1.2 et Java 25. Utilisez au minimum Fabric Loader 0.19.3 avec Fabric API 0.146.1, Forge 64.1.5 ou NeoForge 26.1.2.126 selon votre serveur. Sponge cible SpongeAPI 17 sur Minecraft Java 1.21.10 et Java 21.
 
-Ouvrez `plugins/KraftLink/config.json` sur Bukkit, ou le `config.json` du dossier de données KraftLink généré sur Velocity/Hytale. Modifiez ces champs sans retirer les autres réglages :
+Sur SpongeVanilla et SpongeForge, placez l’un des deux JAR dans `mods/plugins/`. Sur SpongeNeo, utilisez la variante Sponge pour que le chargeur NeoForge détecte KraftLink comme plugin Sponge.
+
+Sur Nukkit, le JAR universel charge le plugin et peut signaler un avertissement en cherchant un pack de ressources Bedrock dans le manifeste Hytale. La variante Nukkit évite cet avertissement.
+
+Pour un serveur Cloudburst Nukkit, choisissez **Minecraft Bedrock** dans **Jeux et identités** et installez la variante Nukkit. Elle requiert Nukkit API 1.1. Pour un serveur Bedrock Dedicated Server de Mojang, choisissez le mode **Ping** pour afficher son état. Le JAR Nukkit est un plugin pour Cloudburst Nukkit.
+
+Ouvrez le `config.json` généré dans le dossier de données du connecteur. Sur Bukkit et Nukkit, il est dans `plugins/KraftLink/`. Sur Fabric, Forge, NeoForge et Sponge, il est dans `config/kraftlink/`. Modifiez ces champs sans retirer les autres réglages.
 
 ```json
 {
@@ -51,12 +62,16 @@ Le serveur de jeu doit pouvoir joindre le site en HTTPS. Aucun port entrant Kraf
 
 ## Activer la vérification Bedrock
 
-Les joueurs peuvent vérifier leur compte Bedrock sur tout serveur Minecraft actif relié au CMS avec KraftLink et équipé de Floodgate. Sur un réseau Velocity, vous pouvez installer les deux plugins sur le proxy pour que les joueurs puissent valider depuis les serveurs du réseau. Le préfixe Floodgate doit correspondre à celui renseigné dans le CMS.
+Les joueurs Bedrock qui rejoignent un serveur Minecraft Java via Geyser peuvent vérifier leur compte sur Bukkit, Paper, Folia ou Velocity avec KraftLink et Floodgate. Sur un réseau Velocity, vous pouvez installer les deux plugins sur le proxy pour que les joueurs puissent valider depuis les serveurs du réseau. Le préfixe Floodgate doit correspondre à celui renseigné dans le CMS.
 
 Choisissez la **Commande de vérification Bedrock** dans les réglages Minecraft du CMS.
 
 - `/link` est proposée par défaut. KraftLink l’enregistre au démarrage sur Velocity et les versions compatibles de Paper et Folia, si le nom est libre.
 - `/kraftlink link` convient si le serveur ne prend pas en charge le raccourci ou si un autre plugin utilise déjà `/link`.
+
+## Synchroniser les skins Minecraft Java
+
+Installez SkinsRestorer 15.12.6 ou une version compatible de la branche 15 sur un serveur Bukkit, Paper ou Folia qui dispose de KraftLink. Dans **Extensions → Skins et capes**, vérifiez l’intégration et autorisez l’application automatique pour ce serveur. Les membres enregistrent leur skin dans leur profil, puis rejoignent le serveur avec leur compte Minecraft Java vérifié. [Utiliser les skins et capes](skins.md)
 
 ## Régler les intervalles
 
@@ -72,7 +87,7 @@ Les intervalles de `config.json` sont exprimés en secondes. KraftLink regroupe 
 
 ## Tester une commande
 
-Sur Bukkit, Paper ou Folia, autorisez `say`, puis envoyez `say KraftLink est connecté` depuis **Gérer la liaison → Console différée**, sans joueur ni attente de connexion. Vérifiez le résultat dans le jeu et l’historique du panneau.
+Sur un serveur Minecraft relié par KraftLink, autorisez `say`, puis envoyez `say KraftLink est connecté` depuis **Gérer la liaison → Console différée**, sans joueur ni attente de connexion. Vérifiez le résultat dans le jeu et l’historique du panneau.
 
 Pour une récompense, choisissez le serveur destinataire et un joueur de test. `{player}` et `{uuid}` utilisent son identité de jeu. L’option d’attente conserve la commande jusqu’à sa présence sur ce serveur.
 

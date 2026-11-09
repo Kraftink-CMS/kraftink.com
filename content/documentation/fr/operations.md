@@ -36,6 +36,10 @@ Les contenus enregistrés, y compris les brouillons, et la corbeille manuelle ne
 
 Placez le site en maintenance, transférez une sauvegarde complète vers un hébergement compatible et conservez la clé d’application. Rétablissez la racine web `public/`, les accès à la base, les droits d’écriture, HTTPS et le cron. Si le domaine change, adaptez aussi la [configuration du site](configuration.md#domaine-et-proxy).
 
+## Créer un administrateur depuis le terminal
+
+Depuis le dossier du site installé, exécutez `php artisan kraft:admin:create <pseudo> <email>`. Saisissez deux fois le nouveau mot de passe à l’invite. La commande crée un membre avec le rang Administrateur. Utilisez une adresse que vous contrôlez si le site exige la validation de l’e-mail. La connexion par mot de passe doit être activée.
+
 ## Dépannage
 
 | Problème | À vérifier |

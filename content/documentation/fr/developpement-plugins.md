@@ -38,13 +38,20 @@ Le namespace du manifeste correspond à `src/`. Les contrôleurs restent sous `H
     "version": "1.0.0",
     "namespace": "MyStudio\\Example\\",
     "provider": "MyStudio\\Example\\Providers\\PluginServiceProvider",
-    "requires": {"cms": ">=0.0.1", "php": "^8.4.1"}
+    "requires": {"cms": ">=0.0.1", "php": "^8.4.1"},
+    "games": {"supported": ["*"]}
 }
 ```
 
 Le fournisseur généré charge les routes, vues et traductions. Enregistrez vos services dans `register()` et vos contributions dans `boot()`. Son démarrage ne doit pas lire de tables ni appeler un service distant, car il est aussi vérifié avant l’installation des données.
 
 Déclarez les dépendances obligatoires dans `requires`, par exemple `"plugin:shop": ">=0.0.1"`. Les intégrations facultatives vont dans `integrations`. Les bibliothèques du paquet et ses migrations suivent le [contrat commun](architecture-extensions.md).
+
+Chaque plugin déclare un objet `games` à la racine de `manifest.json`. Renseignez `games.supported` avec `["*"]` pour tous les jeux ou listez les seuls identifiants de modules compatibles. Le caractère `*` s’utilise seul. Avec `["*"]`, vous pouvez déclarer des exceptions dans `games.excluded`.
+
+Utilisez `games.enhancements` pour signaler les jeux compatibles qui disposent de fonctions supplémentaires. Par exemple, `"games": {"supported": ["*"], "enhancements": ["minecraft"]}` indique un plugin utilisable avec tous les jeux, avec des fonctions supplémentaires pour Minecraft. Vous pouvez omettre les listes d’exceptions ou de fonctions supplémentaires si elles sont vides.
+
+Chaque liste accepte jusqu’à cinquante identifiants de modules distincts. Un identifiant commence par une lettre minuscule et contient de deux à cinquante lettres minuscules, chiffres ou tirets. Le Market publie ces déclarations pour chaque version. Les thèmes et les modules de jeu omettent `games`.
 
 ## Données et traductions
 

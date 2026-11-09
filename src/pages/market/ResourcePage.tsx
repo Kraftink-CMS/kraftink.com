@@ -8,7 +8,37 @@ import { useSession } from '../../lib/session';
 import { commonMessages, publicMessages } from '../../lib/translations';
 import { resourcePrice } from '../../lib/catalogue';
 import { LegalNotice } from '../../components/legal/LegalNotice';
-import { externalLinkRel } from '../../../shared/links';
+import { discordUrl, externalLinkRel } from '../../../shared/links';
+
+const gameNames: Record<string, string> = {
+    ark: 'ARK: Survival Evolved',
+    arkascended: 'ARK: Survival Ascended',
+    conanexiles: 'Conan Exiles',
+    counterstrike2: 'Counter-Strike 2',
+    dayz: 'DayZ',
+    fivem: 'FiveM',
+    garrysmod: 'Garry’s Mod',
+    minecraftbedrock: 'Minecraft Bedrock',
+    palworld: 'Palworld',
+    projectzomboid: 'Project Zomboid',
+    redm: 'RedM',
+    sevendaystodie: '7 Days to Die',
+    teamfortress2: 'Team Fortress 2',
+};
+
+function GameBadges({ games }: { games: string[] }) {
+    return (
+        <span className="d-inline-flex flex-wrap gap-2">
+            {games.map((game) => (
+                <span className="badge text-bg-light" key={game}>
+                    {Object.hasOwn(gameNames, game)
+                        ? gameNames[game]
+                        : game[0].toUpperCase() + game.slice(1).replaceAll('-', ' ')}
+                </span>
+            ))}
+        </span>
+    );
+}
 
 export function ResourcePage() {
     const { locale, path } = useLocale();
@@ -81,6 +111,20 @@ export function ResourcePage() {
         );
     }
     const version = resource.versions[0];
+    const supported = version?.games?.supported.filter((game) => game !== '*') ?? [];
+    const excluded = version?.games?.excluded ?? [];
+    const enhancements = version?.games?.enhancements ?? [];
+    const preview = localized(resource.image, locale);
+    const otherResources = data.resources.filter(
+        (entry) => entry.id !== resource.id && entry.author.id === resource.author.id,
+    );
+    const email = resource.support?.email;
+    const discord = resource.support?.discord ?? (email ? null : discordUrl);
+    const free = resource.commercial.kind === 'free';
+    const actionUrl = free
+        ? (version?.download?.url ?? resource.repository)
+        : (resource.commercial.url ?? resource.repository);
+    const actionLabel = free ? (version?.download?.url ? common.download : text.source) : text.external;
     return (
         <>
             <Link className="back-link" to={path('/market')}>
@@ -91,16 +135,40 @@ export function ResourcePage() {
             </PageTitle>
             <div className="row g-4">
                 <div className="col-lg-8">
+                    {preview && (
+                        <img
+                            className="img-fluid rounded border w-100 mb-4"
+                            src={preview}
+                            alt=""
+                            onError={(event) => {
+                                event.currentTarget.hidden = true;
+                            }}
+                        />
+                    )}
                     <Card title={text.compatibility}>
                         <dl className="metadata-list">
                             <div>
                                 <dt>{common.author}</dt>
-                                <dd>{resource.author.name}</dd>
+                                <dd>
+                                    {resource.author.url ? (
+                                        <a
+                                            href={resource.author.url}
+                                            target="_blank"
+                                            rel={externalLinkRel(resource.author.url)}
+                                        >
+                                            {resource.author.name}
+                                        </a>
+                                    ) : (
+                                        resource.author.name
+                                    )}
+                                </dd>
                             </div>
-                            <div>
-                                <dt>{common.version}</dt>
-                                <dd>{version?.version}</dd>
-                            </div>
+                            {version?.version && (
+                                <div>
+                                    <dt>{common.version}</dt>
+                                    <dd>{version.version}</dd>
+                                </div>
+                            )}
                             {Object.entries(version?.requirements ?? {}).map(([key, value]) => (
                                 <div key={key}>
                                     <dt>{key === 'cms' ? text.cms : key === 'php' ? text.php : key}</dt>
@@ -109,6 +177,42 @@ export function ResourcePage() {
                                     </dd>
                                 </div>
                             ))}
+                            {resource.type === 'plugin' && (
+                                <div>
+                                    <dt>{text.supportedGames}</dt>
+                                    <dd className="d-flex flex-wrap align-items-center gap-2">
+                                        {supported.length > 0 ? (
+                                            <GameBadges games={supported} />
+                                        ) : excluded.length > 0 ? (
+                                            <>
+                                                <span>{text.allGamesExcept}</span>
+                                                <GameBadges games={excluded} />
+                                            </>
+                                        ) : (
+                                            text.allGames
+                                        )}
+                                    </dd>
+                                </div>
+                            )}
+                            {resource.type === 'plugin' && enhancements.length > 0 && (
+                                <div>
+                                    <dt>{text.gameEnhancements}</dt>
+                                    <dd>
+                                        <GameBadges games={enhancements} />
+                                    </dd>
+                                </div>
+                            )}
+                            <div id="resource-support">
+                                <dt>{text.supportContact}</dt>
+                                <dd className="d-flex flex-wrap gap-3">
+                                    {discord && (
+                                        <a href={discord} target="_blank" rel={externalLinkRel(discord)}>
+                                            Discord
+                                        </a>
+                                    )}
+                                    {email && <a href={`mailto:${email}`}>{text.contactEmail}</a>}
+                                </dd>
+                            </div>
                         </dl>
                         {resource.repository && (
                             <a
@@ -121,11 +225,28 @@ export function ResourcePage() {
                             </a>
                         )}
                     </Card>
+                    {otherResources.length > 0 && (
+                        <div className="mt-4">
+                            <Card title={text.moreFromAuthor}>
+                                <ul className="list-unstyled d-grid gap-2 mb-0">
+                                    {otherResources.map((entry) => (
+                                        <li key={entry.id}>
+                                            <Link
+                                                to={`${path('/market/resource')}/${encodeURIComponent(entry.resourceId ?? entry.id)}`}
+                                            >
+                                                {localized(entry.name, locale)}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </Card>
+                        </div>
+                    )}
                 </div>
                 <div className="col-lg-4">
                     <Card
                         title={
-                            resource.commercial.kind === 'free'
+                            free
                                 ? common.free
                                 : resource.resourceId && resource.access?.allowed
                                   ? common.purchased
@@ -137,24 +258,24 @@ export function ResourcePage() {
                             <p className="alert alert-warning mb-0" role="status">
                                 {text.resourceUnavailable}
                             </p>
-                        ) : resource.commercial.kind === 'free' ? (
-                            <a
-                                className="btn btn-primary w-100"
-                                href={version?.download?.url ?? resource.repository}
-                                target="_blank"
-                                rel={externalLinkRel(version?.download?.url ?? resource.repository)}
-                            >
-                                {common.download}
-                            </a>
-                        ) : !resource.resourceId ? (
-                            <a
-                                className="btn btn-primary w-100"
-                                href={resource.commercial.url ?? resource.repository}
-                                target="_blank"
-                                rel={externalLinkRel(resource.commercial.url ?? resource.repository)}
-                            >
-                                {text.external}
-                            </a>
+                        ) : free || !resource.resourceId ? (
+                            actionUrl ? (
+                                <a
+                                    className="btn btn-primary w-100"
+                                    href={actionUrl}
+                                    target="_blank"
+                                    rel={externalLinkRel(actionUrl)}
+                                >
+                                    {actionLabel}
+                                </a>
+                            ) : (
+                                <>
+                                    <p>{free ? text.downloadUnavailable : text.purchaseLinkUnavailable}</p>
+                                    <a href="#resource-support" className="btn btn-outline-secondary w-100">
+                                        {text.contactSupport}
+                                    </a>
+                                </>
+                            )
                         ) : resource.access?.allowed ? (
                             <>
                                 <p>{text.boughtHelp}</p>

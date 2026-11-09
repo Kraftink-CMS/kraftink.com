@@ -38,13 +38,20 @@ The manifest namespace maps to `src/`. Controllers belong under `Http`, Eloquent
     "version": "1.0.0",
     "namespace": "MyStudio\\Example\\",
     "provider": "MyStudio\\Example\\Providers\\PluginServiceProvider",
-    "requires": {"cms": ">=0.0.1", "php": "^8.4.1"}
+    "requires": {"cms": ">=0.0.1", "php": "^8.4.1"},
+    "games": {"supported": ["*"]}
 }
 ```
 
 The generated provider loads routes, views and translations. Register services in `register()` and contributions in `boot()`. Booting must not read tables or contact a remote service, because it is also checked before data installation.
 
 Declare required dependencies in `requires`, such as `"plugin:shop": ">=0.0.1"`. Optional integrations belong in `integrations`. Package libraries and migrations follow the [shared contract](architecture-extensions.md).
+
+Each plugin declares a `games` object at the root of `manifest.json`. Set `games.supported` to `["*"]` for all games or list the only compatible game module IDs. A wildcard must appear on its own. Use `games.excluded` with the wildcard to list exceptions.
+
+Use `games.enhancements` to list compatible games that get extra features. For example, `"games": {"supported": ["*"], "enhancements": ["minecraft"]}` means the plugin works with all games and adds features for Minecraft. Omit empty exception or enhancement lists.
+
+Each list accepts up to fifty distinct game module IDs. An ID starts with a lowercase letter and contains two to fifty lowercase letters, digits or hyphens. The Market publishes these declarations for each version. Themes and game modules omit `games`.
 
 ## Data and translations
 

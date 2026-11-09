@@ -36,6 +36,10 @@ These settings do not delete saved content, including drafts, or manually trashe
 
 Put the site into maintenance, transfer a full backup to a compatible host and keep the application key. Restore the `public/` web root, database access, write permissions, HTTPS and cron. If the domain changes, also update the [site configuration](configuration.md#domain-and-proxy).
 
+## Create an administrator from the terminal
+
+From the installed site directory, run `php artisan kraft:admin:create <username> <email>`. Enter the new password twice when prompted. The command creates a new member with the Administrator role. Use a mailbox you control if the site requires email verification. Password sign-in must be enabled.
+
 ## Troubleshooting
 
 | Problem | Check |

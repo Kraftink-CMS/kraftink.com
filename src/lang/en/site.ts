@@ -258,6 +258,15 @@ export default {
         'guide': 'Read the installation guide',
         'extensions': 'Looking for a plugin or theme?',
         'browse': 'Browse the market',
+        'kraftLink': {
+            'title': 'Download KraftLink',
+            'description': 'Connect your game server to KraftInk. Choose the JAR for your platform.',
+            'universal': 'Universal',
+            'api': 'Java API for developers',
+            'guide': 'Install KraftLink',
+            'releases': 'KraftLink releases on GitHub',
+            'checksums': 'SHA-256 checksums',
+        },
     },
     'docs': {
         'groups': {

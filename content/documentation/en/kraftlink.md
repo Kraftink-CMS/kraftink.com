@@ -1,6 +1,6 @@
 # Connecting a server with KraftLink
 
-KraftLink sends a server’s status and online players to KraftInk, then retrieves commands to execute. It supports Bukkit, Spigot, Paper, Folia, Velocity and Hytale. For other connections, see [game servers](games.md).
+KraftLink sends a server’s status and online players to KraftInk, then retrieves commands to execute. It connects Minecraft Java servers, Bedrock servers running Nukkit, and Hytale servers. For other connections, see [game servers](games.md).
 
 ## Creating the connection in the CMS
 
@@ -23,17 +23,28 @@ In-game sign-in and AuthMe each use the connection selected in their settings. W
 
 ## Installing the connector
 
-Download `KraftLink.jar` from [KraftLink releases](https://github.com/kraftink-cms/KraftLink/releases). You can also choose a dedicated variant:
+Download the universal `KraftLink.jar` or your platform's variant from [KraftLink releases](https://github.com/kraftink-cms/KraftLink/releases). Starting with KraftLink 1.4.1, the universal JAR covers every platform in the table.
 
 | Platform | Variant | Installation directory |
 | --- | --- | --- |
 | Bukkit, Spigot, Paper, Folia | `KraftLink-Bukkit-VERSION.jar` | `plugins/` |
 | Velocity | `KraftLink-Velocity-VERSION.jar` | `plugins/` |
 | Hytale | `KraftLink-Hytale-VERSION.jar` | `mods/` |
+| Fabric | `KraftLink-Fabric-VERSION.jar` | `mods/` |
+| Forge | `KraftLink-Forge-VERSION.jar` | `mods/` |
+| NeoForge | `KraftLink-NeoForge-VERSION.jar` | `mods/` |
+| Sponge | `KraftLink-Sponge-VERSION.jar` | `mods/plugins/` |
+| Cloudburst Nukkit | `KraftLink-Nukkit-VERSION.jar` | `plugins/` |
 
-Stop the server, add **one KraftLink JAR per instance**, then restart. The Bukkit variant targets Minecraft 1.8.x from 1.8.8. The Hytale connector targets server 0.7.4. Use the Java version required by your server and check the compatibility stated in the release.
+Stop the server, add **one KraftLink JAR per instance**, then restart. The Bukkit variant targets Minecraft from 1.8.8. The Hytale connector targets server 0.7.4. Fabric, Forge and NeoForge target Minecraft Java 26.1.2 and Java 25. Use Fabric Loader 0.19.3 with Fabric API 0.146.1, Forge 64.1.5 or NeoForge 26.1.2.126 as the minimum for your server. Sponge targets SpongeAPI 17 on Minecraft Java 1.21.10 and Java 21.
 
-Open `plugins/KraftLink/config.json` on Bukkit, or the generated KraftLink data directory’s `config.json` on Velocity/Hytale. Edit these fields without removing the other settings:
+On SpongeVanilla and SpongeForge, put either JAR in `mods/plugins/`. On SpongeNeo, use the Sponge variant so the NeoForge loader discovers KraftLink as a Sponge plugin.
+
+On Nukkit, the universal JAR loads the plugin and may log a warning while looking for a Bedrock resource pack in the Hytale manifest. The Nukkit variant avoids that warning.
+
+For a Cloudburst Nukkit server, choose **Minecraft Bedrock** in **Games and identities** and install the Nukkit variant. It requires Nukkit API 1.1. For Mojang's Bedrock Dedicated Server, choose **Ping** to display its status. The Nukkit JAR is a plugin for Cloudburst Nukkit.
+
+Open the generated `config.json` in the connector's data directory. On Bukkit and Nukkit, it is in `plugins/KraftLink/`. On Fabric, Forge, NeoForge and Sponge, it is in `config/kraftlink/`. Edit these fields and keep the other settings.
 
 ```json
 {
@@ -51,12 +62,16 @@ The game server must be able to reach the site over HTTPS. No incoming KraftLink
 
 ## Enable Bedrock verification
 
-Players can verify their Bedrock account on any enabled Minecraft server connected to the CMS with KraftLink and running Floodgate. On a Velocity network, you can install both plugins on the proxy so players can verify from any server on the network. The Floodgate prefix must match the one configured in the CMS.
+Bedrock players who join a Minecraft Java server via Geyser can verify their account on Bukkit, Paper, Folia or Velocity with KraftLink and Floodgate. On a Velocity network, you can install both plugins on the proxy so players can verify from any server on the network. The Floodgate prefix must match the one configured in the CMS.
 
 Choose the **Bedrock verification command** in the CMS Minecraft settings.
 
 - `/link` is the default. KraftLink registers it at startup on Velocity and supported versions of Paper and Folia if the name is free.
 - Use `/kraftlink link` if the server does not support the shortcut or if another plugin already uses `/link`.
+
+## Sync Minecraft Java skins
+
+Install SkinsRestorer 15.12.6 or a compatible version from the 15 series on a Bukkit, Paper or Folia server running KraftLink. In **Extensions → Skins and capes**, check the integration and allow automatic application for that server. Members save their skin in their profile, then join with their verified Minecraft Java account. [Use skins and capes](skins.md)
 
 ## Set polling intervals
 
@@ -72,7 +87,7 @@ Use `operation_poll_seconds` to override the interval of an operation added by a
 
 ## Testing a command
 
-On Bukkit, Paper or Folia, allow `say`, then send `say KraftLink is connected` from **Manage connection → Deferred console**, without a player or online requirement. Check the result in the game and panel history.
+On a Minecraft server connected through KraftLink, allow `say`, then send `say KraftLink is connected` from **Manage connection → Deferred console**, without a player or online requirement. Check the result in the game and panel history.
 
 For a reward, select the destination server and a test player. `{player}` and `{uuid}` use their game identity. The online requirement keeps the command pending until the player joins that server.
 

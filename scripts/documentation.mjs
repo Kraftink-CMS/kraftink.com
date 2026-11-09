@@ -13,7 +13,7 @@ const sections = [
     {
         id: 'services',
         audience: 'owner',
-        slugs: ['oauth', 'games', 'kraftlink', 'shop-administration', 'vote', 'service-accounts'],
+        slugs: ['oauth', 'games', 'kraftlink', 'skins', 'shop-administration', 'vote', 'stats', 'service-accounts'],
     },
     {
         id: 'maintenance',

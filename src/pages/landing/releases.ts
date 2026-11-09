@@ -1,3 +1,5 @@
+import { kraftLinkRepository } from '../../../shared/links';
+
 export type ReleaseChannel = 'stable' | 'beta' | 'alpha' | 'prerelease';
 
 export interface InstallationRelease {
@@ -170,4 +172,64 @@ export function installationReleases(payload: unknown, source: ReleaseSource): I
         seen.add(tag);
     }
     return releases.sort((left, right) => right.published - left.published);
+}
+
+const kraftLinkPlatforms = ['Bukkit', 'Fabric', 'Forge', 'NeoForge', 'Sponge', 'Velocity', 'Nukkit', 'Hytale'] as const;
+
+type KraftLinkPackage = (typeof kraftLinkPlatforms)[number] | 'Universal' | 'API';
+
+export function kraftLinkRelease(payload: unknown) {
+    const release = record(payload);
+    const tag = release?.tag_name;
+    if (
+        release?.draft !== false ||
+        release.prerelease !== false ||
+        typeof tag !== 'string' ||
+        tag.length > 32 ||
+        !/^v?\d+\.\d+\.\d+$/.test(tag) ||
+        !Array.isArray(release.assets)
+    ) {
+        return null;
+    }
+    const notesUrl = githubReleaseUrl(release.html_url, kraftLinkRepository, ['releases', 'tag', tag]);
+    if (!notesUrl) {
+        return null;
+    }
+    const version = tag.replace(/^v/, '');
+    const expected = new Map<string, KraftLinkPackage>([
+        ['KraftLink.jar', 'Universal'],
+        ...kraftLinkPlatforms.map((platform) => [`KraftLink-${platform}-${version}.jar`, platform] as const),
+        [`KraftLink-API-${version}.jar`, 'API'],
+    ]);
+    const downloads = new Map<string, string>();
+    for (const item of release.assets.slice(0, 100)) {
+        const asset = record(item);
+        const name = asset?.name;
+        if (
+            asset?.state !== 'uploaded' ||
+            typeof name !== 'string' ||
+            (name !== 'SHA256SUMS' && !expected.has(name)) ||
+            typeof asset.size !== 'number' ||
+            !Number.isSafeInteger(asset.size) ||
+            asset.size <= 0
+        ) {
+            continue;
+        }
+        const url = githubReleaseUrl(asset.browser_download_url, kraftLinkRepository, [
+            'releases',
+            'download',
+            tag,
+            name,
+        ]);
+        if (url) {
+            downloads.set(name, url);
+        }
+    }
+    const assets = Array.from(expected, ([name, platform]) => ({ name, platform, url: downloads.get(name) })).filter(
+        (asset): asset is { name: string; platform: KraftLinkPackage; url: string } => Boolean(asset.url),
+    );
+    if (assets.length === 0) {
+        return null;
+    }
+    return { version, notesUrl, assets, checksumUrl: downloads.get('SHA256SUMS') };
 }
