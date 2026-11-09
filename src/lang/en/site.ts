@@ -1,3 +1,5 @@
+import { bundledGames } from '../../../shared/games';
+
 export default {
     'siteName': 'KraftInk',
     'description': 'The CMS for your gaming community. Explore KraftInk, its plugins, themes and documentation.',
@@ -31,7 +33,7 @@ export default {
             'Optional plugins',
             'Themes and a built-in layout',
             'Game server connections with KraftLink',
-            '17 supported games',
+            `${bundledGames.length} supported games`,
             '5 languages for the website and panel',
         ],
         'guidesTitle': 'Getting started',
@@ -55,25 +57,6 @@ export default {
         'screenshot': 'The KraftInk homepage with its default appearance.',
     },
     'compatible': 'FOR YOUR GAME SERVER',
-    'games': [
-        'Minecraft',
-        'Hytale',
-        'Garry’s Mod',
-        'Rust',
-        'FiveM',
-        'DayZ',
-        'ARK: Survival Evolved',
-        '7 Days to Die',
-        'Counter-Strike 2',
-        'Team Fortress 2',
-        'Unturned',
-        'Project Zomboid',
-        'RedM',
-        'ARK: Survival Ascended',
-        'Palworld',
-        'Satisfactory',
-        'Conan Exiles',
-    ],
     'cmsLanguages': ['Français', 'English', 'Español', 'Deutsch', 'Português'],
     'flexible': 'Configure the site for your community.',
     'features': {
@@ -326,7 +309,12 @@ export default {
             [
                 'Plugins, themes and games',
                 'Add a shop to sell in-game products or a forum to talk with your players. Plugins evolve independently from the CMS, and themes adapt its presentation. Game modules provide identity and connection options for your server. KraftLink connects Minecraft and Hytale.',
-                ['Optional plugins', 'Customisable themes', 'KraftLink connector', '17 built-in game modules'],
+                [
+                    'Optional plugins',
+                    'Customisable themes',
+                    'KraftLink connector',
+                    `${bundledGames.length} built-in game modules`,
+                ],
                 'admin-plugins.png',
                 'extensions-catalogue',
             ],
@@ -356,8 +344,7 @@ export default {
     },
     'about': {
         'title': 'About KraftInk',
-        'description':
-            'KraftInk is an open-source CMS for creating and managing a game server website on your own hosting. It supports 17 games, with the website and panel available in French, English, Spanish, German and Portuguese.',
+        'description': `KraftInk is an open-source CMS for creating and managing a game server website on your own hosting. It supports ${bundledGames.length} games, with the website and panel available in French, English, Spanish, German and Portuguese.`,
         'statusTitle': 'The KraftInk CMS',
         'status':
             'The core manages accounts, permissions and content. Plugins add community features, while themes define the presentation.',

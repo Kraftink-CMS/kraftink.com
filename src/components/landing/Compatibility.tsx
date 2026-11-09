@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { bundledGames } from '../../../shared/games';
 import { useLocale, useSiteCopy } from '../../lib/i18n';
 
 export function Compatibility() {
@@ -13,7 +14,7 @@ export function Compatibility() {
                     <Link to={path('/documentation/games')}>{copy.landing.gamesLink}</Link>
                 </div>
                 <ul className="supported-games">
-                    {copy.games.map((game) => (
+                    {bundledGames.map((game) => (
                         <li key={game}>{game}</li>
                     ))}
                 </ul>

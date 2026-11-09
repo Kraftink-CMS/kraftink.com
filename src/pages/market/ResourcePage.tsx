@@ -11,31 +11,16 @@ import { useSession } from '../../lib/session';
 import { commonMessages, publicMessages } from '../../lib/translations';
 import { resourcePrice } from '../../lib/catalogue';
 import { LegalNotice } from '../../components/legal/LegalNotice';
+import { bundledGameNames } from '../../../shared/games';
 import { discordUrl, externalLinkRel } from '../../../shared/links';
-
-const gameNames: Record<string, string> = {
-    ark: 'ARK: Survival Evolved',
-    arkascended: 'ARK: Survival Ascended',
-    conanexiles: 'Conan Exiles',
-    counterstrike2: 'Counter-Strike 2',
-    dayz: 'DayZ',
-    fivem: 'FiveM',
-    garrysmod: 'Garry’s Mod',
-    minecraftbedrock: 'Minecraft Bedrock',
-    palworld: 'Palworld',
-    projectzomboid: 'Project Zomboid',
-    redm: 'RedM',
-    sevendaystodie: '7 Days to Die',
-    teamfortress2: 'Team Fortress 2',
-};
 
 function GameBadges({ games }: { games: string[] }) {
     return (
         <span className="d-inline-flex flex-wrap gap-2">
             {games.map((game) => (
                 <span className="badge text-bg-light" key={game}>
-                    {Object.hasOwn(gameNames, game)
-                        ? gameNames[game]
+                    {Object.hasOwn(bundledGameNames, game)
+                        ? bundledGameNames[game]
                         : game[0].toUpperCase() + game.slice(1).replaceAll('-', ' ')}
                 </span>
             ))}
