@@ -15,7 +15,7 @@ Les avatars externes reçoivent l’identifiant public du joueur et l’IP de so
 
 ### Exiger un compte Minecraft vérifié
 
-Activez la connexion **Minecraft Java (Microsoft)** et vérifiez votre profil. Dans **Sécurité et accès → Connexion et inscription → Réglages généraux**, choisissez ensuite **Compte Minecraft vérifié** dans les réglages Minecraft. En **Java uniquement**, les joueurs associent leur compte avec Microsoft. En **Java et Bedrock vérifiés**, activez aussi **Joueurs Geyser et Floodgate**, indiquez le préfixe configuré en jeu et choisissez une liaison active. Le serveur ou proxy choisi doit exécuter Floodgate, disposer d’un jeton de liaison et avoir `bedrock_link_enabled` activé dans KraftLink. [Activer la commande de vérification](kraftlink.md#activer-la-verification-bedrock)
+Activez la connexion **Minecraft Java (Microsoft)** et vérifiez votre profil. Dans **Sécurité et accès → Connexion et inscription → Réglages généraux**, choisissez ensuite **Compte Minecraft vérifié** dans les réglages Minecraft. En **Java uniquement**, les joueurs associent leur compte avec Microsoft. En **Java et Bedrock vérifiés**, activez aussi **Joueurs Geyser et Floodgate**, indiquez le préfixe configuré en jeu et choisissez le serveur et la commande de vérification. [Configurer la vérification Bedrock](kraftlink.md#activer-la-verification-bedrock)
 
 Le joueur Bedrock copie la commande à usage unique affichée sur le site, l’exécute en jeu, puis confirme le pseudo détecté sur le site. Si Floodgate utilise déjà son identité Java à la suite d’une liaison, il choisit **Minecraft Java (Microsoft)**.
 
