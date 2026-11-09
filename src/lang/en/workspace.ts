@@ -146,7 +146,7 @@ export default {
     searchResources: 'Search resources or creators',
     searchAction: 'Search',
     manifestOnlyHint:
-        'Choose your resource source and its price. Its name, description, image, type and version come from the manifest.',
+        'Choose a source and price. The package manifest and Market Markdown files provide the listing content.',
     localPreviewHint: 'The preview is prepared on your device. The ZIP is uploaded only after you confirm.',
     previewArchive: 'Check and preview',
     inspectingArchive: 'Checking the archive…',
@@ -155,6 +155,10 @@ export default {
     invalidArchive: 'This archive cannot be used. Check its structure, manifest and size.',
     invalidManifestMetadata:
         'The manifest must contain a public name and description in market.name and market.description, or valid literal text.',
+    invalidMarketReadme:
+        'Check the Market Markdown files and their paths. Use UTF-8, up to 32 KiB per file, without HTML.',
+    invalidMarketChangelog: 'Check the release notes. Use UTF-8, up to 8 KiB per file, without HTML.',
+    marketChangelog: 'Release notes',
     invalidManifestImage:
         'The image must be a PNG, JPEG or WebP file included in the ZIP, up to 2 MB and 4096 × 4096 pixels.',
     invalidManifestFiles: 'The providers and files declared in the manifest must be included in the ZIP.',

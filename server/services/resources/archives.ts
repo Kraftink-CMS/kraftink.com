@@ -3,7 +3,8 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { database } from '../../database';
 import { resourceVersions, type UploadReservationRow } from '../../models/resources';
 import { now } from '../../lib/time';
-import { resourceStorage } from './storage';
+import { marketAssetKey, resourceStorage } from './storage';
+import { marketAssetMaxCount } from '../../../shared/packages/presentation';
 
 export async function cleanupArchives(env: Env): Promise<void> {
     const timestamp = now();
@@ -43,10 +44,11 @@ export async function cleanupArchives(env: Env): Promise<void> {
             continue;
         }
         try {
-            if (row.image_key) {
-                await resourceStorage(env).delete(row.image_key);
-            }
-            await resourceStorage(env).delete(row.archive_key);
+            await resourceStorage(env).delete([
+                row.archive_key,
+                ...(row.image_key ? [row.image_key] : []),
+                ...Array.from({ length: marketAssetMaxCount }, (_, index) => marketAssetKey(row.archive_key, index)),
+            ]);
             if (row.upload_status === 'reserved') {
                 continue;
             }

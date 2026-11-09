@@ -17,6 +17,9 @@ export function AboutPage() {
                         {copy.about.bootstrap} <a href="/licenses/bootstrap.txt">{copy.market.license}</a>
                     </li>
                     <li>
+                        {copy.about.bootstrapIcons} <a href="/licenses/bootstrap-icons.txt">{copy.market.license}</a>
+                    </li>
+                    <li>
                         {copy.about.marked} <a href="/licenses/marked.txt">{copy.market.license}</a>
                     </li>
                     <li>

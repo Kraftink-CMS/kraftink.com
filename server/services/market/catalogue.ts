@@ -1,9 +1,10 @@
-import { and, asc, eq, exists, inArray, isNull, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, exists, inArray, isNull, or, sql } from 'drizzle-orm';
 import { rcompare, valid } from 'semver';
 import { normalizedVersion, requirements } from '../../../shared/compatibility';
 import {
     gameCompatibility,
     validResourceSupport,
+    type CatalogueHistoryEntry,
     type CatalogueResource,
     type CatalogueVersion,
     type PublicCatalogue,
@@ -18,6 +19,15 @@ import { now } from '../../lib/time';
 import { fail } from '../../http';
 import type { Env } from '../../types';
 import { parseRepositorySource } from '../../../shared/packages/repository';
+import {
+    marketAssetLinks,
+    marketHistoryLimit,
+    marketHttpsUrl,
+    marketIconName,
+    marketMarkdownMaxBytes,
+    marketMarkdownMaxLocales,
+    marketMarkdownTotalBytes,
+} from '../../../shared/packages/presentation';
 import type { ResourceManifest } from '../../../shared/packages/zip';
 import { kraftLinkRepository } from '../../../shared/links';
 import { cachedRepositoryRelease } from '../resources/repository-updates';
@@ -94,6 +104,22 @@ function localized(value: unknown, maximum: number): boolean {
     );
 }
 
+function validMarketMarkdown(value: unknown): boolean {
+    if (!localized(value, marketMarkdownMaxBytes)) {
+        return false;
+    }
+    const translations = typeof value === 'string' ? [value] : Object.values(value as Record<string, string>);
+    if (translations.length > marketMarkdownMaxLocales) {
+        return false;
+    }
+    const encoder = new TextEncoder();
+    const sizes = translations.map((markdown) => encoder.encode(markdown).byteLength);
+    return (
+        sizes.every((size) => size <= marketMarkdownMaxBytes) &&
+        sizes.reduce((total, size) => total + size, 0) <= marketMarkdownTotalBytes
+    );
+}
+
 function archiveUrl(value: unknown, trustedEndpoint?: string): value is string {
     if (!https(value)) {
         return false;
@@ -154,6 +180,8 @@ export function validatePublicCatalogue(value: unknown, trustedEndpoint?: string
             ...candidate,
             manual_only: candidate.manual_only ?? candidate.commercial.kind === 'paid',
         } as unknown as CatalogueResource;
+        delete resource.readmeImages;
+        delete resource.history;
         if (typeof resource.manual_only !== 'boolean') {
             throw new Error('Invalid resource distribution mode');
         }
@@ -177,6 +205,15 @@ export function validatePublicCatalogue(value: unknown, trustedEndpoint?: string
         ) {
             throw new Error('Invalid public image');
         }
+        if ('readme' in candidate && !validMarketMarkdown(candidate.readme)) {
+            throw new Error('Invalid public description Markdown');
+        }
+        if (
+            'icon' in candidate &&
+            (typeof candidate.icon !== 'string' || (!marketIconName(candidate.icon) && !marketHttpsUrl(candidate.icon)))
+        ) {
+            throw new Error('Invalid public icon');
+        }
         if ('support' in candidate && !validResourceSupport(candidate.support)) {
             throw new Error('Invalid public support contact');
         }
@@ -197,7 +234,8 @@ export function validatePublicCatalogue(value: unknown, trustedEndpoint?: string
                 !normalized ||
                 versions.has(normalized) ||
                 !requirements(version.requirements) ||
-                !gameCompatibility(version, resource.type)
+                !gameCompatibility(version, resource.type) ||
+                ('changelog' in version && !validMarketMarkdown(version.changelog))
             ) {
                 throw new Error('Invalid public resource version');
             }
@@ -545,7 +583,7 @@ export async function mergedCatalogue(
     env: Env,
     userId: string | null,
     forCms = false,
-    options: MetadataOptions = {},
+    options: MetadataOptions & { resourceId?: string } = {},
 ): Promise<{ resources: CatalogueResource[]; state: string }> {
     const db = database(env.DB);
     const purchase = db
@@ -573,7 +611,10 @@ export async function mergedCatalogue(
                 type: resources.type,
                 name: resources.name,
                 description: resources.description,
-                metadata_json: resources.metadata_json,
+                metadata_json: sql<string>`CASE WHEN ${resources.id} = ${options.resourceId ?? ''}
+                    OR ('creator-' || ${resources.author_id} || '/' || ${resources.slug}) = ${options.resourceId ?? ''}
+                    THEN ${resources.metadata_json}
+                    ELSE json_remove(${resources.metadata_json}, '$.readme') END`,
                 price_cents: resources.price_cents,
                 currency: resources.currency,
                 status: resources.status,
@@ -606,7 +647,23 @@ export async function mergedCatalogue(
             .all(),
     ]);
     const freeSlugs = new Set(github.resources.map((resource) => resource.slug));
-    const mergedResources = [...github.resources];
+    const mergedResources = github.resources.map((entry) => {
+        if (!forCms && entry.id === options.resourceId) {
+            return entry;
+        }
+        const summary = { ...entry };
+        delete summary.readme;
+        delete summary.readmeImages;
+        if (forCms) {
+            delete summary.icon;
+        }
+        summary.versions = entry.versions.map((version) => {
+            const release = { ...version };
+            delete release.changelog;
+            return release;
+        });
+        return summary;
+    });
     const origin = env.APP_ORIGIN.replace(/\/$/, '');
     for (const resource of premium) {
         const purchased = owned.has(resource.id);
@@ -617,10 +674,17 @@ export async function mergedCatalogue(
             continue;
         }
         const author = `creator-${resource.author_id}`;
+        const id = `${author}/${resource.slug}`;
         const metadata = JSON.parse(resource.metadata_json) as {
             name?: CatalogueResource['name'];
             description?: CatalogueResource['description'];
+            readme?: CatalogueResource['readme'];
+            icon?: string;
+            marketAssets?: string[];
         };
+        const imageUrl = `${origin}/api/market/resources/${resource.id}/images/${resource.version_id}`;
+        const imageLinks = forCms ? {} : marketAssetLinks(metadata.marketAssets, imageUrl);
+        const icon = metadata.icon && (imageLinks[metadata.icon] ?? metadata.icon);
         const source = parseRepositorySource(resource.payload_json);
         const release = source
             ? cachedRepositoryRelease(
@@ -650,16 +714,52 @@ export async function mergedCatalogue(
                   }
                 : {}),
         };
+        let history: CatalogueHistoryEntry[] | undefined;
+        if (!forCms && (options.resourceId === resource.id || options.resourceId === id)) {
+            const uploads = await db
+                .select({
+                    version: resourceVersions.version,
+                    changelog: sql<string | null>`${resourceVersions.payload_json} -> '$.changelog'`,
+                })
+                .from(resourceVersions)
+                .where(
+                    and(
+                        eq(resourceVersions.resource_id, resource.id),
+                        inArray(resourceVersions.status, ['approved', 'superseded']),
+                    ),
+                )
+                .orderBy(desc(resourceVersions.created_at))
+                .limit(marketHistoryLimit)
+                .all();
+            const entries = new Map((release?.history ?? []).map((entry) => [entry.version, entry]));
+            for (const upload of uploads) {
+                const changelog = upload.changelog
+                    ? (JSON.parse(upload.changelog) as CatalogueHistoryEntry['changelog'])
+                    : undefined;
+                if (changelog || !entries.has(upload.version)) {
+                    entries.set(upload.version, { version: upload.version, changelog });
+                }
+            }
+            if (!entries.has(version.version)) {
+                entries.set(version.version, { version: version.version });
+            }
+            history = [...entries.values()]
+                .sort((left, right) => rcompare(left.version, right.version))
+                .slice(0, marketHistoryLimit);
+        }
         mergedResources.push({
-            id: `${author}/${resource.slug}`,
+            id,
             resourceId: resource.id,
             slug: resource.slug,
             type: resource.type,
             name: metadata.name ?? resource.name,
             description: metadata.description ?? resource.description,
-            ...(resource.image_key
-                ? { image: `${origin}/api/market/resources/${resource.id}/images/${resource.version_id}` }
+            ...(!forCms && metadata.readme
+                ? { readme: metadata.readme, ...(Object.keys(imageLinks).length ? { readmeImages: imageLinks } : {}) }
                 : {}),
+            ...(!forCms && icon ? { icon } : {}),
+            ...(resource.image_key ? { image: imageUrl } : {}),
+            ...(history ? { history } : {}),
             author: { id: author, name: resource.author_name },
             ...(validResourceSupport(support) ? { support } : {}),
             ...(source ? { repository: source.repository } : {}),

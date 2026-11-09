@@ -7,7 +7,7 @@ import { now } from '../../lib/time';
 import { fromBase64Url } from '../../security/crypto';
 import { cleanupArchives } from './archives';
 import type { ResourceEffects } from './publication';
-import { resourceStorage } from './storage';
+import { getResourceImage, resourceStorage } from './storage';
 
 export interface ReviewListing {
     time: number | null;
@@ -85,22 +85,24 @@ export async function reviewArchive(env: Env, id: string, effects: ResourceEffec
         },
     });
 }
-export async function reviewImage(env: Env, id: string) {
+export async function reviewImage(env: Env, id: string, asset?: string) {
     const version = await database(env.DB)
-        .select({ image_key: resourceVersions.image_key, image_mime: resourceVersions.image_mime })
+        .select({
+            archive_key: resourceVersions.archive_key,
+            image_key: resourceVersions.image_key,
+            image_mime: resourceVersions.image_mime,
+        })
         .from(resourceVersions)
         .where(eq(resourceVersions.id, id))
         .get();
-    if (!version?.image_key || !['image/png', 'image/jpeg', 'image/webp'].includes(version.image_mime ?? '')) {
+    const result = await getResourceImage(env, version, asset);
+    if (!result) {
         error(404, 'image_unavailable');
     }
-    const image = await resourceStorage(env).get(version.image_key);
-    if (!image) {
-        error(404, 'image_unavailable');
-    }
+    const { image, mime } = result;
     return new Response(image.body, {
         headers: {
-            'Content-Type': version.image_mime!,
+            'Content-Type': mime,
             'Cache-Control': 'private, no-store',
             'X-Content-Type-Options': 'nosniff',
             'Content-Security-Policy': "default-src 'none'",

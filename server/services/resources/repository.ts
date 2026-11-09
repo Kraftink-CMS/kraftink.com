@@ -1,11 +1,14 @@
 import { eq } from 'drizzle-orm';
 import { HTTPException } from 'hono/http-exception';
+import { gt, rcompare } from 'semver';
 import { database } from '../../database';
 import { users } from '../../models/accounts';
 import { fail } from '../../http';
 import { sha256 } from '../../security/crypto';
 import type { Env } from '../../types';
 import { effectiveUploadLimit } from '../../upload-limits';
+import type { CatalogueHistoryEntry } from '../../../shared/catalogue';
+import { marketChangelogMaxBytes, marketHistoryLimit } from '../../../shared/packages/presentation';
 import {
     ArchiveError,
     inspectArchive,
@@ -28,6 +31,7 @@ export interface RepositoryInspection {
     source: RepositorySource;
     bytes: Uint8Array<ArrayBuffer>;
     inspection: ArchiveInspection;
+    changelog?: string;
 }
 
 interface ReusableRelease {
@@ -124,23 +128,116 @@ async function request(url: string, signal: AbortSignal, env?: Env): Promise<Res
     return response;
 }
 
-async function json(url: string, signal: AbortSignal, maximum = 512 * 1024, env?: Env): Promise<Json> {
+async function jsonValue(url: string, signal: AbortSignal, maximum: number, env?: Env): Promise<unknown> {
     const response = await request(url, signal, env);
     if (response.status !== 200) {
         await response.body?.cancel();
         fail(400, 'repository_public_required');
     }
     const bytes = await readBytes(response, maximum);
-    let value: unknown;
     try {
-        value = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+        return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
     } catch {
         fail(400, 'repository_invalid');
     }
+}
+
+async function json(url: string, signal: AbortSignal, maximum = 512 * 1024, env?: Env): Promise<Json> {
+    const value = await jsonValue(url, signal, maximum, env);
     if (!object(value)) {
         fail(400, 'repository_invalid');
     }
     return value;
+}
+
+function releaseNote(value: unknown): string | undefined {
+    if (typeof value !== 'string') {
+        return;
+    }
+    const text = value
+        .replace(/\r\n?/g, '\n')
+        .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, '')
+        .trim();
+    const bytes = new TextEncoder().encode(text).subarray(0, marketChangelogMaxBytes);
+    return new TextDecoder().decode(bytes, { stream: true }).trim() || undefined;
+}
+
+function releaseZip(assets: unknown[], slug: string, version: string): Json | undefined {
+    const zipAssets = assets.filter(
+        (asset): asset is Json =>
+            object(asset) && typeof asset.name === 'string' && /^[A-Za-z0-9_.-]+\.zip$/.test(asset.name),
+    );
+    return (
+        zipAssets.find((asset) => asset.name === `${slug}-${version}.zip`) ??
+        (zipAssets.length === 1 ? zipAssets[0] : undefined)
+    );
+}
+
+export async function loadRepositoryHistory(
+    env: Env,
+    source: RepositorySource,
+    slug: string,
+    changelog?: string,
+): Promise<CatalogueHistoryEntry[] | undefined> {
+    const version = repositoryVersion(source.tag);
+    if (!version) {
+        return;
+    }
+    let entries: unknown;
+    try {
+        entries = await jsonValue(
+            `https://api.github.com/repos/${source.repository.slice(19)}/releases?per_page=${marketHistoryLimit}`,
+            AbortSignal.timeout(8000),
+            2 * 1024 * 1024,
+            env,
+        );
+    } catch {
+        return;
+    }
+    if (!Array.isArray(entries) || entries.length > marketHistoryLimit) {
+        return;
+    }
+    const history = new Map<string, CatalogueHistoryEntry>();
+    for (const entry of entries) {
+        if (
+            !object(entry) ||
+            entry.draft !== false ||
+            entry.prerelease !== false ||
+            !Array.isArray(entry.assets) ||
+            entry.assets.length > 100
+        ) {
+            continue;
+        }
+        const candidate = repositoryVersion(entry.tag_name);
+        if (
+            !candidate ||
+            gt(candidate, version) ||
+            history.has(candidate) ||
+            (candidate === version && entry.tag_name !== source.tag)
+        ) {
+            continue;
+        }
+        const zip = releaseZip(entry.assets, slug, candidate);
+        if (
+            !zip ||
+            zip.state !== 'uploaded' ||
+            !Number.isSafeInteger(zip.size) ||
+            Number(zip.size) <= 0 ||
+            Number(zip.size) > maxRepositoryArchiveBytes ||
+            zip.browser_download_url !==
+                `${source.repository}/releases/download/${encodeURIComponent(String(entry.tag_name))}/${zip.name}`
+        ) {
+            continue;
+        }
+        const note = releaseNote(entry.body);
+        history.set(candidate, { version: candidate, ...(note ? { changelog: note } : {}) });
+    }
+    if (!history.has(version)) {
+        history.set(version, { version, ...(changelog ? { changelog } : {}) });
+    }
+    return [...history.values()]
+        .sort((left, right) => rcompare(left.version, right.version))
+        .slice(0, marketHistoryLimit);
 }
 
 async function publicRepository(env: Env, url: string, signal: AbortSignal, source?: RepositorySource): Promise<Json> {
@@ -340,13 +437,7 @@ async function inspectRelease(
     ) {
         fail(400, 'repository_manifest_invalid');
     }
-    const zipAssets = release.assets.filter(
-        (asset): asset is Json =>
-            object(asset) && typeof asset.name === 'string' && /^[A-Za-z0-9_.-]+\.zip$/.test(asset.name),
-    );
-    const selected =
-        zipAssets.find((asset) => asset.name === `${sourceManifest.id}-${version}.zip`) ??
-        (zipAssets.length === 1 ? zipAssets[0] : undefined);
+    const selected = releaseZip(release.assets, sourceManifest.id, version);
     if (
         !selected ||
         selected.state !== 'uploaded' ||
@@ -408,6 +499,7 @@ async function inspectRelease(
     if (inspection.expandedBytes > maxRepositoryExpandedBytes) {
         fail(400, 'archive_expansion');
     }
+    const changelog = releaseNote(release.body);
     return {
         source: {
             kind: 'github',
@@ -423,6 +515,7 @@ async function inspectRelease(
         },
         bytes,
         inspection,
+        ...(changelog ? { changelog } : {}),
     };
 }
 

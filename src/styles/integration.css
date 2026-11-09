@@ -47,9 +47,6 @@
 .market-filters .form-select {
     min-width: 150px;
 }
-.resource-art img {
-    object-fit: contain;
-}
 .form-control[type='file'] {
     height: 2.75rem;
     min-height: 2.75rem;

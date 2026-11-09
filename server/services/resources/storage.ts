@@ -1,6 +1,37 @@
 import type { Env } from '../../types';
 import { fail } from '../../http';
 import { now } from '../../lib/time';
+import { marketAssetMaxCount } from '../../../shared/packages/presentation';
+import { maxPreviewBytes } from '../../../shared/packages/raster';
+
+export function marketAssetKey(archive: string, index: number): string {
+    return `${archive}/market/${index}`;
+}
+
+export async function getResourceImage(
+    env: Env,
+    version: { archive_key: string | null; image_key: string | null; image_mime: string | null } | undefined,
+    asset?: string,
+) {
+    if (!version) {
+        return null;
+    }
+    let key = version.image_key;
+    if (asset !== undefined) {
+        if (!/^[0-9]$/.test(asset) || Number(asset) >= marketAssetMaxCount || !version.archive_key) {
+            return null;
+        }
+        key = marketAssetKey(version.archive_key, Number(asset));
+    }
+    if (!key) {
+        return null;
+    }
+    const image = await resourceStorage(env).get(key);
+    const mime = asset === undefined ? version.image_mime : image?.httpMetadata?.contentType;
+    return image && image.size <= maxPreviewBytes && mime && ['image/png', 'image/jpeg', 'image/webp'].includes(mime)
+        ? { image, mime }
+        : null;
+}
 
 async function reserveOperation(env: Env, operation: 'A' | 'B'): Promise<void> {
     const day = Math.floor(now() / 86400);

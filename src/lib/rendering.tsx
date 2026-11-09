@@ -9,6 +9,7 @@ export interface PublicPageData {
     guides?: Guide[];
     catalogue?: { resources: CatalogueResource[]; state: string };
     catalogueIdentity?: string;
+    catalogueResource?: string;
     sources?: unknown;
     releases?: unknown;
     kraftLink?: unknown;

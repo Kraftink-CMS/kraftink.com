@@ -6,6 +6,8 @@ import type { RepositorySource } from '../../../shared/packages/repository';
 import { externalLinkRel } from '../../../shared/links';
 import { Link } from 'react-router-dom';
 import { Card, ErrorNotice } from '../../components/UI';
+import { ResourceMarkdown } from '../../components/market/ResourceMarkdown';
+import { ResourceIcon } from '../../components/market/ResourceIcon';
 import { workspace } from '../../lib/translations';
 import { useSession } from '../../lib/session';
 import { hasRole } from '../../../shared/auth';
@@ -18,6 +20,22 @@ function cents(input: string): number | null {
     }
     const value = Math.round(Number(input.replace(',', '.')) * 100);
     return value >= 50 && value <= 1000000 ? value : null;
+}
+
+function assetUrl(bytes: Uint8Array, mime: string): string {
+    return URL.createObjectURL(new Blob([new Uint8Array(bytes)], { type: mime }));
+}
+
+interface EncodedAsset {
+    data: string;
+    mime: string;
+}
+
+function decodedAsset({ data, mime }: EncodedAsset): string {
+    return assetUrl(
+        Uint8Array.from(atob(data.replaceAll('-', '+').replaceAll('_', '/')), (byte) => byte.charCodeAt(0)),
+        mime,
+    );
 }
 
 export function ArchiveSubmission({
@@ -46,6 +64,7 @@ export function ArchiveSubmission({
         sizeBytes: number;
         price: number;
         imageUrl: string | null;
+        images: Record<string, string>;
     } | null>(null);
     const [busy, setBusy] = useState(false);
     const [maxUploadBytes, setMaxUploadBytes] = useState<number | null>(null);
@@ -93,8 +112,9 @@ export function ArchiveSubmission({
             if (preview?.imageUrl) {
                 URL.revokeObjectURL(preview.imageUrl);
             }
+            Object.values(preview?.images ?? {}).forEach((url) => URL.revokeObjectURL(url));
         },
-        [preview?.imageUrl],
+        [preview],
     );
 
     function reset() {
@@ -130,13 +150,23 @@ export function ArchiveSubmission({
                     inspection: Pick<ArchiveInspection, 'manifest' | 'metadata' | 'entries' | 'expandedBytes'>;
                     sha256: string;
                     sizeBytes: number;
+                    cover?: EncodedAsset;
+                    images?: Record<string, EncodedAsset>;
                 }>('/api/creator/resources/preview-repository', {
                     method: 'POST',
                     json: { repository: String(fields.get('repository')).trim(), resourceId: resource?.id },
                     signal: controller.signal,
                 });
                 if (!controller.signal.aborted) {
-                    setPreview({ ...result, price, imageUrl: null });
+                    const { cover, images, ...details } = result;
+                    setPreview({
+                        ...details,
+                        price,
+                        imageUrl: cover ? decodedAsset(cover) : null,
+                        images: Object.fromEntries(
+                            Object.entries(images ?? {}).map(([path, asset]) => [path, decodedAsset(asset)]),
+                        ),
+                    });
                 }
             } catch (cause) {
                 if (!controller.signal.aborted) {
@@ -182,34 +212,34 @@ export function ArchiveSubmission({
                 stopWorker();
                 setInspecting(false);
                 if (!message.data.inspection) {
-                    const code = message.data.error;
-                    setLocalError(
-                        code === 'version_must_increase'
-                            ? t.versionHint
-                            : code === 'archive_metadata'
-                              ? t.invalidManifestMetadata
-                              : code === 'archive_image'
-                                ? t.invalidManifestImage
-                                : code === 'archive_provider' || code === 'archive_assets'
-                                  ? t.invalidManifestFiles
-                                  : t.invalidArchive,
-                    );
+                    const errors: Record<string, string> = {
+                        version_must_increase: t.versionHint,
+                        archive_metadata: t.invalidManifestMetadata,
+                        archive_readme: t.invalidMarketReadme,
+                        archive_changelog: t.invalidMarketChangelog,
+                        archive_image: t.invalidManifestImage,
+                        archive_provider: t.invalidManifestFiles,
+                        archive_assets: t.invalidManifestFiles,
+                    };
+                    setLocalError(errors[message.data.error ?? ''] ?? t.invalidArchive);
                     return;
                 }
                 const inspection = message.data.inspection;
-                const imageUrl = inspection.image
-                    ? URL.createObjectURL(
-                          new Blob([new Uint8Array(inspection.image.bytes)], { type: inspection.image.mime }),
-                      )
-                    : null;
-                setPreview({ inspection, file, sizeBytes: file.size, price, imageUrl });
+                const imageUrl = inspection.image ? assetUrl(inspection.image.bytes, inspection.image.mime) : null;
+                const images = Object.fromEntries(
+                    Object.entries(inspection.marketAssets ?? {}).map(([path, asset]) => [
+                        path,
+                        assetUrl(asset.bytes, asset.mime),
+                    ]),
+                );
+                setPreview({ inspection, file, sizeBytes: file.size, price, imageUrl, images });
             };
             worker.onerror = fail;
             timeoutRef.current = setTimeout(fail, 20000);
             worker.postMessage({
                 file,
                 maxUploadBytes,
-                expected: resource ? { slug: resource.slug, type: resource.type } : undefined,
+                expected: { slug: resource?.slug, type: resource?.type, imageLocale: locale },
                 previousVersion,
             });
         } catch {
@@ -453,10 +483,32 @@ export function ArchiveSubmission({
                             </div>
                         )}
                         <div className={preview.imageUrl ? 'col-md-8' : 'col-12'}>
-                            <h2 className="h4">{localized(preview.inspection.metadata.name, locale)}</h2>
+                            <div className="d-flex align-items-center gap-3 mb-3">
+                                {!preview.imageUrl && (
+                                    <ResourceIcon
+                                        resource={preview.inspection.metadata}
+                                        previewImage={preview.images[preview.inspection.metadata.icon ?? '']}
+                                    />
+                                )}
+                                <h2 className="h4 mb-0">{localized(preview.inspection.metadata.name, locale)}</h2>
+                            </div>
                             <p className="text-break" style={{ whiteSpace: 'pre-wrap' }}>
                                 {localized(preview.inspection.metadata.description, locale)}
                             </p>
+                            {preview.inspection.metadata.readme && (
+                                <ResourceMarkdown
+                                    markdown={localized(preview.inspection.metadata.readme, locale)}
+                                    previewImages={preview.images}
+                                />
+                            )}
+                            {preview.inspection.metadata.changelog && (
+                                <>
+                                    <h3 className="h5">{t.marketChangelog}</h3>
+                                    <ResourceMarkdown
+                                        markdown={localized(preview.inspection.metadata.changelog, locale)}
+                                    />
+                                </>
+                            )}
                             <dl className="row mb-0">
                                 <dt className="col-sm-4">{t.slug}</dt>
                                 <dd className="col-sm-8">{preview.inspection.manifest.id}</dd>

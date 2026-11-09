@@ -26,6 +26,7 @@
         "@noble/hashes": "^2.0.1",
         "@otplib/plugin-crypto-web": "^13.5.0",
         "bootstrap": "5.3.8",
+        "bootstrap-icons": "1.13.2",
         "drizzle-orm": "^0.45.4",
         "fflate": "^0.8.2",
         "hono": "^4.10.0",

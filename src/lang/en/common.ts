@@ -148,6 +148,8 @@ export default {
             'Declare the supported games in games.supported and check any exclusions or extra features.',
         archive_market_support: 'Enter a valid Discord invite URL or a simple support email in the manifest.',
         archive_metadata: 'The manifest must include a readable Market name and description.',
+        archive_readme: 'Include a valid UTF-8 Market Markdown file without HTML. Each file can be up to 32 KiB.',
+        archive_changelog: 'Include a valid UTF-8 changelog without HTML. Each file can be up to 8 KiB.',
         archive_image: 'The manifest image must be a valid PNG, JPEG or WebP file included in the ZIP, up to 2 MiB.',
         archive_provider: 'Check the package namespace, provider and PHP entry file.',
         archive_assets: 'A file declared in the manifest is missing from the ZIP.',

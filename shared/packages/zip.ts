@@ -1,9 +1,22 @@
 import { Inflate } from 'fflate';
+import { marked } from 'marked';
 import { valid, gt } from 'semver';
 import { requirements } from '../compatibility';
 import { gameCompatibility, validResourceSupport } from '../catalogue';
 import { inspectRaster, maxPreviewBytes, type RasterInfo } from './raster';
 import { parseStaticTranslations, type StaticTranslations } from './php-translations';
+import {
+    marketAssetMaxCount,
+    marketAssetTotalBytes,
+    marketChangelogMaxBytes,
+    marketHttpsUrl,
+    marketIconName,
+    marketImagePath,
+    marketMarkdownMaxBytes,
+    marketMarkdownMaxLocales,
+    marketMarkdownTotalBytes,
+    marketMarkdownPath,
+} from './presentation';
 
 export type ResourceType = 'plugin' | 'theme' | 'game';
 export type LocalizedText = string | Record<string, string>;
@@ -26,9 +39,13 @@ export interface ArchiveInspection {
         version: string;
         name: LocalizedText;
         description: LocalizedText;
+        readme?: LocalizedText;
+        changelog?: LocalizedText;
+        icon?: string;
         image?: LocalizedText;
     };
     image?: RasterInfo & { bytes: Uint8Array; path: string; locale: string | null };
+    marketAssets?: Record<string, RasterInfo & { bytes: Uint8Array }>;
     entries: number;
     expandedBytes: number;
 }
@@ -158,6 +175,92 @@ function extract(bytes: Uint8Array, entry: Entry, maximum: number, code: string)
         fail(code);
     }
     return result;
+}
+
+function readPresentation(bytes: Uint8Array, entries: Map<string, Entry>, market: Record<string, unknown>) {
+    const assets: NonNullable<ArchiveInspection['marketAssets']> = Object.create(null);
+    let assetBytes = 0;
+    const addImage = (reference: string) => {
+        const path = marketImagePath(reference);
+        const entry = path ? entries.get(path) : undefined;
+        if (!path || !entry) {
+            fail('archive_image');
+        }
+        if (!assets[path]) {
+            assetBytes += entry.expanded;
+            if (Object.keys(assets).length >= marketAssetMaxCount || assetBytes > marketAssetTotalBytes) {
+                fail('archive_image');
+            }
+            const data = extract(bytes, entry, maxPreviewBytes, 'archive_image');
+            try {
+                assets[path] = { ...inspectRaster(data, path), bytes: data };
+            } catch {
+                fail('archive_image');
+            }
+        }
+        return path;
+    };
+
+    let icon: string | undefined;
+    if (market.icon !== undefined) {
+        if (typeof market.icon !== 'string') {
+            fail('archive_metadata');
+        }
+        icon = marketIconName(market.icon) || marketHttpsUrl(market.icon) ? market.icon : addImage(market.icon);
+    }
+
+    const readMarkdown = (field: 'readme' | 'changelog', kind: 'MARKET' | 'CHANGELOG', maxBytes: number) => {
+        const defaultFile = `${kind}.md`;
+        if (market[field] === undefined && !entries.has(defaultFile)) {
+            return undefined;
+        }
+        const error = field === 'readme' ? 'archive_readme' : 'archive_changelog';
+        const paths = market[field] === undefined ? defaultFile : publicText(market[field], 256);
+        if (!paths || (typeof paths !== 'string' && Object.keys(paths).length > marketMarkdownMaxLocales)) {
+            fail(error);
+        }
+        let totalBytes = 0;
+        const read = (path: string): string => {
+            const entry = entries.get(path);
+            if (!marketMarkdownPath(path, kind) || !entry) {
+                fail(error);
+            }
+            totalBytes += entry.expanded;
+            if (totalBytes > marketMarkdownTotalBytes) {
+                fail(error);
+            }
+            let markdown: string;
+            try {
+                markdown = decoder.decode(extract(bytes, entry, maxBytes, error)).trim();
+            } catch {
+                fail(error);
+            }
+            if (!markdown || /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(markdown)) {
+                fail(error);
+            }
+            marked.walkTokens(marked.lexer(markdown), (token) => {
+                if (token.type === 'html') {
+                    fail(error);
+                }
+                if (token.type === 'image' && !marketHttpsUrl(token.href)) {
+                    if (field === 'changelog') {
+                        fail(error);
+                    }
+                    addImage(token.href.replace(/^\.\//, ''));
+                }
+            });
+            return markdown;
+        };
+        return typeof paths === 'string'
+            ? read(paths)
+            : Object.fromEntries(Object.entries(paths).map(([locale, path]) => [locale, read(path)]));
+    };
+    return {
+        readme: readMarkdown('readme', 'MARKET', marketMarkdownMaxBytes),
+        changelog: readMarkdown('changelog', 'CHANGELOG', marketChangelogMaxBytes),
+        icon,
+        assets,
+    };
 }
 
 function checkExtra(bytes: Uint8Array, view: DataView, offset: number, length: number, name: string): void {
@@ -579,6 +682,7 @@ export function inspectArchive(
     if (!name || !description) {
         fail('archive_metadata');
     }
+    const { readme, changelog, icon, assets } = readPresentation(bytes, entries, market);
     let image: ArchiveInspection['image'];
     let images: LocalizedText | undefined;
     if (market.image !== undefined) {
@@ -629,9 +733,13 @@ export function inspectArchive(
             version: manifest.version,
             name,
             description,
+            ...(readme ? { readme } : {}),
+            ...(changelog ? { changelog } : {}),
+            ...(icon ? { icon } : {}),
             ...(images ? { image: images } : {}),
         },
         ...(image ? { image } : {}),
+        ...(Object.keys(assets).length ? { marketAssets: assets } : {}),
         entries: count,
         expandedBytes,
     };

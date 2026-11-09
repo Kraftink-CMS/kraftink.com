@@ -4,11 +4,10 @@ import { fail } from '../../http';
 import { siteLicenses, users } from '../../models/accounts';
 import { entitlements, orders } from '../../models/commerce';
 import { resources, resourceVersions } from '../../models/resources';
-import { maxPreviewBytes } from '../../../shared/packages/raster';
 import { sha256 } from '../../security/crypto';
 import { ipMatchesPolicy } from '../../../shared/ip';
 import type { Env } from '../../types';
-import { resourceStorage } from '../resources/storage';
+import { getResourceImage, resourceStorage } from '../resources/storage';
 import { parseRepositorySource } from '../../../shared/packages/repository';
 import { repositoryRelease } from '../resources/repository-updates';
 
@@ -150,9 +149,18 @@ export async function downloadResource(
     return purchasedArchive(env, userId, resource.id, version);
 }
 
-export async function resourceImage(env: Env, resourceId: string, versionId: string): Promise<Response> {
+export async function resourceImage(
+    env: Env,
+    resourceId: string,
+    versionId: string,
+    asset?: string,
+): Promise<Response> {
     const resource = await database(env.DB)
-        .select({ image_key: resourceVersions.image_key, image_mime: resourceVersions.image_mime })
+        .select({
+            archive_key: resourceVersions.archive_key,
+            image_key: resourceVersions.image_key,
+            image_mime: resourceVersions.image_mime,
+        })
         .from(resources)
         .innerJoin(resourceVersions, eq(resourceVersions.id, resources.approved_version_id))
         .innerJoin(users, eq(users.id, resources.author_id))
@@ -166,16 +174,14 @@ export async function resourceImage(env: Env, resourceId: string, versionId: str
             ),
         )
         .get();
-    if (!resource?.image_key || !['image/png', 'image/jpeg', 'image/webp'].includes(resource.image_mime ?? '')) {
+    const result = await getResourceImage(env, resource, asset);
+    if (!result) {
         fail(404, 'image_not_found');
     }
-    const image = await resourceStorage(env).get(resource.image_key);
-    if (!image || image.size > maxPreviewBytes) {
-        fail(404, 'image_not_found');
-    }
+    const { image, mime } = result;
     return new Response(image.body, {
         headers: {
-            'Content-Type': resource.image_mime!,
+            'Content-Type': mime,
             'Content-Length': String(image.size),
             'Content-Security-Policy': "default-src 'none'; sandbox",
             'X-Content-Type-Options': 'nosniff',

@@ -9,7 +9,7 @@ import { ArchiveError, inspectArchive, isNewerVersion, type LocalizedText } from
 import { loadPublicCatalogue } from '../market/catalogue';
 import { defaultUploadLimit, effectiveUploadLimit } from '../../upload-limits';
 import { cleanupArchives } from './archives';
-import { resourceStorage } from './storage';
+import { marketAssetKey, resourceStorage } from './storage';
 import { requireSellerReady } from '../commerce/sellers';
 import { parseRepositorySource, type RepositorySource } from '../../../shared/packages/repository';
 import { inspectRepository } from './repository';
@@ -22,6 +22,30 @@ export interface ResourceEffects {
 
 function fallbackText(value: LocalizedText): string {
     return typeof value === 'string' ? value : value.en || Object.values(value).find(Boolean) || '';
+}
+
+interface ResourcePresentation {
+    name: LocalizedText;
+    description: LocalizedText;
+    readme?: LocalizedText;
+    icon?: string;
+    marketAssets?: string[];
+}
+
+function listingMetadata({
+    name,
+    description,
+    readme,
+    icon,
+    marketAssets,
+}: ResourcePresentation): ResourcePresentation {
+    return {
+        name,
+        description,
+        ...(readme ? { readme } : {}),
+        ...(icon ? { icon } : {}),
+        ...(marketAssets ? { marketAssets } : {}),
+    };
 }
 
 async function isAdministrator(env: Env, actorId: string): Promise<boolean> {
@@ -213,9 +237,7 @@ export async function reviewResourceVersion(
                 error(409, 'repository_release_changed');
             }
         }
-        const payload = JSON.parse(version.payload_json) as {
-            name: LocalizedText;
-            description: LocalizedText;
+        const payload = JSON.parse(version.payload_json) as ResourcePresentation & {
             priceCents: number;
             currency: string;
         };
@@ -243,7 +265,7 @@ export async function reviewResourceVersion(
                 version.id,
                 fallbackText(payload.name),
                 fallbackText(payload.description),
-                JSON.stringify({ name: payload.name, description: payload.description }),
+                JSON.stringify(listingMetadata(payload)),
                 payload.priceCents,
                 payload.currency,
                 time,
@@ -292,6 +314,7 @@ export async function submitArchive(
     effects: ResourceEffects,
     limitCreation: () => Promise<void>,
     source?: RepositorySource,
+    repositoryChangelog?: string,
 ) {
     await requireSellerReady(env, actorId);
     const bytes = await readArchive();
@@ -305,16 +328,25 @@ export async function submitArchive(
         throw cause;
     }
     const { manifest, metadata, image } = inspection;
+    const marketAssets = Object.entries(inspection.marketAssets ?? {});
     const digest = await sha256(bytes);
     const payload = {
-        name: metadata.name,
-        description: metadata.description,
+        ...listingMetadata({
+            ...metadata,
+            marketAssets: marketAssets.length ? marketAssets.map(([path]) => path) : undefined,
+        }),
+        ...((metadata.changelog ?? repositoryChangelog)
+            ? { changelog: metadata.changelog ?? repositoryChangelog }
+            : {}),
         priceCents: priceCents,
         currency: 'EUR',
         ...(source ? { source } : {}),
     };
     const time = now();
-    const totalSize = bytes.byteLength + (image?.bytes.byteLength ?? 0);
+    const totalSize =
+        bytes.byteLength +
+        (image?.bytes.byteLength ?? 0) +
+        marketAssets.reduce((size, [, asset]) => size + asset.bytes.byteLength, 0);
     const accountLimit = limit(env.MAX_ACCOUNT_STORAGE_BYTES, 250 * 1024 * 1024, 5 * 1024 * 1024 * 1024);
     const globalLimit = storageLimit(env);
     let resource = existing;
@@ -455,6 +487,12 @@ export async function submitArchive(
         if (image && imageKey) {
             await resourceStorage(env).put(imageKey, image.bytes, {
                 httpMetadata: { contentType: image.mime },
+                customMetadata: { versionId: id, resourceId: resource.id },
+            });
+        }
+        for (const [index, [, asset]] of marketAssets.entries()) {
+            await resourceStorage(env).put(marketAssetKey(archiveKey, index), asset.bytes, {
+                httpMetadata: { contentType: asset.mime },
                 customMetadata: { versionId: id, resourceId: resource.id },
             });
         }

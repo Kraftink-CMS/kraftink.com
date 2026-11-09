@@ -153,6 +153,9 @@ export default {
         archive_market_support:
             'Indiquez une URL d’invitation Discord valide ou une adresse d’assistance dans le manifeste.',
         archive_metadata: 'Le manifeste doit contenir un nom et une description lisibles pour le Market.',
+        archive_readme:
+            'Ajoutez un fichier Markdown UTF-8 valide, sans HTML. Chaque fichier peut peser jusqu’à 32 Kio.',
+        archive_changelog: 'Ajoutez un fichier de notes UTF-8 valide, sans HTML, de 8 Kio maximum.',
         archive_image:
             'L’image du manifeste doit être un fichier PNG, JPEG ou WebP valide présent dans le ZIP, de 2 Mio au maximum.',
         archive_provider: 'Vérifiez le namespace, le fournisseur et le fichier PHP d’entrée du paquet.',

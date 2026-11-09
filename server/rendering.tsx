@@ -13,6 +13,7 @@ import { hasRole } from '../shared/auth';
 import { matchProtectedPage } from '../shared/routes';
 import type { Env } from './types';
 import { cachedMetadata, mergedCatalogue } from './services/market/catalogue';
+import { marketResourceId } from '../shared/catalogue';
 
 const publicPaths = ['', 'features', 'about', 'downloads', 'market', 'terms', 'privacy'];
 
@@ -80,7 +81,13 @@ async function guides(env: Env, locale: string, signal: AbortSignal): Promise<Gu
     return value;
 }
 
-async function publicData(env: Env, locale: string, relative: string, userId: string | null): Promise<PublicPageData> {
+async function publicData(
+    env: Env,
+    locale: string,
+    relative: string,
+    search: string,
+    userId: string | null,
+): Promise<PublicPageData> {
     const data: PublicPageData = { locale, origin: new URL(env.APP_ORIGIN).origin };
     if (relative === 'documentation' || relative.startsWith('documentation/')) {
         data.guides = await bounded((signal) => guides(env, locale, signal));
@@ -90,10 +97,12 @@ async function publicData(env: Env, locale: string, relative: string, userId: st
         relative === 'market/resource' ||
         relative.startsWith('market/resource/')
     ) {
+        const resourceId = marketResourceId(relative, search);
         data.catalogue = await bounded((signal) =>
-            mergedCatalogue(env, userId, false, { persistMetadata: false, signal }),
+            mergedCatalogue(env, userId, false, { persistMetadata: false, signal, resourceId }),
         );
         data.catalogueIdentity = userId ?? 'public';
+        data.catalogueResource = resourceId;
     } else if (relative === 'downloads') {
         const [result, kraftLink] = await Promise.all([
             bounded(async (signal) => {
@@ -190,7 +199,10 @@ export async function renderPage(c: AppContext): Promise<Response> {
             },
         });
     }
-    const data: PageData = { ...(await publicData(c.env, locale, relative, session.user?.id ?? null)), session };
+    const data: PageData = {
+        ...(await publicData(c.env, locale, relative, url.search, session.user?.id ?? null)),
+        session,
+    };
     let metadata = pageMetadata(localePath, url.search, locale, data, new URL(c.env.APP_ORIGIN).origin);
     const requiredRole = protectedPage?.role;
     if (requiredRole && !hasRole(session.user, requiredRole)) {
