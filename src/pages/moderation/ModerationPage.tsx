@@ -11,6 +11,9 @@ import { hasRole } from '../../../shared/auth';
 import { moderationTabs } from '../../../shared/routes';
 import { parseRepositorySource } from '../../../shared/packages/repository';
 import { externalLinkRel } from '../../../shared/links';
+import { marketAssetLinks } from '../../../shared/packages/presentation';
+import { ResourceMarkdown } from '../../components/market/ResourceMarkdown';
+import { ResourceIcon } from '../../components/market/ResourceIcon';
 
 interface Review {
     id: string;
@@ -42,6 +45,10 @@ interface ManagedResource {
 interface Proposal {
     name: string | Record<string, string>;
     description: string | Record<string, string>;
+    readme?: string | Record<string, string>;
+    changelog?: string | Record<string, string>;
+    icon?: string;
+    marketAssets?: string[];
     priceCents: number;
     currency: string;
 }
@@ -285,6 +292,9 @@ export function ModerationPage() {
     }
 
     const payload = selected ? proposal(selected) : null;
+    const images = selected
+        ? marketAssetLinks(payload?.marketAssets, `/api/moderation/versions/${selected.id}/image`)
+        : {};
     const source = selected ? parseRepositorySource(selected.payload_json) : null;
     return (
         <>
@@ -491,6 +501,28 @@ export function ModerationPage() {
                                                 className="img-fluid rounded mb-4"
                                                 style={{ maxHeight: 280 }}
                                             />
+                                        )}
+                                        {!selected.image_key && payload.icon && (
+                                            <div className="mb-3">
+                                                <ResourceIcon
+                                                    resource={{
+                                                        type: selected.type,
+                                                        icon: images[payload.icon] ?? payload.icon,
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+                                        {payload.readme && (
+                                            <ResourceMarkdown
+                                                markdown={localized(payload.readme, locale)}
+                                                images={images}
+                                            />
+                                        )}
+                                        {payload.changelog && (
+                                            <>
+                                                <h3 className="h5">{t.marketChangelog}</h3>
+                                                <ResourceMarkdown markdown={localized(payload.changelog, locale)} />
+                                            </>
                                         )}
                                         <dl className="row">
                                             <dt className="col-sm-4">{t.author}</dt>

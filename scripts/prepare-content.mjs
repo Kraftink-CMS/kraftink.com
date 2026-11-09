@@ -24,6 +24,7 @@ await Promise.all([
         }
     }),
     cp(path.join(root, 'node_modules/bootstrap/LICENSE'), path.join(root, 'public/licenses/bootstrap.txt')),
+    cp(path.join(root, 'node_modules/bootstrap-icons/LICENSE'), path.join(root, 'public/licenses/bootstrap-icons.txt')),
     cp(path.join(root, 'node_modules/marked/LICENSE.md'), path.join(root, 'public/licenses/marked.txt')),
     cp(path.join(root, 'node_modules/ipaddr.js/LICENSE'), path.join(root, 'public/licenses/ipaddr.txt')),
     Promise.all([

@@ -1,5 +1,7 @@
 import { HTTPException } from 'hono/http-exception';
+import type { CatalogueHistoryEntry } from '../../../shared/catalogue';
 import { requirements } from '../../../shared/compatibility';
+import { marketChangelogMaxBytes, marketHistoryLimit } from '../../../shared/packages/presentation';
 import { ArchiveError, isNewerVersion, type ResourceManifest } from '../../../shared/packages/zip';
 import { parseRepositorySource, repositoryVersion, type RepositorySource } from '../../../shared/packages/repository';
 import { sha256 } from '../../security/crypto';
@@ -7,7 +9,7 @@ import { now } from '../../lib/time';
 import type { ResourceVersionRow } from '../../models/resources';
 import type { MetadataCacheRow } from '../../models/infrastructure';
 import type { Env } from '../../types';
-import { resolveRepositoryRelease } from './repository';
+import { loadRepositoryHistory, resolveRepositoryRelease } from './repository';
 
 export interface RepositoryRelease {
     source: RepositorySource;
@@ -16,6 +18,7 @@ export interface RepositoryRelease {
     sha256: string;
     sizeBytes: number;
     manifest: ResourceManifest;
+    history?: CatalogueHistoryEntry[];
     unavailable?: boolean;
 }
 
@@ -58,7 +61,23 @@ export function cachedRepositoryRelease(
     ) {
         return null;
     }
-    return { ...value, source: candidate };
+    const encoder = new TextEncoder();
+    const history =
+        Array.isArray(value.history) &&
+        value.history.length <= marketHistoryLimit &&
+        value.history.every(
+            (entry) =>
+                entry &&
+                typeof entry.version === 'string' &&
+                repositoryVersion(entry.version) === entry.version &&
+                !isNewerVersion(entry.version, value.version) &&
+                (entry.changelog === undefined ||
+                    (typeof entry.changelog === 'string' &&
+                        encoder.encode(entry.changelog).byteLength <= marketChangelogMaxBytes)),
+        )
+            ? value.history
+            : undefined;
+    return { ...value, source: candidate, history };
 }
 
 export async function seedRepositoryRelease(env: Env, resourceId: string, version: ResourceVersionRow): Promise<void> {
@@ -142,44 +161,40 @@ export async function refreshRepositoryResources(env: Env): Promise<void> {
                 { slug: version.slug, type: version.type },
                 baseline,
             );
-            if (!result) {
-                const release = {
+            let release: RepositoryRelease;
+            if (result) {
+                const digest = await sha256(result.bytes);
+                const previousVersion = previous?.version ?? version.version;
+                const currentVersion = result.inspection.manifest.version;
+                if (currentVersion !== previousVersion && !isNewerVersion(currentVersion, previousVersion)) {
+                    throw new ArchiveError('version_must_increase');
+                }
+                if (currentVersion === previousVersion && digest !== (previous?.sha256 ?? version.sha256)) {
+                    throw new ArchiveError('repository_release_changed');
+                }
+                release = {
+                    source: result.source,
+                    version: currentVersion,
+                    requirements: result.inspection.manifest.requires as Record<string, string>,
+                    sha256: digest,
+                    sizeBytes: result.bytes.byteLength,
+                    manifest: result.inspection.manifest,
+                };
+            } else {
+                release = {
                     ...baseline,
                     version: baseline.manifest.version,
-                    requirements: baseline.manifest.requires,
+                    requirements: baseline.manifest.requires as Record<string, string>,
                     sizeBytes: previous?.sizeBytes ?? version.size_bytes,
                     unavailable: false,
                 };
-                await env.DB.prepare(
-                    `UPDATE metadata_cache SET payload_json = ?, fetched_at = ?, retry_at = ?
-                    WHERE key = ? AND retry_at = ?`,
-                )
-                    .bind(JSON.stringify(release), now(), now() + 3600, key, lock.retry_at)
-                    .run();
-                continue;
             }
-            const digest = await sha256(result.bytes);
-            const previousVersion = previous?.version ?? version.version;
-            if (
-                result.inspection.manifest.version !== previousVersion &&
-                !isNewerVersion(result.inspection.manifest.version, previousVersion)
-            ) {
-                throw new ArchiveError('version_must_increase');
+            release.history = previous?.history;
+            if (release.history?.[0]?.version !== release.version) {
+                release.history =
+                    (await loadRepositoryHistory(env, release.source, version.slug, result?.changelog)) ??
+                    release.history;
             }
-            if (
-                result.inspection.manifest.version === previousVersion &&
-                digest !== (previous?.sha256 ?? version.sha256)
-            ) {
-                throw new ArchiveError('repository_release_changed');
-            }
-            const release: RepositoryRelease = {
-                source: result.source,
-                version: result.inspection.manifest.version,
-                requirements: result.inspection.manifest.requires as Record<string, string>,
-                sha256: digest,
-                sizeBytes: result.bytes.byteLength,
-                manifest: result.inspection.manifest,
-            };
             await env.DB.prepare(
                 `UPDATE metadata_cache SET payload_json = ?, fetched_at = ?, retry_at = ?
                 WHERE key = ? AND retry_at = ?`,

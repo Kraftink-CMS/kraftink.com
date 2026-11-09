@@ -7,8 +7,12 @@ export interface GameCompatibility {
     games?: { supported: string[]; excluded?: string[]; enhancements?: string[] };
 }
 
-export interface CatalogueVersion extends GameCompatibility {
+export interface CatalogueHistoryEntry {
     version: string;
+    changelog?: string | Record<string, string>;
+}
+
+export interface CatalogueVersion extends GameCompatibility, CatalogueHistoryEntry {
     requirements: Record<string, string>;
     download?: { url: string; sha256: string };
 }
@@ -19,6 +23,10 @@ export interface CatalogueResource {
     type: 'plugin' | 'theme' | 'game';
     name: string | Record<string, string>;
     description: string | Record<string, string>;
+    readme?: string | Record<string, string>;
+    readmeImages?: Record<string, string>;
+    icon?: string;
+    history?: CatalogueHistoryEntry[];
     image?: string | Record<string, string>;
     author: { id: string; name: string; url?: string };
     support?: ResourceSupport;
@@ -34,6 +42,21 @@ export interface PublicCatalogue {
     resources: CatalogueResource[];
     state: 'fresh' | 'stale' | 'unavailable';
     fetchedAt: number | null;
+}
+
+export function marketResourceId(path: string, search: string): string | undefined {
+    if (path === 'market/resource') {
+        const query = new URLSearchParams(search);
+        return query.get('resource') ?? query.get('id') ?? undefined;
+    }
+    if (path.startsWith('market/resource/')) {
+        try {
+            return decodeURIComponent(path.slice('market/resource/'.length));
+        } catch {
+            return undefined;
+        }
+    }
+    return undefined;
 }
 
 export function gameCompatibility(value: object, type: unknown): GameCompatibility | null {

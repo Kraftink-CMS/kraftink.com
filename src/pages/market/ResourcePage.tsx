@@ -1,6 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Card, Empty, ErrorNotice, Loading, Skeleton, PageTitle } from '../../components/UI';
+import { Modal } from '../../components/Modal';
+import { ResourceDetails } from '../../components/market/ResourceDetails';
+import { ResourceIcon } from '../../components/market/ResourceIcon';
 import { useCatalogue } from '../../hooks/useCatalogue';
 import { api } from '../../lib/api';
 import { localized, useLocale } from '../../lib/i18n';
@@ -46,12 +49,13 @@ export function ResourcePage() {
     const common = commonMessages[locale];
     const [search] = useSearchParams();
     const params = useParams();
-    const { data, error } = useCatalogue();
+    const id = params.resourceId ?? search.get('resource') ?? search.get('id') ?? undefined;
+    const { data, error } = useCatalogue(id);
     const { user } = useSession();
     const [failure, setFailure] = useState<unknown>(null);
     const [busy, setBusy] = useState(false);
-    const id = params.resourceId ?? search.get('resource') ?? search.get('id');
-    const resource = data?.resources.find((entry) => entry.resourceId === id || entry.id === id);
+    const [downloadOpen, setDownloadOpen] = useState(false);
+    const resource = id ? data?.resources.find((entry) => entry.resourceId === id || entry.id === id) : undefined;
     async function checkout(event: FormEvent) {
         event.preventDefault();
         if (!resource?.resourceId) {
@@ -79,17 +83,12 @@ export function ResourcePage() {
                 <Skeleton width="75%" className="mb-4" />
                 <div className="row g-4">
                     <div className="col-lg-8">
-                        <Card title={text.compatibility}>
-                            <dl className="metadata-list">
-                                {[common.author, common.version, text.cms, text.php].map((label) => (
-                                    <div key={label}>
-                                        <dt>{label}</dt>
-                                        <dd>
-                                            <Skeleton height="1.5rem" width="65%" />
-                                        </dd>
-                                    </div>
-                                ))}
-                            </dl>
+                        <Card title={text.description}>
+                            <div className="vstack gap-3">
+                                <Skeleton />
+                                <Skeleton width="85%" />
+                                <Skeleton width="65%" />
+                            </div>
                         </Card>
                     </div>
                     <div className="col-lg-4">
@@ -115,120 +114,61 @@ export function ResourcePage() {
     const excluded = version?.games?.excluded ?? [];
     const enhancements = version?.games?.enhancements ?? [];
     const preview = localized(resource.image, locale);
+    const name = localized(resource.name, locale);
+    const description = localized(resource.description, locale);
+    const readme = localized(resource.readme, locale);
     const otherResources = data.resources.filter(
         (entry) => entry.id !== resource.id && entry.author.id === resource.author.id,
     );
     const email = resource.support?.email;
     const discord = resource.support?.discord ?? (email ? null : discordUrl);
     const free = resource.commercial.kind === 'free';
-    const actionUrl = free
-        ? (version?.download?.url ?? resource.repository)
-        : (resource.commercial.url ?? resource.repository);
-    const actionLabel = free ? (version?.download?.url ? common.download : text.source) : text.external;
+    const downloadUrl = free ? version?.download?.url : undefined;
+    const repositoryUnavailable = resource.access?.code === 'repository_unavailable';
+    const downloadButton = downloadUrl && !repositoryUnavailable && (
+        <button className="btn btn-primary w-100" type="button" onClick={() => setDownloadOpen(true)}>
+            <i className="bi bi-download me-2" aria-hidden="true" />
+            {common.download}
+        </button>
+    );
+    const actionUrl = free ? resource.repository : (resource.commercial.url ?? resource.repository);
+    const installArea = text.installAreas[resource.type];
     return (
         <>
             <Link className="back-link" to={path('/market')}>
                 ← {text.returnMarket}
             </Link>
-            <PageTitle title={localized(resource.name, locale)} description={localized(resource.description, locale)}>
-                <span className="badge text-bg-light">{common[resource.type]}</span>
-            </PageTitle>
+            <header className="page-heading resource-heading gap-3">
+                {(!preview || resource.type !== 'theme') && <ResourceIcon resource={resource} />}
+                <div className="resource-heading-copy">
+                    <div className="d-flex flex-wrap align-items-center gap-2">
+                        <h1 className="mb-0">{name}</h1>
+                        <span className="badge text-bg-light">{common[resource.type]}</span>
+                    </div>
+                    {readme && <p>{description}</p>}
+                </div>
+            </header>
+            {downloadButton && <div className="d-lg-none mb-4">{downloadButton}</div>}
             <div className="row g-4">
-                <div className="col-lg-8">
+                <div className="col-lg-8 resource-content">
                     {preview && (
                         <img
-                            className="img-fluid rounded border w-100 mb-4"
+                            className="resource-hero-image rounded border mb-4"
+                            key={preview}
                             src={preview}
                             alt=""
+                            decoding="async"
+                            referrerPolicy="no-referrer"
                             onError={(event) => {
                                 event.currentTarget.hidden = true;
                             }}
                         />
                     )}
-                    <Card title={text.compatibility}>
-                        <dl className="metadata-list">
-                            <div>
-                                <dt>{common.author}</dt>
-                                <dd>
-                                    {resource.author.url ? (
-                                        <a
-                                            href={resource.author.url}
-                                            target="_blank"
-                                            rel={externalLinkRel(resource.author.url)}
-                                        >
-                                            {resource.author.name}
-                                        </a>
-                                    ) : (
-                                        resource.author.name
-                                    )}
-                                </dd>
-                            </div>
-                            {version?.version && (
-                                <div>
-                                    <dt>{common.version}</dt>
-                                    <dd>{version.version}</dd>
-                                </div>
-                            )}
-                            {Object.entries(version?.requirements ?? {}).map(([key, value]) => (
-                                <div key={key}>
-                                    <dt>{key === 'cms' ? text.cms : key === 'php' ? text.php : key}</dt>
-                                    <dd>
-                                        <code>{value}</code>
-                                    </dd>
-                                </div>
-                            ))}
-                            {resource.type === 'plugin' && (
-                                <div>
-                                    <dt>{text.supportedGames}</dt>
-                                    <dd className="d-flex flex-wrap align-items-center gap-2">
-                                        {supported.length > 0 ? (
-                                            <GameBadges games={supported} />
-                                        ) : excluded.length > 0 ? (
-                                            <>
-                                                <span>{text.allGamesExcept}</span>
-                                                <GameBadges games={excluded} />
-                                            </>
-                                        ) : (
-                                            text.allGames
-                                        )}
-                                    </dd>
-                                </div>
-                            )}
-                            {resource.type === 'plugin' && enhancements.length > 0 && (
-                                <div>
-                                    <dt>{text.gameEnhancements}</dt>
-                                    <dd>
-                                        <GameBadges games={enhancements} />
-                                    </dd>
-                                </div>
-                            )}
-                            <div id="resource-support">
-                                <dt>{text.supportContact}</dt>
-                                <dd className="d-flex flex-wrap gap-3">
-                                    {discord && (
-                                        <a href={discord} target="_blank" rel={externalLinkRel(discord)}>
-                                            Discord
-                                        </a>
-                                    )}
-                                    {email && <a href={`mailto:${email}`}>{text.contactEmail}</a>}
-                                </dd>
-                            </div>
-                        </dl>
-                        {resource.repository && (
-                            <a
-                                className="btn btn-outline-secondary"
-                                href={resource.repository}
-                                target="_blank"
-                                rel={externalLinkRel(resource.repository)}
-                            >
-                                {text.source} ↗
-                            </a>
-                        )}
-                    </Card>
+                    <ResourceDetails key={resource.id} resource={resource} />
                     {otherResources.length > 0 && (
                         <div className="mt-4">
                             <Card title={text.moreFromAuthor}>
-                                <ul className="list-unstyled d-grid gap-2 mb-0">
+                                <ul className="list-unstyled d-flex flex-wrap gap-3 mb-0">
                                     {otherResources.map((entry) => (
                                         <li key={entry.id}>
                                             <Link
@@ -243,69 +183,203 @@ export function ResourcePage() {
                         </div>
                     )}
                 </div>
-                <div className="col-lg-4">
-                    <Card
-                        title={
-                            free
-                                ? common.free
-                                : resource.resourceId && resource.access?.allowed
-                                  ? common.purchased
-                                  : resourcePrice(resource, locale)
-                        }
-                    >
-                        <ErrorNotice error={failure} />
-                        {resource.access?.code === 'repository_unavailable' ? (
-                            <p className="alert alert-warning mb-0" role="status">
-                                {text.resourceUnavailable}
-                            </p>
-                        ) : free || !resource.resourceId ? (
-                            actionUrl ? (
-                                <a
-                                    className="btn btn-primary w-100"
-                                    href={actionUrl}
-                                    target="_blank"
-                                    rel={externalLinkRel(actionUrl)}
-                                >
-                                    {actionLabel}
-                                </a>
+                <aside className="col-lg-4">
+                    <div className="vstack gap-4">
+                        <Card
+                            className={downloadButton ? 'd-none d-lg-block' : undefined}
+                            title={
+                                free
+                                    ? common.free
+                                    : resource.resourceId && resource.access?.allowed
+                                      ? common.purchased
+                                      : resourcePrice(resource, locale)
+                            }
+                        >
+                            <ErrorNotice error={failure} />
+                            {repositoryUnavailable ? (
+                                <p className="alert alert-warning mb-0" role="status">
+                                    {text.resourceUnavailable}
+                                </p>
                             ) : (
-                                <>
-                                    <p>{free ? text.downloadUnavailable : text.purchaseLinkUnavailable}</p>
-                                    <a href="#resource-support" className="btn btn-outline-secondary w-100">
-                                        {text.contactSupport}
-                                    </a>
-                                </>
-                            )
-                        ) : resource.access?.allowed ? (
-                            <>
-                                <p>{text.boughtHelp}</p>
-                                <Link to={path('/account')} className="btn btn-primary w-100">
-                                    {common.purchases}
-                                </Link>
-                            </>
-                        ) : (
-                            <>
-                                <p>{text.checkoutHelp}</p>
-                                <LegalNotice context="purchase" />
-                                {user ? (
-                                    <form onSubmit={checkout}>
-                                        <button className="btn btn-primary w-100" disabled={busy} type="submit">
-                                            {busy ? common.loading : text.confirmBuy}
-                                        </button>
-                                    </form>
+                                downloadButton ||
+                                (free || !resource.resourceId ? (
+                                    actionUrl ? (
+                                        <a
+                                            className="btn btn-primary w-100"
+                                            href={actionUrl}
+                                            target="_blank"
+                                            rel={externalLinkRel(actionUrl)}
+                                        >
+                                            {free ? text.source : text.external}
+                                        </a>
+                                    ) : (
+                                        <>
+                                            <p>{free ? text.downloadUnavailable : text.purchaseLinkUnavailable}</p>
+                                            <a href="#resource-support" className="btn btn-outline-secondary w-100">
+                                                {text.contactSupport}
+                                            </a>
+                                        </>
+                                    )
+                                ) : resource.access?.allowed ? (
+                                    <>
+                                        <p>{text.boughtHelp}</p>
+                                        <Link to={path('/account')} className="btn btn-primary w-100">
+                                            {common.purchases}
+                                        </Link>
+                                    </>
                                 ) : (
-                                    <Link
-                                        className="btn btn-primary w-100"
-                                        to={`${path('/login')}?next=${encodeURIComponent(path('/market/resource') + '?resource=' + resource.resourceId)}`}
-                                    >
-                                        {common.login}
-                                    </Link>
+                                    <>
+                                        <p>{text.checkoutHelp}</p>
+                                        <LegalNotice context="purchase" />
+                                        {user ? (
+                                            <form onSubmit={checkout}>
+                                                <button className="btn btn-primary w-100" disabled={busy} type="submit">
+                                                    {busy ? common.loading : text.confirmBuy}
+                                                </button>
+                                            </form>
+                                        ) : (
+                                            <Link
+                                                className="btn btn-primary w-100"
+                                                to={`${path('/login')}?next=${encodeURIComponent(path('/market/resource') + '?resource=' + resource.resourceId)}`}
+                                            >
+                                                {common.login}
+                                            </Link>
+                                        )}
+                                    </>
+                                ))
+                            )}
+                        </Card>
+                        <Card title={text.compatibility}>
+                            <dl className="metadata-list">
+                                <div>
+                                    <dt>{common.author}</dt>
+                                    <dd>
+                                        {resource.author.url ? (
+                                            <a
+                                                href={resource.author.url}
+                                                target="_blank"
+                                                rel={externalLinkRel(resource.author.url)}
+                                            >
+                                                {resource.author.name}
+                                            </a>
+                                        ) : (
+                                            resource.author.name
+                                        )}
+                                    </dd>
+                                </div>
+                                {version?.version && (
+                                    <div>
+                                        <dt>{common.version}</dt>
+                                        <dd>{version.version}</dd>
+                                    </div>
                                 )}
-                            </>
-                        )}
-                    </Card>
-                </div>
+                                {Object.entries(version?.requirements ?? {}).map(([key, value]) => (
+                                    <div key={key}>
+                                        <dt>{key === 'cms' ? text.cms : key === 'php' ? text.php : key}</dt>
+                                        <dd>
+                                            <code>{value}</code>
+                                        </dd>
+                                    </div>
+                                ))}
+                                {resource.type === 'plugin' && (
+                                    <div>
+                                        <dt>{text.supportedGames}</dt>
+                                        <dd className="d-flex flex-wrap align-items-center gap-2">
+                                            {supported.length > 0 ? (
+                                                <GameBadges games={supported} />
+                                            ) : excluded.length > 0 ? (
+                                                <>
+                                                    <span>{text.allGamesExcept}</span>
+                                                    <GameBadges games={excluded} />
+                                                </>
+                                            ) : (
+                                                text.allGames
+                                            )}
+                                        </dd>
+                                    </div>
+                                )}
+                                {resource.type === 'plugin' && enhancements.length > 0 && (
+                                    <div>
+                                        <dt>{text.gameEnhancements}</dt>
+                                        <dd>
+                                            <GameBadges games={enhancements} />
+                                        </dd>
+                                    </div>
+                                )}
+                                <div id="resource-support">
+                                    <dt>{text.supportContact}</dt>
+                                    <dd className="d-flex flex-wrap gap-3">
+                                        {discord && (
+                                            <a href={discord} target="_blank" rel={externalLinkRel(discord)}>
+                                                Discord
+                                            </a>
+                                        )}
+                                        {email && <a href={`mailto:${email}`}>{text.contactEmail}</a>}
+                                    </dd>
+                                </div>
+                            </dl>
+                            {resource.repository && (
+                                <a
+                                    className="btn btn-outline-secondary"
+                                    href={resource.repository}
+                                    target="_blank"
+                                    rel={externalLinkRel(resource.repository)}
+                                >
+                                    {text.source} ↗
+                                </a>
+                            )}
+                        </Card>
+                    </div>
+                </aside>
             </div>
+            {downloadUrl && (
+                <Modal
+                    open={downloadOpen}
+                    onClose={() => setDownloadOpen(false)}
+                    labelledBy="resource-download-title"
+                    trapFocus
+                >
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h2 id="resource-download-title" className="modal-title h5">
+                                {resource.manual_only ? text.manualInstallation : text.installInCms}
+                            </h2>
+                            <button
+                                type="button"
+                                className="btn-close"
+                                aria-label={text.closeDownload}
+                                onClick={() => setDownloadOpen(false)}
+                            />
+                        </div>
+                        <div className="modal-body">
+                            {!resource.manual_only && (
+                                <ol>
+                                    <li>{text.openInstallArea.replace('{area}', installArea)}</li>
+                                    <li>{text.selectCatalogueResource.replace('{name}', name)}</li>
+                                </ol>
+                            )}
+                            <p className="mb-0">{text.uploadManualZip.replace('{area}', installArea)}</p>
+                        </div>
+                        <div className="modal-footer">
+                            <Link
+                                className="btn btn-outline-secondary"
+                                to={path('/documentation/extensions-catalogue')}
+                                onClick={() => setDownloadOpen(false)}
+                            >
+                                {text.installationGuide}
+                            </Link>
+                            <a
+                                className="btn btn-primary"
+                                href={downloadUrl}
+                                target="_blank"
+                                rel={externalLinkRel(downloadUrl)}
+                            >
+                                {text.downloadZip}
+                            </a>
+                        </div>
+                    </div>
+                </Modal>
+            )}
         </>
     );
 }

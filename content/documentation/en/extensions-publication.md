@@ -2,6 +2,8 @@
 
 Ship a ZIP installable from the panel, with dependencies and assets already prepared. The site owner should not need to compile your package.
 
+Point users to the catalogue in their KraftInk admin panel when your extension is listed. For manual installation, direct them to the ready-to-install ZIP attached to the release. [Installing extensions](extensions-catalogue.md)
+
 ## Archive contents
 
 Place `manifest.json`, `src/`, routes, views, translations, migrations and required assets at the root or in a single top-level directory. Include licences for distributed libraries and fonts. Exclude secrets, local data, `node_modules` and development tools.
@@ -28,13 +30,13 @@ For the frontend, declare a `build` script producing files under `public/`. Publ
 
 ## Market presentation
 
-`market.name` and `market.description` define the catalogue presentation. When omitted, publication uses `name` and `description` from the manifest root. Validation requires a description.
+`market.name` is the listing title. Keep `market.description` short for the catalogue cards and put details in the listing’s Markdown. When omitted, publication uses `name` and `description` from the manifest root. Validation requires a description.
 
 For plugins, the Market reads the required [game declaration](developpement-plugins.md#manifest-and-provider) from `games` in the manifest. Each listing shows compatibility and extra features for its latest version.
 
 To add a public support contact to your Market listing, set `market.support.discord` to an HTTPS invite on `discord.gg` or `discord.com/invite`, or set `market.support.email` to a simple email address. You can provide both. The listing links to the KraftInk Discord when no contact is provided.
 
-Choose one of these three formats for each field.
+Choose one of these three formats for the name and summary.
 
 ### Reusing package translations
 
@@ -106,9 +108,52 @@ A dictionary also lets you supply text directly per language:
 
 Dictionary values are literal text. You can mix formats between fields, such as a shared name and a description from a translation key. Not every language is required.
 
-Place images in `resources/market/`. `"image": "preview.jpg"` uses a shared image, while the example dictionary selects an image per language. Supported formats are PNG, JPG, JPEG, WebP, GIF and AVIF. A direct public HTTPS URL is also accepted.
-
 Optional `author.name`, `author.url`, `commercial.kind`, `commercial.url`, `commercial.price` and `manual_only` also belong in `market`. For example, a price uses `{"amount": "9.99", "currency": "EUR"}`.
+
+### Writing the listing in Markdown
+
+Add `MARKET.md` at the package root to display one shared write-up. To provide translations, put a `market.md` file in each language directory under `lang/` and declare the paths in `market.readme`.
+
+```json
+"market": {
+    "description": "A forum for your gaming community.",
+    "readme": {
+        "en": "lang/en/market.md",
+        "fr": "lang/fr/market.md"
+    }
+}
+```
+
+The Market shows the current language when available, then English, then the first language you provided. Write UTF-8 Markdown, with up to 32 KiB per file, eight languages and 128 KiB total. Use Markdown for formatting and links. The listing renderer skips raw HTML, and direct ZIP uploads reject it.
+
+### Adding icons and images
+
+- Set `market.icon` to a Bootstrap Icons name in kebab case, such as `chat-square-text`, or point it to an image in `resources/market/`. [Bootstrap Icons](https://icons.getbootstrap.com/)
+- Set `market.image` to a cover. A single path such as `preview.jpg` uses the same cover in every language. Use a language dictionary for localized covers. For a theme preview, a 1440 × 900 image (8:5) keeps the layout and key content in view on the card.
+- To illustrate a feature in the Markdown, save the image in `resources/market/` and reference it with Markdown image syntax.
+
+```markdown
+![Forum categories](resources/market/categories.webp)
+```
+
+A direct public HTTPS URL also works for a cover, an image icon or an image in the Markdown. Covers published from GitHub can also use GIF and AVIF. For files bundled in a ZIP uploaded to the Market, use PNG, JPEG or WebP, up to 2 MiB per image. Image icons and Markdown images share a limit of eight distinct files and 6 MiB total.
+
+## Release notes
+
+For a registered GitHub repository, the Market reads each version’s notes from GitHub Releases.
+
+For a ZIP uploaded to the Market, add an optional `CHANGELOG.md` at the package root with the notes for that ZIP’s version. For translations, put a `changelog.md` file in each language directory and declare the paths in `market.changelog`. The Market uses the same language order as the listing description.
+
+```json
+"market": {
+    "changelog": {
+        "en": "lang/en/changelog.md",
+        "fr": "lang/fr/changelog.md"
+    }
+}
+```
+
+Write up to 8 KiB per file in up to eight languages. Release notes can include Markdown links and direct public HTTPS images. Images bundled in the ZIP can appear in the listing description. A version without notes still appears in the changelog.
 
 ## Publishing a version
 

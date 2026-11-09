@@ -69,13 +69,16 @@ routes.get('/market/catalogue', async (c) => {
 
 routes.get('/catalogue', async (c) => {
     await rateLimit(c, 'market.browse', 120, 60);
-    const catalogue = await mergedCatalogue(c.env, c.get('user')?.id ?? null);
+    const resourceId = c.req.query('resource');
+    const catalogue = await mergedCatalogue(c.env, c.get('user')?.id ?? null, false, {
+        resourceId: resourceId && resourceId.length <= 200 ? resourceId : undefined,
+    });
     return c.json({ schema_version: 1, ...catalogue });
 });
 
 routes.get('/market/resources/:id/images/:versionId', async (c) => {
     await rateLimit(c, 'market.image', 120, 60);
-    return resourceImage(c.env, c.req.param('id'), c.req.param('versionId'));
+    return resourceImage(c.env, c.req.param('id'), c.req.param('versionId'), c.req.query('asset'));
 });
 
 routes.get('/metadata', async (c) => {

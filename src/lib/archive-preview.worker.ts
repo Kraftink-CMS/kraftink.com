@@ -6,7 +6,7 @@ const scope = globalThis as unknown as {
               event: MessageEvent<{
                   file: File;
                   maxUploadBytes: number;
-                  expected?: { slug: string; type: 'plugin' | 'theme' | 'game' };
+                  expected?: { slug?: string; type?: 'plugin' | 'theme' | 'game'; imageLocale?: string };
                   previousVersion?: string;
               }>,
           ) => Promise<void>)

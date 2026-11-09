@@ -366,6 +366,7 @@ export default {
             'An account keeps your purchases and connects your CMS. A session cookie protects your sign-in. Stripe processes payments and seller documents. Your email is used for account verification and password recovery. Your site key and allowed IP address control downloads. Your language preference is stored in your account when signed in, otherwise in a cookie. No audience analytics are added.',
         'creditsTitle': 'Credits',
         'bootstrap': 'The public website uses Bootstrap, distributed under the MIT licence.',
+        'bootstrapIcons': 'The Market uses Bootstrap Icons, distributed under the MIT licence.',
         'marked': 'Documentation is rendered with Marked, distributed under the MIT licence.',
         'octicons': 'The GitHub icon is provided by Octicons, distributed under the MIT licence.',
         'qrcode': 'Authenticator QR codes are generated locally with node-qrcode, distributed under the MIT licence.',

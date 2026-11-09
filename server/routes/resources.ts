@@ -9,7 +9,7 @@ import { rateLimit } from '../security/abuse';
 import { effectiveUploadLimit } from '../upload-limits';
 import { inspectRepository } from '../services/resources/repository';
 import { requireSellerReady } from '../services/commerce/sellers';
-import { sha256 } from '../security/crypto';
+import { sha256, toBase64Url } from '../security/crypto';
 import {
     findOwnedResource,
     listCreatorResources,
@@ -109,6 +109,7 @@ async function upload(c: Context<AppEnv>, existing?: ResourceRow): Promise<Respo
             effects(c),
             () => rateLimit(c, 'resource.create', 20, 86400, user.id),
             release.source,
+            release.changelog,
         );
         return c.json(result.data, result.status);
     }
@@ -159,10 +160,24 @@ routes.post('/creator/resources/preview-repository', async (c) => {
         resource ? { slug: resource.slug, type: resource.type } : undefined,
         { maxBytes: await effectiveUploadLimit(c.env, user.id) },
     );
-    const { manifest, metadata, entries, expandedBytes } = release.inspection;
+    const { manifest, metadata, entries, expandedBytes, image, marketAssets } = release.inspection;
+    const previewAsset = ({ bytes, mime }: { bytes: Uint8Array; mime: string }) => ({ data: toBase64Url(bytes), mime });
     return c.json({
         source: release.source,
-        inspection: { manifest, metadata, entries, expandedBytes },
+        inspection: {
+            manifest,
+            metadata: { ...metadata, changelog: metadata.changelog ?? release.changelog },
+            entries,
+            expandedBytes,
+        },
+        ...(image ? { cover: previewAsset(image) } : {}),
+        ...(marketAssets
+            ? {
+                  images: Object.fromEntries(
+                      Object.entries(marketAssets).map(([path, asset]) => [path, previewAsset(asset)]),
+                  ),
+              }
+            : {}),
         sha256: await sha256(release.bytes),
         sizeBytes: release.bytes.byteLength,
     });
@@ -195,7 +210,7 @@ routes.get('/moderation/versions/:id/archive', async (c) => {
 });
 routes.get('/moderation/versions/:id/image', async (c) => {
     requireRole(c, 'moderator');
-    return reviewImage(c.env, c.req.param('id'));
+    return reviewImage(c.env, c.req.param('id'), c.req.query('asset'));
 });
 routes.patch('/moderation/reviews/:id', async (c) => {
     const user = requireRole(c, 'moderator');

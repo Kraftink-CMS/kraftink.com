@@ -8,6 +8,7 @@ export function Modal({
     labelledBy,
     children,
     dismissible = true,
+    trapFocus = false,
     initialFocus,
     size,
 }: {
@@ -16,6 +17,7 @@ export function Modal({
     labelledBy: string;
     children: ReactNode;
     dismissible?: boolean;
+    trapFocus?: boolean;
     initialFocus?: RefObject<HTMLElement | null>;
     size?: 'lg';
 }) {
@@ -57,7 +59,7 @@ export function Modal({
         }
         const node = element.current!;
         disposing.current = false;
-        const modal = new ModalConstructor(node, { focus: false });
+        const modal = new ModalConstructor(node, { focus: trapFocus });
         instance.current = modal;
         const hiding = (event: Event) => beforeHide(event);
         const showing = () => shown();
@@ -66,9 +68,27 @@ export function Modal({
                 previousFocus.current.focus();
             }
         };
+        const cycleFocus = (event: KeyboardEvent) => {
+            if (!trapFocus || event.key !== 'Tab') {
+                return;
+            }
+            const controls = Array.from(
+                node.querySelectorAll<HTMLElement>('a[href], button, input, select, textarea, [tabindex]'),
+            ).filter(
+                (control) => control.tabIndex >= 0 && !control.matches(':disabled') && control.getClientRects().length,
+            );
+            const first = controls[0];
+            const last = controls.at(-1);
+            const focused = document.activeElement;
+            if (!first || (event.shiftKey ? focused === first || focused === node : focused === last)) {
+                event.preventDefault();
+                (event.shiftKey ? (last ?? node) : (first ?? node)).focus();
+            }
+        };
         node.addEventListener('hide.bs.modal', hiding);
         node.addEventListener('shown.bs.modal', showing);
         node.addEventListener('hidden.bs.modal', hidden);
+        node.addEventListener('keydown', cycleFocus);
         return () => {
             disposing.current = true;
             modal.hide();
@@ -76,9 +96,10 @@ export function Modal({
             node.removeEventListener('hide.bs.modal', hiding);
             node.removeEventListener('shown.bs.modal', showing);
             node.removeEventListener('hidden.bs.modal', hidden);
+            node.removeEventListener('keydown', cycleFocus);
             instance.current = null;
         };
-    }, [ModalConstructor]);
+    }, [ModalConstructor, trapFocus]);
 
     useEffect(() => {
         if (open && ModalConstructor) {

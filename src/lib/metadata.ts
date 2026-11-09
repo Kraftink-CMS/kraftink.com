@@ -1,4 +1,5 @@
 import { fallbackLocale, localeRegistry } from '../../shared/locales';
+import { marketResourceId } from '../../shared/catalogue';
 import { localized } from './i18n';
 import {
     accountCopy,
@@ -103,16 +104,10 @@ export function pageMetadata(
         languages = guide?.availableLocales ?? languages;
         canonicalRelative = `documentation${slug === 'index' ? '' : `/${slug.split('/').map(encodeURIComponent).join('/')}`}`;
     } else if (relative === 'market/resource' || relative.startsWith('market/resource/')) {
-        let id = '';
-        try {
-            id =
-                relative === 'market/resource'
-                    ? (new URLSearchParams(search).get('resource') ?? new URLSearchParams(search).get('id') ?? '')
-                    : decodeURIComponent(relative.slice(16));
-        } catch {
-            id = '';
-        }
-        const resource = data.catalogue?.resources.find((entry) => entry.resourceId === id || entry.id === id);
+        const id = marketResourceId(relative, search);
+        const resource = id
+            ? data.catalogue?.resources.find((entry) => entry.resourceId === id || entry.id === id)
+            : undefined;
         title = resource ? localized(resource.name, locale) : common.resource;
         description = resource ? localized(resource.description, locale) : text.marketText;
         indexable = Boolean(resource);
