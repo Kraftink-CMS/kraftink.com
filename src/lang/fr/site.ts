@@ -224,7 +224,6 @@ export default {
         'published': 'Publiée le',
         'size': 'Taille',
         'megabytes': 'Mo',
-        'selected': 'Version sélectionnée : {version}.',
         'archive': 'Archive d’installation',
         'includes':
             'L’archive contient KraftInk prêt à installer. Extrayez-la dans le dossier de votre site, puis ouvrez votre adresse pour suivre l’assistant.',

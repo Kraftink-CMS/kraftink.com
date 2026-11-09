@@ -141,7 +141,7 @@ export function DownloadsPage() {
                                             <dl className="detail-facts">
                                                 <div>
                                                     <dt>{copy.downloads.tag}</dt>
-                                                    <dd>{selected.tag}</dd>
+                                                    <dd aria-live="polite">{selected.tag}</dd>
                                                 </div>
                                                 <div>
                                                     <dt>{copy.downloads.published}</dt>
@@ -206,16 +206,6 @@ export function DownloadsPage() {
                                 </>
                             )}
                         </div>
-                        {selected && (
-                            <p
-                                data-release-state
-                                className="small text-body-secondary mt-3 mb-0"
-                                role="status"
-                                aria-live="polite"
-                            >
-                                {copy.downloads.selected.replace('{version}', selected.tag)}
-                            </p>
-                        )}
                         <div className="d-flex flex-wrap align-items-center gap-3 mt-3">
                             {source && (
                                 <a className="btn btn-outline-dark" href={source.releasesUrl} rel="noreferrer">

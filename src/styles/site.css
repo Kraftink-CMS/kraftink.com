@@ -1341,10 +1341,38 @@ small,
     font-size: 0.9375rem;
 }
 
-.download-meta,
-[data-release-state] {
+.download-meta {
     color: var(--muted);
     font-size: 0.9375rem;
+}
+
+.kraftlink-download {
+    --bs-btn-color: var(--ink);
+    --bs-btn-border-color: var(--line);
+    --bs-btn-hover-color: var(--ink);
+    --bs-btn-hover-bg: var(--soft);
+    --bs-btn-hover-border-color: var(--accent);
+    --bs-btn-active-color: var(--ink);
+    --bs-btn-active-bg: var(--soft);
+    --bs-btn-active-border-color: var(--accent);
+    --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
+}
+
+.kraftlink-filename {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+}
+
+.kraftlink-download:is(:hover, :focus-visible, :active) .kraftlink-filename {
+    color: var(--ink);
+}
+
+.kraftlink-download > .bi {
+    color: var(--accent);
 }
 
 .checksum {

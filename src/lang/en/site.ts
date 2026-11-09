@@ -218,7 +218,6 @@ export default {
         'published': 'Published on',
         'size': 'Size',
         'megabytes': 'MB',
-        'selected': 'Selected version: {version}.',
         'archive': 'Installation archive',
         'includes':
             'The archive contains KraftInk ready to install. Extract it into your site directory, then open your site address to follow the setup wizard.',
