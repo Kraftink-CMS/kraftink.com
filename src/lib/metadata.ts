@@ -99,7 +99,9 @@ export function pageMetadata(pathname: string, locale: string, data: PublicPageD
         canonicalRelative = `documentation${slug === 'index' ? '' : `/${slug.split('/').map(encodeURIComponent).join('/')}`}`;
     } else if (resourceRoute) {
         const resource = findMarketResource(data.catalogue?.resources, resourceRoute);
-        title = resource ? localized(resource.name, locale) : common.resource;
+        title = resource
+            ? text.marketResourceTitles[resource.type].replace('{name}', () => localized(resource.name, locale))
+            : common.resource;
         description = resource ? localized(resource.description, locale) : text.marketText;
         indexable = Boolean(resource);
         status = resource ? 200 : data.catalogue?.state === 'fresh' ? 404 : 503;
