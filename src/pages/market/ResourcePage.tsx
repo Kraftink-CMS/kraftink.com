@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Card, Empty, ErrorNotice, Loading, Skeleton, PageTitle } from '../../components/UI';
 import { Modal } from '../../components/Modal';
 import { ResourceDetails } from '../../components/market/ResourceDetails';
@@ -13,12 +13,7 @@ import { resourcePrice } from '../../lib/catalogue';
 import { LegalNotice } from '../../components/legal/LegalNotice';
 import { bundledGameNames } from '../../../shared/games';
 import { discordUrl, externalLinkRel } from '../../../shared/links';
-import {
-    findMarketResource,
-    marketResourcePath,
-    marketResourceRedirect,
-    matchMarketResourceRoute,
-} from '../../../shared/routes';
+import { findMarketResource, marketResourcePath, matchMarketResourceRoute } from '../../../shared/routes';
 import { NotFoundPage } from '../NotFoundPage';
 
 function GameBadges({ games }: { games: string[] }) {
@@ -39,8 +34,8 @@ export function ResourcePage() {
     const { locale, path } = useLocale();
     const text = publicMessages[locale];
     const common = commonMessages[locale];
-    const { pathname, search, hash } = useLocation();
-    const route = matchMarketResourceRoute(pathname.split('/').slice(2).join('/'), search);
+    const { pathname } = useLocation();
+    const route = matchMarketResourceRoute(pathname.split('/').slice(2).join('/'));
     const { data, error } = useCatalogue(route?.id);
     const { user } = useSession();
     const [failure, setFailure] = useState<unknown>(null);
@@ -104,10 +99,6 @@ export function ResourcePage() {
         );
     }
     const resourcePath = path(marketResourcePath(resource));
-    const redirect = marketResourceRedirect(pathname, resourcePath, search);
-    if (redirect) {
-        return <Navigate replace to={redirect + hash} />;
-    }
     const version = resource.versions[0];
     const supported = version?.games?.supported.filter((game) => game !== '*') ?? [];
     const excluded = version?.games?.excluded ?? [];
