@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CardsLoading, ErrorNotice } from '../../components/UI';
+import { ErrorNotice, Loading } from '../../components/UI';
 import { Screenshot } from '../../components/landing/Screenshot';
 import { Compatibility } from '../../components/landing/Compatibility';
-import { ResourceCard } from '../../components/market/ResourceCard';
+import { ResourceCard, ResourceCardLoading } from '../../components/market/ResourceCard';
 import { useCatalogue } from '../../hooks/useCatalogue';
 import { useLocale, useSiteCopy, localized } from '../../lib/i18n';
 import { DiscordIcon } from '../../components/DiscordIcon';
 import { discordUrl, externalLinkRel } from '../../../shared/links';
+
+const previewPluginCount = 3;
+const previewThemeCount = 2;
 
 export function HomePage() {
     const copy = useSiteCopy();
@@ -16,9 +19,38 @@ export function HomePage() {
     const [activeTab, setActiveTab] = useState(0);
     const screenshots = copy.workspace.tabs;
     const selected = screenshots[activeTab] ?? screenshots[0];
-    const resources = [...(data?.resources ?? [])]
-        .sort((left, right) => localized(left.name, locale).localeCompare(localized(right.name, locale), locale))
-        .slice(0, 3);
+    const resources = [...(data?.resources ?? [])].sort((left, right) =>
+        localized(left.name, locale).localeCompare(localized(right.name, locale), locale),
+    );
+    const plugins = resources.filter((resource) => resource.type === 'plugin').slice(0, previewPluginCount);
+    const themes = resources.filter((resource) => resource.type === 'theme').slice(0, previewThemeCount);
+    const loading = !data && !error;
+    const preview = (
+        <div className="row g-3">
+            {(loading || plugins.length > 0) && (
+                <div className="col-12 col-lg-4">
+                    <div className="vstack gap-3">
+                        {loading
+                            ? Array.from({ length: previewPluginCount }, (_, index) => (
+                                  <ResourceCardLoading key={index} />
+                              ))
+                            : plugins.map((resource) => <ResourceCard resource={resource} key={resource.id} />)}
+                    </div>
+                </div>
+            )}
+            {loading
+                ? Array.from({ length: previewThemeCount }, (_, index) => (
+                      <div className="col-md-6 col-lg-4" key={index}>
+                          <ResourceCardLoading cover />
+                      </div>
+                  ))
+                : themes.map((resource) => (
+                      <div className="col-md-6 col-lg-4" key={resource.id}>
+                          <ResourceCard resource={resource} />
+                      </div>
+                  ))}
+        </div>
+    );
 
     return (
         <div className="container">
@@ -97,17 +129,10 @@ export function HomePage() {
                     </div>
                     <Link to={path('/market')}>{copy.project.allExtensions}</Link>
                 </div>
-                <div className="row g-4" data-market-list data-limit="3">
-                    {resources.map((resource) => (
-                        <div className="col-md-6 col-xl-4" key={resource.id}>
-                            <ResourceCard resource={resource} />
-                        </div>
-                    ))}
-                </div>
-                <div data-catalogue-state aria-live="polite">
+                {loading ? <Loading>{preview}</Loading> : preview}
+                <div aria-live="polite">
                     <ErrorNotice error={error} />
-                    {!data && !error && <CardsLoading image />}
-                    {data && resources.length === 0 && (
+                    {data && plugins.length === 0 && themes.length === 0 && (
                         <p className="text-body-secondary">{copy.market.catalogueEmpty}</p>
                     )}
                 </div>

@@ -857,74 +857,6 @@ small,
     font-size: 0.9375rem;
 }
 
-.market-card-preview {
-    display: block;
-    border-bottom: 1px solid var(--line);
-    background: var(--soft);
-    text-decoration: none;
-}
-
-.market-card-image,
-.market-card-placeholder {
-    display: block;
-    width: 100%;
-    aspect-ratio: 16 / 10;
-}
-
-.market-card-image {
-    object-fit: cover;
-    object-position: top;
-}
-
-.market-card-placeholder {
-    display: grid;
-    place-items: center;
-    background: var(--soft);
-    color: var(--accent);
-}
-
-.market-resource-icon {
-    font-size: 3rem;
-}
-
-.market-card-title a {
-    color: var(--ink);
-    text-decoration: none;
-}
-
-.market-card-title a:hover {
-    color: var(--accent);
-}
-
-.market-card-byline {
-    margin-bottom: 0.75rem;
-}
-
-.market-card-description {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    margin-bottom: 1rem;
-    font-size: 1rem;
-}
-
-.market-card-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-}
-
-.market-card-footer {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-}
-
 .market-back {
     margin-bottom: 1.25rem;
 }
@@ -1656,10 +1588,6 @@ small,
         flex: 1 1 auto;
         padding: 0.65rem 0.75rem;
         font-size: 0.875rem;
-    }
-
-    .market-card-footer {
-        align-items: start;
     }
 
     .docs-main.card-body {

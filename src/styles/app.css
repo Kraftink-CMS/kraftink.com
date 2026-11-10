@@ -449,6 +449,13 @@ code {
 .resource-card {
     overflow: hidden;
 }
+.resource-card:hover {
+    border-color: var(--accent);
+}
+.resource-card:has(.stretched-link:focus-visible) {
+    outline: 3px solid #c04f1c99;
+    outline-offset: 3px;
+}
 .resource-art {
     position: relative;
     display: grid;
@@ -503,42 +510,26 @@ code {
 .resource-icon img[hidden] {
     display: none;
 }
-.resource-card h2 {
-    margin-top: 0.2rem;
+.resource-card > .card-body > .resource-icon {
+    align-self: flex-start;
 }
-.resource-card :is(h2, h3) a {
-    color: var(--ink);
-    text-decoration: none;
-}
-.resource-card-copy > p {
-    color: var(--muted);
-    font-size: 0.9375rem;
-}
-.resource-card .card-body,
 .resource-card-copy {
     display: flex;
     flex-direction: column;
-}
-.resource-card-copy {
     flex: 1;
     min-width: 0;
     overflow-wrap: anywhere;
+}
+.resource-card-copy > p {
+    margin-bottom: 0;
+    color: var(--muted);
+    font-size: 0.9375rem;
 }
 .resource-card-copy > p:last-child {
     margin-top: auto;
     padding-top: 0.5rem;
 }
-.market-card:hover {
-    border-color: var(--accent);
-}
-.market-card .card-body > .resource-icon {
-    align-self: flex-start;
-}
-.market-card:has(.stretched-link:focus-visible) {
-    outline: 3px solid #c04f1c99;
-    outline-offset: 3px;
-}
-.market-card-heading {
+.resource-card-heading {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
@@ -546,28 +537,16 @@ code {
     gap: 0.25rem 0.75rem;
     margin-bottom: 0.35rem;
 }
-.market-card-heading h3 {
+.resource-card-heading h3 {
     font-weight: 700;
 }
-.market-card-price {
+.resource-card-heading a {
+    color: var(--ink);
+    text-decoration: none;
+}
+.resource-card-price {
     color: var(--muted);
     font-size: 0.875rem;
-}
-.market-card .resource-card-copy > p {
-    margin-bottom: 0;
-}
-.resource-type {
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    font-weight: 700;
-    color: var(--muted);
-}
-.resource-link {
-    color: var(--accent);
-    font-size: 1.4rem;
-    text-decoration: none;
-    line-height: 1;
 }
 .resource-layout {
     display: grid;

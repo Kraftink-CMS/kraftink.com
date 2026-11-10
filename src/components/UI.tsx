@@ -116,39 +116,6 @@ export function TableLoading({
     );
 }
 
-export function CardsLoading({
-    count = 3,
-    image = false,
-    columnClassName = 'col-md-6 col-xl-4',
-}: {
-    count?: number;
-    image?: boolean;
-    columnClassName?: string;
-}) {
-    return (
-        <Loading>
-            <div className="row g-4">
-                {Array.from({ length: count }, (_, index) => (
-                    <div className={columnClassName} key={index}>
-                        <div className="card h-100 overflow-hidden">
-                            {image && <div className="resource-art skeleton" />}
-                            <div className="card-body vstack gap-3">
-                                <Skeleton width="65%" height="1.25rem" />
-                                <Skeleton />
-                                <Skeleton width="85%" />
-                                <Skeleton width="50%" />
-                            </div>
-                            <div className="card-footer">
-                                <Skeleton width="35%" height="1.5rem" />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </Loading>
-    );
-}
-
 export function FormLoading({ fields = 4 }: { fields?: number }) {
     return (
         <Loading>

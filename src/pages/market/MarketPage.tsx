@@ -1,14 +1,15 @@
 import { useSearchParams } from 'react-router-dom';
 import type { CatalogueResource } from '../../../shared/catalogue';
 import { Select } from '../../components/Select';
-import { ResourceCard } from '../../components/market/ResourceCard';
-import { CardsLoading, Empty, ErrorNotice, PageTitle } from '../../components/UI';
+import { ResourceCard, ResourceCardLoading } from '../../components/market/ResourceCard';
+import { Empty, ErrorNotice, Loading, PageTitle, Skeleton } from '../../components/UI';
 import { useCatalogue } from '../../hooks/useCatalogue';
 import { localized, useLocale } from '../../lib/i18n';
 import { commonMessages, publicMessages } from '../../lib/translations';
 
 const resourceTypes = ['theme', 'plugin', 'game'] as const;
 const filterTypes = ['plugin', 'theme', 'game'] as const;
+const resourceGrid = 'row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3';
 
 export function MarketPage() {
     const { locale } = useLocale();
@@ -111,7 +112,16 @@ export function MarketPage() {
             <ErrorNotice error={error} />
             {data?.state !== 'fresh' && data && <div className="alert alert-warning">{text.stale}</div>}
             {!data && !error ? (
-                <CardsLoading image={!type || type === 'theme'} />
+                <Loading>
+                    <Skeleton width="7rem" height="1.375rem" className="mb-3" />
+                    <div className={resourceGrid}>
+                        {Array.from({ length: 3 }, (_, index) => (
+                            <div className="col" key={index}>
+                                <ResourceCardLoading cover={!type || type === 'theme'} />
+                            </div>
+                        ))}
+                    </div>
+                </Loading>
             ) : sections.length ? (
                 <div className="d-grid gap-4">
                     {sections.map((value) => (
@@ -119,10 +129,10 @@ export function MarketPage() {
                             <h2 id={`market-section-${value}`} className="h4 mb-3">
                                 {text.marketTypes[value]}
                             </h2>
-                            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                            <div className={resourceGrid}>
                                 {groups[value].map((resource) => (
                                     <div className="col" key={resource.id}>
-                                        <ResourceCard resource={resource} market />
+                                        <ResourceCard resource={resource} />
                                     </div>
                                 ))}
                             </div>
