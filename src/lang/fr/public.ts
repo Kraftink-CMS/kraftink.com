@@ -9,6 +9,7 @@ export default {
     'marketOfferFilter': 'Filtrer par offre',
     'marketAll': 'Tous',
     'marketTypes': { 'plugin': 'Plugins', 'theme': 'Thèmes', 'game': 'Jeux' },
+    'marketResourceTitles': { 'plugin': 'Plugin {name}', 'theme': 'Thème {name}', 'game': 'Module de jeu {name}' },
     'allOffers': 'Toutes les offres',
     'paid': 'Payantes',
     'free': 'Gratuites',
