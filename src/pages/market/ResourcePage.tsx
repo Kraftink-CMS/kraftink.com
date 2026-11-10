@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Card, Empty, ErrorNotice, Loading, Skeleton, PageTitle } from '../../components/UI';
 import { Modal } from '../../components/Modal';
 import { ResourceDetails } from '../../components/market/ResourceDetails';
@@ -13,6 +13,13 @@ import { resourcePrice } from '../../lib/catalogue';
 import { LegalNotice } from '../../components/legal/LegalNotice';
 import { bundledGameNames } from '../../../shared/games';
 import { discordUrl, externalLinkRel } from '../../../shared/links';
+import {
+    findMarketResource,
+    marketResourcePath,
+    marketResourceRedirect,
+    matchMarketResourceRoute,
+} from '../../../shared/routes';
+import { NotFoundPage } from '../NotFoundPage';
 
 function GameBadges({ games }: { games: string[] }) {
     return (
@@ -32,15 +39,14 @@ export function ResourcePage() {
     const { locale, path } = useLocale();
     const text = publicMessages[locale];
     const common = commonMessages[locale];
-    const [search] = useSearchParams();
-    const params = useParams();
-    const id = params.resourceId ?? search.get('resource') ?? search.get('id') ?? undefined;
-    const { data, error } = useCatalogue(id);
+    const { pathname, search, hash } = useLocation();
+    const route = matchMarketResourceRoute(pathname.split('/').slice(2).join('/'), search);
+    const { data, error } = useCatalogue(route?.id);
     const { user } = useSession();
     const [failure, setFailure] = useState<unknown>(null);
     const [busy, setBusy] = useState(false);
     const [downloadOpen, setDownloadOpen] = useState(false);
-    const resource = id ? data?.resources.find((entry) => entry.resourceId === id || entry.id === id) : undefined;
+    const resource = route ? findMarketResource(data?.resources, route) : undefined;
     async function checkout(event: FormEvent) {
         event.preventDefault();
         if (!resource?.resourceId) {
@@ -57,6 +63,9 @@ export function ResourcePage() {
             setFailure(failure);
             setBusy(false);
         }
+    }
+    if (!route) {
+        return <NotFoundPage />;
     }
     if (!data) {
         return error ? (
@@ -93,6 +102,11 @@ export function ResourcePage() {
                 <Link to={path('/market')}>{text.returnMarket}</Link>
             </>
         );
+    }
+    const resourcePath = path(marketResourcePath(resource));
+    const redirect = marketResourceRedirect(pathname, resourcePath, search);
+    if (redirect) {
+        return <Navigate replace to={redirect + hash} />;
     }
     const version = resource.versions[0];
     const supported = version?.games?.supported.filter((game) => game !== '*') ?? [];
@@ -228,7 +242,7 @@ export function ResourcePage() {
                                     ) : (
                                         <Link
                                             className="btn btn-primary w-100"
-                                            to={`${path('/login')}?next=${encodeURIComponent(path('/market/resource') + '?resource=' + resource.resourceId)}`}
+                                            to={`${path('/login')}?next=${encodeURIComponent(resourcePath)}`}
                                         >
                                             {common.login}
                                         </Link>
@@ -314,11 +328,7 @@ export function ResourcePage() {
                         <ul className="list-unstyled d-flex flex-wrap gap-3 mb-0">
                             {otherResources.map((entry) => (
                                 <li key={entry.id}>
-                                    <Link
-                                        to={`${path('/market/resource')}/${encodeURIComponent(entry.resourceId ?? entry.id)}`}
-                                    >
-                                        {localized(entry.name, locale)}
-                                    </Link>
+                                    <Link to={path(marketResourcePath(entry))}>{localized(entry.name, locale)}</Link>
                                 </li>
                             ))}
                         </ul>

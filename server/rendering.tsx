@@ -10,10 +10,15 @@ import { fail, sessionCookieName, type AppContext } from './http';
 import { getCookie } from 'hono/cookie';
 import { resolveSession, sessionData } from './middleware/authentication';
 import { hasRole } from '../shared/auth';
-import { matchProtectedPage } from '../shared/routes';
+import {
+    marketResourcePath,
+    marketResourceRedirect,
+    matchMarketResourceRoute,
+    matchProtectedPage,
+    type MarketResourceRoute,
+} from '../shared/routes';
 import type { Env } from './types';
 import { cachedMetadata, mergedCatalogue } from './services/market/catalogue';
-import { marketResourceId } from '../shared/catalogue';
 
 const publicPaths = ['', 'features', 'about', 'downloads', 'market', 'terms', 'privacy'];
 
@@ -85,19 +90,14 @@ async function publicData(
     env: Env,
     locale: string,
     relative: string,
-    search: string,
+    resourceRoute: MarketResourceRoute | null,
     userId: string | null,
 ): Promise<PublicPageData> {
     const data: PublicPageData = { locale, origin: new URL(env.APP_ORIGIN).origin };
     if (relative === 'documentation' || relative.startsWith('documentation/')) {
         data.guides = await bounded((signal) => guides(env, locale, signal));
-    } else if (
-        relative === '' ||
-        relative === 'market' ||
-        relative === 'market/resource' ||
-        relative.startsWith('market/resource/')
-    ) {
-        const resourceId = marketResourceId(relative, search);
+    } else if (relative === '' || relative === 'market' || resourceRoute) {
+        const resourceId = resourceRoute?.id;
         data.catalogue = await bounded((signal) =>
             mergedCatalogue(env, userId, false, { persistMetadata: false, signal, resourceId }),
         );
@@ -184,6 +184,7 @@ export async function renderPage(c: AppContext): Promise<Response> {
         return new Response(null, { status: 404 });
     }
     const relative = localePath.split('/').slice(2).join('/');
+    const resourceRoute = matchMarketResourceRoute(relative, url.search);
     const personalized = Boolean(session.user || getCookie(c, sessionCookieName(c)) || c.req.header('Authorization'));
     const protectedPage = matchProtectedPage(relative);
     if (protectedPage && !session.user) {
@@ -200,10 +201,23 @@ export async function renderPage(c: AppContext): Promise<Response> {
         });
     }
     const data: PageData = {
-        ...(await publicData(c.env, locale, relative, url.search, session.user?.id ?? null)),
+        ...(await publicData(c.env, locale, relative, resourceRoute, session.user?.id ?? null)),
         session,
     };
     let metadata = pageMetadata(localePath, url.search, locale, data, new URL(c.env.APP_ORIGIN).origin);
+    if (resourceRoute && metadata.indexable) {
+        const redirect = marketResourceRedirect(localePath, new URL(metadata.canonical).pathname, url.search);
+        if (redirect) {
+            return new Response(null, {
+                status: 301,
+                headers: {
+                    Location: new URL(redirect, c.env.APP_ORIGIN).href,
+                    'Cache-Control': 'private, no-store',
+                    'CDN-Cache-Control': 'no-store',
+                },
+            });
+        }
+    }
     const requiredRole = protectedPage?.role;
     if (requiredRole && !hasRole(session.user, requiredRole)) {
         metadata = { ...metadata, status: 403 };
@@ -338,16 +352,9 @@ export async function sitemap(env: Env): Promise<Response> {
         }
     }
     for (const resource of catalogue?.resources ?? []) {
-        for (const locale of locales)
-            urls.add(
-                new URL(
-                    localizedPagePath(
-                        locale,
-                        `market/resource/${encodeURIComponent(resource.resourceId ?? resource.id)}`,
-                    ),
-                    origin,
-                ).href,
-            );
+        for (const locale of locales) {
+            urls.add(new URL(`/${locale}${marketResourcePath(resource)}`, origin).href);
+        }
     }
     return new Response(
         `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${Array.from(

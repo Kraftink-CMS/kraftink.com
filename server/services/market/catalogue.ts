@@ -31,6 +31,7 @@ import {
 import type { ResourceManifest } from '../../../shared/packages/zip';
 import { kraftLinkRepository } from '../../../shared/links';
 import { cachedRepositoryRelease } from '../resources/repository-updates';
+import { marketResourcePath } from '../../../shared/routes';
 
 const slugPattern = /^[a-z][a-z0-9-]{1,49}$/;
 export const CMS_CATALOGUE_MAX_RESOURCES = 1000;
@@ -673,8 +674,8 @@ export async function mergedCatalogue(
         ) {
             continue;
         }
-        const author = `creator-${resource.author_id}`;
-        const id = `${author}/${resource.slug}`;
+        const author = { id: `creator-${resource.author_id}`, name: resource.author_name };
+        const id = `${author.id}/${resource.slug}`;
         const metadata = JSON.parse(resource.metadata_json) as {
             name?: CatalogueResource['name'];
             description?: CatalogueResource['description'];
@@ -708,7 +709,7 @@ export async function mergedCatalogue(
                       download: {
                           url:
                               release?.source.archiveUrl ??
-                              `${origin}/api/market/resources/${author}/${resource.slug}/versions/${resource.version}/download`,
+                              `${origin}/api/market/resources/${id}/versions/${resource.version}/download`,
                           sha256: release?.sha256 ?? resource.sha256,
                       },
                   }
@@ -760,13 +761,13 @@ export async function mergedCatalogue(
             ...(!forCms && icon ? { icon } : {}),
             ...(resource.image_key ? { image: imageUrl } : {}),
             ...(history ? { history } : {}),
-            author: { id: author, name: resource.author_name },
+            author,
             ...(validResourceSupport(support) ? { support } : {}),
             ...(source ? { repository: source.repository } : {}),
             commercial: {
                 kind: 'paid',
                 price: { amount: (resource.price_cents / 100).toFixed(2), currency: resource.currency },
-                url: `${origin}/market/resource/${resource.id}`,
+                url: origin + marketResourcePath({ author, slug: resource.slug, type: resource.type }),
             },
             access: {
                 allowed: purchased && available,

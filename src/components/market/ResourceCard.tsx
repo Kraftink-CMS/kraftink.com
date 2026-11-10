@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { CatalogueResource } from '../../../shared/catalogue';
+import { marketResourcePath } from '../../../shared/routes';
 import { localized, useLocale } from '../../lib/i18n';
 import { commonMessages } from '../../lib/translations';
 import { resourcePrice } from '../../lib/catalogue';
@@ -8,10 +9,9 @@ import { ResourceIcon } from './ResourceIcon';
 export function ResourceCard({ resource, market = false }: { resource: CatalogueResource; market?: boolean }) {
     const { locale, path } = useLocale();
     const common = commonMessages[locale];
-    const identifier = encodeURIComponent(resource.resourceId ?? resource.id);
     const image = localized(resource.image, locale);
     const name = localized(resource.name, locale);
-    const target = `${path('/market/resource')}/${identifier}`;
+    const target = path(marketResourcePath(resource));
     const price =
         resource.commercial.kind === 'free'
             ? common.free
