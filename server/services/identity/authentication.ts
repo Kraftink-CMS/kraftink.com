@@ -2,6 +2,7 @@ import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { pbkdf2 } from '@noble/hashes/pbkdf2.js';
 import { sha256 as nobleSha256 } from '@noble/hashes/sha2.js';
 import type { OAuthProvider } from '../../../shared/auth';
+import { fallbackLocale, localizedPathname } from '../../../shared/locales';
 import type { Env } from '../../types';
 import { database } from '../../database';
 import {
@@ -67,10 +68,11 @@ export function safeReturnPath(value: unknown, origin: string): string {
     }
     try {
         const url = new URL(value, origin);
+        const localized = localizedPathname(url.pathname, fallbackLocale).replace(/\/{2,}/g, '/');
         if (
             url.origin !== new URL(origin).origin ||
             url.pathname.startsWith('/api/') ||
-            /\/(?:login|register|forgot-password|reset-password|verify-email)$/.test(url.pathname)
+            /^\/[^/]+\/(?:login|register|forgot-password|reset-password|verify-email)\/?$/.test(localized)
         ) {
             return '/account';
         }

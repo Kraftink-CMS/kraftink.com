@@ -19,7 +19,7 @@ import { ModerationPage } from './pages/moderation/ModerationPage';
 import { AnnouncementsPage } from './pages/admin/AnnouncementsPage';
 import { StatisticsPage } from './pages/admin/StatisticsPage';
 import { LegalPage } from './pages/legal/LegalPage';
-import { matchProtectedPage, protectedPages, type PrivatePage } from '../shared/routes';
+import { marketResourceRoutes, matchProtectedPage, protectedPages, type PrivatePage } from '../shared/routes';
 import type { ReactNode } from 'react';
 
 const privatePages = {
@@ -48,8 +48,9 @@ export function App() {
                 <Route index element={<HomePage />} />
                 <Route path="features" element={<FeaturesPage />} />
                 <Route path="market" element={<MarketPage />} />
-                <Route path="market/resource" element={<ResourcePage />} />
-                <Route path="market/resource/:resourceId" element={<ResourcePage />} />
+                {marketResourceRoutes.map((path) => (
+                    <Route key={path} path={path} caseSensitive element={<ResourcePage />} />
+                ))}
                 <Route path="documentation/*" element={<DocumentationPage />} />
                 <Route path="downloads" element={<DownloadsPage />} />
                 <Route path="about" element={<AboutPage />} />

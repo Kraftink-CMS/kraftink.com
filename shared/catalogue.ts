@@ -44,21 +44,6 @@ export interface PublicCatalogue {
     fetchedAt: number | null;
 }
 
-export function marketResourceId(path: string, search: string): string | undefined {
-    if (path === 'market/resource') {
-        const query = new URLSearchParams(search);
-        return query.get('resource') ?? query.get('id') ?? undefined;
-    }
-    if (path.startsWith('market/resource/')) {
-        try {
-            return decodeURIComponent(path.slice('market/resource/'.length));
-        } catch {
-            return undefined;
-        }
-    }
-    return undefined;
-}
-
 export function gameCompatibility(value: object, type: unknown): GameCompatibility | null {
     if (['supported_games', 'excluded_games', 'game_enhancements'].some((key) => Object.hasOwn(value, key))) {
         return null;

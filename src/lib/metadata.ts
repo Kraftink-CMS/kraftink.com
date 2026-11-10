@@ -1,5 +1,4 @@
 import { fallbackLocale, localeRegistry } from '../../shared/locales';
-import { marketResourceId } from '../../shared/catalogue';
 import { localized } from './i18n';
 import {
     accountCopy,
@@ -11,7 +10,12 @@ import {
     workspace,
 } from './translations';
 import type { PublicPageData } from './rendering';
-import { matchProtectedPage } from '../../shared/routes';
+import {
+    findMarketResource,
+    marketResourcePath,
+    matchMarketResourceRoute,
+    matchProtectedPage,
+} from '../../shared/routes';
 
 export interface PageMetadata {
     title: string;
@@ -67,6 +71,7 @@ export function pageMetadata(
         'checkout/success': { title: text.verified, description: site.description, public: false },
     };
     const protectedPage = matchProtectedPage(relative);
+    const resourceRoute = matchMarketResourceRoute(relative, search);
     const page = pages[protectedPage?.page ?? relative];
     let title = page?.title ?? text.notFound;
     let description = page?.description ?? text.notFoundText;
@@ -103,18 +108,13 @@ export function pageMetadata(
         canonicalLocale = guide?.contentLocale ?? locale;
         languages = guide?.availableLocales ?? languages;
         canonicalRelative = `documentation${slug === 'index' ? '' : `/${slug.split('/').map(encodeURIComponent).join('/')}`}`;
-    } else if (relative === 'market/resource' || relative.startsWith('market/resource/')) {
-        const id = marketResourceId(relative, search);
-        const resource = id
-            ? data.catalogue?.resources.find((entry) => entry.resourceId === id || entry.id === id)
-            : undefined;
+    } else if (resourceRoute) {
+        const resource = findMarketResource(data.catalogue?.resources, resourceRoute);
         title = resource ? localized(resource.name, locale) : common.resource;
         description = resource ? localized(resource.description, locale) : text.marketText;
         indexable = Boolean(resource);
         status = resource ? 200 : data.catalogue?.state === 'fresh' ? 404 : 503;
-        canonicalRelative = resource
-            ? `market/resource/${encodeURIComponent(resource.resourceId ?? resource.id)}`
-            : relative;
+        canonicalRelative = resource ? marketResourcePath(resource).slice(1) : relative;
     }
     if (
         relative === 'market' &&
