@@ -10,13 +10,7 @@ import { fail, sessionCookieName, type AppContext } from './http';
 import { getCookie } from 'hono/cookie';
 import { resolveSession, sessionData } from './middleware/authentication';
 import { hasRole } from '../shared/auth';
-import {
-    marketResourcePath,
-    marketResourceRedirect,
-    matchMarketResourceRoute,
-    matchProtectedPage,
-    type MarketResourceRoute,
-} from '../shared/routes';
+import { marketResourcePath, matchMarketResourceRoute, matchProtectedPage } from '../shared/routes';
 import type { Env } from './types';
 import { cachedMetadata, mergedCatalogue } from './services/market/catalogue';
 
@@ -90,14 +84,13 @@ async function publicData(
     env: Env,
     locale: string,
     relative: string,
-    resourceRoute: MarketResourceRoute | null,
+    resourceId: string | undefined,
     userId: string | null,
 ): Promise<PublicPageData> {
     const data: PublicPageData = { locale, origin: new URL(env.APP_ORIGIN).origin };
     if (relative === 'documentation' || relative.startsWith('documentation/')) {
         data.guides = await bounded((signal) => guides(env, locale, signal));
-    } else if (relative === '' || relative === 'market' || resourceRoute) {
-        const resourceId = resourceRoute?.id;
+    } else if (relative === '' || relative === 'market' || resourceId) {
         data.catalogue = await bounded((signal) =>
             mergedCatalogue(env, userId, false, { persistMetadata: false, signal, resourceId }),
         );
@@ -184,7 +177,7 @@ export async function renderPage(c: AppContext): Promise<Response> {
         return new Response(null, { status: 404 });
     }
     const relative = localePath.split('/').slice(2).join('/');
-    const resourceRoute = matchMarketResourceRoute(relative, url.search);
+    const resourceId = matchMarketResourceRoute(relative)?.id;
     const personalized = Boolean(session.user || getCookie(c, sessionCookieName(c)) || c.req.header('Authorization'));
     const protectedPage = matchProtectedPage(relative);
     if (protectedPage && !session.user) {
@@ -201,23 +194,10 @@ export async function renderPage(c: AppContext): Promise<Response> {
         });
     }
     const data: PageData = {
-        ...(await publicData(c.env, locale, relative, resourceRoute, session.user?.id ?? null)),
+        ...(await publicData(c.env, locale, relative, resourceId, session.user?.id ?? null)),
         session,
     };
-    let metadata = pageMetadata(localePath, url.search, locale, data, new URL(c.env.APP_ORIGIN).origin);
-    if (resourceRoute && metadata.indexable) {
-        const redirect = marketResourceRedirect(localePath, new URL(metadata.canonical).pathname, url.search);
-        if (redirect) {
-            return new Response(null, {
-                status: 301,
-                headers: {
-                    Location: new URL(redirect, c.env.APP_ORIGIN).href,
-                    'Cache-Control': 'private, no-store',
-                    'CDN-Cache-Control': 'no-store',
-                },
-            });
-        }
-    }
+    let metadata = pageMetadata(localePath, locale, data, new URL(c.env.APP_ORIGIN).origin);
     const requiredRole = protectedPage?.role;
     if (requiredRole && !hasRole(session.user, requiredRole)) {
         metadata = { ...metadata, status: 403 };

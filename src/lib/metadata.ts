@@ -10,12 +10,7 @@ import {
     workspace,
 } from './translations';
 import type { PublicPageData } from './rendering';
-import {
-    findMarketResource,
-    marketResourcePath,
-    matchMarketResourceRoute,
-    matchProtectedPage,
-} from '../../shared/routes';
+import { findMarketResource, matchMarketResourceRoute, matchProtectedPage } from '../../shared/routes';
 
 export interface PageMetadata {
     title: string;
@@ -34,13 +29,7 @@ function readable(value: string): string {
     return value.replace(/[—–]/g, '-').replace(/\s+/g, ' ').trim();
 }
 
-export function pageMetadata(
-    pathname: string,
-    search: string,
-    locale: string,
-    data: PublicPageData,
-    origin: string,
-): PageMetadata {
+export function pageMetadata(pathname: string, locale: string, data: PublicPageData, origin: string): PageMetadata {
     const site = siteMessages[locale] ?? siteMessages[fallbackLocale];
     const common = commonMessages[locale] ?? commonMessages[fallbackLocale];
     const account = accountCopy[locale] ?? accountCopy[fallbackLocale];
@@ -71,7 +60,7 @@ export function pageMetadata(
         'checkout/success': { title: text.verified, description: site.description, public: false },
     };
     const protectedPage = matchProtectedPage(relative);
-    const resourceRoute = matchMarketResourceRoute(relative, search);
+    const resourceRoute = matchMarketResourceRoute(relative);
     const page = pages[protectedPage?.page ?? relative];
     let title = page?.title ?? text.notFound;
     let description = page?.description ?? text.notFoundText;
@@ -114,7 +103,6 @@ export function pageMetadata(
         description = resource ? localized(resource.description, locale) : text.marketText;
         indexable = Boolean(resource);
         status = resource ? 200 : data.catalogue?.state === 'fresh' ? 404 : 503;
-        canonicalRelative = resource ? marketResourcePath(resource).slice(1) : relative;
     }
     if (
         relative === 'market' &&

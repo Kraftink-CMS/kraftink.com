@@ -59,8 +59,8 @@ export function PageMetadata() {
     const { data } = usePublicPageData();
     const origin = data.origin;
     const metadata = useMemo(
-        () => pageMetadata(location.pathname, location.search, locale, data, origin),
-        [location.pathname, location.search, locale, data, origin],
+        () => pageMetadata(location.pathname, locale, data, origin),
+        [location.pathname, locale, data, origin],
     );
     useEffect(() => {
         document.title = metadata.title;
