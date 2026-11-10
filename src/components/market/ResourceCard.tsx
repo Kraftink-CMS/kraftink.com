@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { CatalogueResource } from '../../../shared/catalogue';
 import { marketResourcePath } from '../../../shared/routes';
-import { localized, useLocale } from '../../lib/i18n';
+import { localized, useLocale, useSiteCopy } from '../../lib/i18n';
 import { commonMessages } from '../../lib/translations';
 import { resourcePrice } from '../../lib/catalogue';
 import { Skeleton } from '../UI';
@@ -9,6 +9,7 @@ import { ResourceIcon } from './ResourceIcon';
 
 export function ResourceCard({ resource }: { resource: CatalogueResource }) {
     const { locale, path } = useLocale();
+    const { market } = useSiteCopy();
     const common = commonMessages[locale];
     const cover = resource.type === 'theme';
     const image = cover ? localized(resource.image, locale) : undefined;
@@ -41,20 +42,22 @@ export function ResourceCard({ resource }: { resource: CatalogueResource }) {
                     )}
                 </div>
             )}
-            <div className="card-body d-flex gap-3">
-                {!cover && <ResourceIcon resource={resource} />}
-                <div className="resource-card-copy">
-                    <div className="resource-card-heading">
+            <div className="card-body">
+                <header className="resource-card-heading">
+                    {!cover && <ResourceIcon resource={resource} />}
+                    <div className="resource-card-identity">
                         <h3 className="h5 mb-0">
                             <Link to={target} className="stretched-link">
                                 {name}
                             </Link>
                         </h3>
-                        <span className="resource-card-price">{price}</span>
+                        <small className="resource-card-author">
+                            {market.by} {resource.author.name}
+                        </small>
                     </div>
-                    <p>{localized(resource.description, locale)}</p>
-                    <p className="small text-body-secondary mb-0">{resource.author.name}</p>
-                </div>
+                    <span className="resource-card-price">{price}</span>
+                </header>
+                <p className="resource-card-description">{localized(resource.description, locale)}</p>
             </div>
         </article>
     );
@@ -64,16 +67,18 @@ export function ResourceCardLoading({ cover = false }: { cover?: boolean }) {
     return (
         <div className="card h-100 overflow-hidden">
             {cover && <div className="resource-art skeleton rounded-0" />}
-            <div className="card-body d-flex gap-3">
-                {!cover && <div className="resource-icon skeleton rounded-3" />}
-                <div className="resource-card-copy gap-2">
-                    <div className="d-flex justify-content-between gap-2">
-                        <Skeleton width="45%" height="1.25rem" />
-                        <Skeleton width="18%" />
+            <div className="card-body">
+                <div className="resource-card-heading">
+                    {!cover && <div className="resource-icon skeleton rounded-3" />}
+                    <div className="resource-card-identity d-flex flex-column gap-1">
+                        <Skeleton width="65%" height="1.25rem" />
+                        <Skeleton width="45%" height="0.8125rem" />
                     </div>
+                    <Skeleton width="15%" />
+                </div>
+                <div className="vstack gap-2">
                     <Skeleton width="95%" />
                     <Skeleton width="65%" />
-                    <Skeleton width="35%" height="0.875rem" />
                 </div>
             </div>
         </div>
