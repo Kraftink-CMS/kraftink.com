@@ -325,10 +325,7 @@ function validatePackage(manifest: ResourceManifest, entries: Map<string, Entry>
             fail('archive_provider');
         }
     }
-    if (
-        manifest.target !== undefined &&
-        (manifest.type !== 'theme' || !['site', 'admin'].includes(String(manifest.target)))
-    ) {
+    if (manifest.type === 'theme' ? manifest.target !== 'site' && manifest.target !== 'admin' : 'target' in manifest) {
         fail('archive_manifest');
     }
     if (manifest.assets !== undefined) {
