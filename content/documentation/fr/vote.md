@@ -1,6 +1,6 @@
 # Relier les annuaires de vote
 
-Installez Vote et préparez les identifiants de votre serveur chez les annuaires proposés pour le jeu du site.
+Installez **Vote**, puis ouvrez **Extensions → Vote → Sites de vote**. Préparez les identifiants de votre serveur chez les annuaires proposés pour le jeu du site.
 
 ## Configurer un annuaire
 
@@ -14,7 +14,9 @@ Pour une vérification par IP, le joueur doit garder la même adresse entre le v
 
 ## Transmettre les votes en jeu avec Votifier
 
-Si le jeu propose Votifier, choisissez ce mode de livraison dans les paramètres de l’annuaire. Le récepteur doit accepter **Votifier v2**. Renseignez son port, un nom de service et un jeton, puis utilisez le même nom et le même jeton dans la configuration du récepteur. Le panneau fournit un exemple adapté au jeu.
+Si le jeu propose Votifier, choisissez **Votifier v2** dans les paramètres de l’annuaire. Sélectionnez le serveur ou le proxy qui reçoit les votes, puis renseignez son port Votifier, un nom de service et un jeton. Utilisez le même nom et le même jeton dans la configuration du récepteur. Le panneau fournit un exemple adapté au jeu.
+
+Dans ce mode, le serveur distribue les récompenses par vote. Les points, paliers et objectifs du site restent actifs. Si l’annuaire envoie aussi les votes directement au serveur, désactivez cet envoi pour éviter un doublon.
 
 ## Récompenses et reprises
 

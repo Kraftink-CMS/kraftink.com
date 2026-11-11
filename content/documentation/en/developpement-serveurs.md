@@ -4,7 +4,7 @@ This API lets a connector manage accounts and balances from the game. It complem
 
 ## Obtain dedicated access
 
-An administrator creates a key under **Servers → Manage link → Account and balance access**, granting only the required operations. The server must use KraftLink, be enabled and belong to the active game. The complete key is shown once. Keep it in the connector’s private configuration. It is separate from delivery tokens and [launcher](auth-api.md) sessions.
+In **Servers and games → Game servers**, click **Manage connection** for the server, then open **Account and balance access**. Create a key with only the required operations. The server must use KraftLink, be enabled and belong to the active game. The complete key is shown once. Keep it in the connector’s private configuration. It is separate from delivery tokens and [launcher](auth-api.md) sessions.
 
 The creator’s permissions are checked on every call. Revocation, expiry, changes to the creator’s security state or loss of required permissions invalidate access. Owner, administrator, banned, anonymized, import-locked and mandatory-password-reset accounts cannot be targets of this API.
 

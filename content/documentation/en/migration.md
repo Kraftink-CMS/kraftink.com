@@ -1,6 +1,6 @@
 # Importing an existing site
 
-**Administration → Imports** reads supported data from KraftInk, Azuriom or historical MineWeb. The installer report lists available conversions and data that will only be archived.
+Open **Administration → Updates and imports → Import a website** to transfer data from KraftInk, Azuriom or legacy MineWeb. The wizard report lists available conversions and the data kept in the private archive.
 
 ## Preparing and running the import
 
@@ -44,6 +44,6 @@ Reconfigure SMTP, OAuth, payment and game connection secrets. Some members will 
 
 ## Checking the result
 
-Open **View report** to find outstanding items and download the JSON report. Check accounts, permissions, amounts, links and images before publishing content. Old commands, rewards and payments are not replayed.
+Open **View the report** to find outstanding items and download the JSON report. Check accounts, permissions, amounts, links and images before publishing content. Old commands, rewards and payments are not replayed.
 
-An interrupted import can resume from the panel. Keep `.env` and the private archives in `storage/app/private/imports/` until the transfer is approved.
+If the import stops, choose **Resume import** in the panel. Keep `.env` and the private archives in `storage/app/private/imports/` until you’ve checked the transfer.

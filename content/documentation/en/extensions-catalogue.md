@@ -8,7 +8,7 @@ Choose the package, check its displayed requirements and confirm installation. A
 
 A plugin’s Market listing shows the supported games for its latest version and any games that get extra features. Extra features do not limit where the plugin can be installed. The CMS offers versions compatible with the active game. If none are compatible, a purchased plugin stays visible without an installation option.
 
-The public site and panel each have their own theme. **Use** selects a theme for its target. **Default** restores the native appearance of that target. Changing themes keeps settings and content.
+Under **Appearance → Themes**, click **Use for website** or **Use for administration** next to the theme you want. To restore the original appearance, use the same button in the corresponding **default presentation** card. Changing themes keeps your settings and content.
 
 For manual installation, use a ready-to-install archive. GitHub “Source code” archives do not always contain the required dependencies and compiled assets.
 

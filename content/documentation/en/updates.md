@@ -1,6 +1,6 @@
 # Updating KraftInk
 
-Open **Administration → Updates** to install a CMS version. Separately added plugins and themes are updated from their own pages.
+Open **Updates and imports → Updates** to install a CMS version. Separately added plugins and themes are updated from their own pages.
 
 ## Applying an update
 
@@ -11,7 +11,7 @@ Open **Administration → Updates** to install a CMS version. Separately added p
 
 The panel downloads the release or accepts its official **update archive**. Installation archives and GitHub source archives cannot be used for this operation.
 
-Keep **Stable** on a public site. Alpha and Beta are trial releases. Switching back to Stable waits for a compatible version and does not restore an earlier site state.
+The **Stable** channel is selected by default. If you are testing an alpha version, select **Alpha** in **Update preferences**, save your choice and click **Check for updates**. Switching back to **Stable** keeps your current version until a compatible stable update is available.
 
 The host must support database backup and restoration. MySQL requires `mysqldump` and `mysql`. MariaDB requires `mariadb-dump` and `mariadb`. PostgreSQL requires `pg_dump` and `psql` from the same major version as the server. The Docker image includes MariaDB and PostgreSQL 17 tools. Add matching tools to the image if your database requires them.
 

@@ -26,7 +26,7 @@ In **Security and access → Sign-in and registration → General settings**, ch
 
 Under **External accounts**, **Allow setting a password** is on by default. It reveals **Require a password at registration**, which is off by default. Turn on the second option to have new members choose a KraftInk password when they sign up with a provider.
 
-When forms open in modal dialogs, password recovery and two-factor authentication can continue there. Links from an email and returns from a sign-in provider open a page. Manage providers and account recovery in the [External connections](oauth.md) tab.
+When forms open in modal dialogs, password recovery and two-factor authentication can continue there. Links from an email and returns from a sign-in provider open a page. Manage providers and account recovery in the [External sign-in](oauth.md) tab.
 
 When Minecraft is the active game, its sign-in settings carry a **Minecraft** badge. **In-game sign-in** is disabled by default. Install and link KraftLink on the selected server. On a Velocity network, installing it on the proxy covers the servers on that network. Number confirmation and any remaining registration fields stay on the page or in the dialog already open. [In-game sign-in](games.md#in-game-sign-in)
 
@@ -46,7 +46,7 @@ Uncheck **Show the online player count** to keep the address without a public pl
 
 ## Email
 
-In **Email and operation**, enter your provider’s SMTP settings and an authorised sender address. Sendmail is also available when supported by the host.
+In **Settings → Email and operations**, enter your provider’s SMTP settings and an authorised sender address. Sendmail is also available when supported by the host.
 
 Save, send a test email and check that it arrives, including in spam. Add any SPF or DKIM DNS records requested by the provider. Leaving a password blank keeps its saved value.
 

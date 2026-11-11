@@ -1,6 +1,6 @@
 # Connecting voting directories
 
-Install Vote and prepare your server credentials for the directories offered for the site’s game.
+Install **Vote**, then open **Extensions → Vote → Voting sites**. Get your server credentials from the directories offered for the site’s game.
 
 ## Configuring a directory
 
@@ -14,7 +14,9 @@ For IP verification, players must keep the same address between voting and verif
 
 ## Sending votes to the game with Votifier
 
-If the game offers Votifier, select it as the delivery mode in the directory settings. The receiver must support **Votifier v2**. Enter its port, a service name and a token, then use the same name and token in the receiver configuration. The admin panel provides an example for the game.
+If the game offers Votifier, select **Votifier v2** in the directory settings. Select the server or proxy that receives votes, then enter its Votifier port, a service name and a token. Use the same name and token in the receiver configuration. The panel provides an example for the game.
+
+In this mode, the server gives out per-vote rewards. Website points, milestones and goals stay active. If the directory also sends votes directly to the server, turn off direct delivery to avoid duplicates.
 
 ## Rewards and retries
 
@@ -24,4 +26,4 @@ Set up the [server connection](games.md) before game commands. `{player}` and `{
 
 Guest voting can grant the configured game commands without a site balance or rank. Minecraft/Hytale commands requiring a UUID or verified presence need an identity linked to an account.
 
-After an interrupted confirmation, check **Votes to review** and the evidence at the directory. For an uncertain delivery, check the server log before retrying.
+After an interrupted confirmation, open **Votes requiring review** and check the vote at the directory. For an uncertain delivery, check the server log before retrying.

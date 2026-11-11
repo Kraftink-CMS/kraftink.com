@@ -1,6 +1,6 @@
 # Configurable widgets
 
-A widget is a block the owner places and configures in **Presentation → Widgets**. The native home page offers the `home` zone. Multiple instances of one widget can have different settings.
+A widget is a block the owner places and configures in **Appearance → Widgets**. The native home page offers the `home` zone. Multiple instances of one widget can have different settings.
 
 ## Defining a widget
 

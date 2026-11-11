@@ -1,6 +1,6 @@
 # Mettre à jour KraftInk
 
-Ouvrez **Administration → Mises à jour** pour installer une version du CMS. Les plugins et thèmes ajoutés séparément se mettent à jour depuis leurs propres pages.
+Ouvrez **Mises à jour et imports → Mises à jour** pour installer une version du CMS. Les plugins et thèmes ajoutés séparément se mettent à jour depuis leurs propres pages.
 
 ## Appliquer une mise à jour
 
@@ -11,7 +11,7 @@ Ouvrez **Administration → Mises à jour** pour installer une version du CMS. L
 
 Le panneau télécharge la version ou accepte son archive officielle de **mise à jour**. L’archive d’installation et les sources GitHub ne conviennent pas à cette opération.
 
-Gardez le canal **Stable** sur un site public. Alpha et Bêta sont des versions d’essai. Revenir au canal Stable attend une version compatible et ne remet pas le site dans un état antérieur.
+Le canal **Stable** est sélectionné par défaut. Si vous testez une version alpha, sélectionnez **Alpha** dans **Préférences de mise à jour**, enregistrez votre choix puis cliquez sur **Rechercher une mise à jour**. Repasser sur **Stable** laisse votre version en place jusqu’à la disponibilité d’une mise à jour stable compatible.
 
 L’hébergement doit permettre de sauvegarder et restaurer la base. Avec MySQL, il faut `mysqldump` et `mysql`. Avec MariaDB, il faut `mariadb-dump` et `mariadb`. Avec PostgreSQL, il faut `pg_dump` et `psql` de la même version majeure que le serveur. L’image Docker inclut les outils de MariaDB et de PostgreSQL 17. Ajoutez les outils adaptés à l’image si votre base en a besoin.
 

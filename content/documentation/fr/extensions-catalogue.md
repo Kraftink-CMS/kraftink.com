@@ -8,7 +8,7 @@ Choisissez le paquet, vérifiez les exigences affichées puis confirmez son inst
 
 La fiche Market d’un plugin indique les jeux compatibles avec sa dernière version et les jeux qui disposent de fonctions supplémentaires. Ces fonctions ne limitent pas l’installation. Le CMS propose les versions compatibles avec le jeu actif. Si aucune ne convient, un plugin acheté reste visible et l’installation est indisponible.
 
-Le site public et le panneau ont chacun leur thème. Le bouton **Utiliser** sélectionne un thème pour sa destination. **Par défaut** rétablit le rendu natif de cette destination. Les réglages et contenus sont conservés lors d’un changement.
+Dans **Apparence → Thèmes**, cliquez sur **Utiliser pour le site** ou **Utiliser pour l’administration** à côté du thème voulu. Pour revenir à la présentation d’origine, utilisez le même bouton dans la carte **présentation par défaut** correspondante. Le changement conserve vos réglages et vos contenus.
 
 Pour une installation manuelle, utilisez une archive prête à installer. Les archives « Source code » de GitHub ne contiennent pas toujours les dépendances et ressources compilées nécessaires.
 

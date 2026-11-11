@@ -4,8 +4,8 @@ KraftLink transmet l’état et les joueurs présents d’un serveur à KraftInk
 
 ## Créer la liaison dans le CMS
 
-1. Activez le jeu correspondant dans **Jeux et identités**.
-2. Dans **Serveurs → Serveurs de jeux**, ajoutez un serveur avec le mode **KraftLink**.
+1. Activez le jeu correspondant dans **Serveurs et jeux → Jeux et identités**.
+2. Dans **Serveurs et jeux → Serveurs de jeux**, ajoutez un serveur avec le mode **KraftLink**.
 3. Renseignez l’adresse et le port du serveur à relier, sans `https://`.
 4. Dans **Gérer la liaison → Jeton de liaison**, créez un jeton et copiez-le. Il n’est affiché qu’une fois.
 
@@ -23,7 +23,7 @@ La connexion rapide en jeu et AuthMe utilisent chacun la liaison choisie dans le
 
 ## Installer le connecteur
 
-Téléchargez le fichier universel `KraftLink.jar` ou la variante de votre plateforme depuis les [publications KraftLink](https://github.com/kraftink-cms/KraftLink/releases). À partir de KraftLink 1.4.1, le JAR universel couvre toutes les plateformes du tableau.
+Téléchargez le fichier universel `KraftLink.jar` ou la variante de votre plateforme depuis les [publications KraftLink](https://github.com/kraftink-cms/KraftLink/releases). À partir de KraftLink 1.5.0, le JAR universel couvre toutes les plateformes du tableau.
 
 | Plateforme | Variante | Dossier d’installation |
 | --- | --- | --- |
@@ -81,7 +81,7 @@ Mettez à jour KraftLink sur chaque serveur Nukkit qui doit recevoir des command
 
 ## Synchroniser les skins Minecraft Java
 
-Installez SkinsRestorer 15.12.6 ou une version compatible de la branche 15 sur un serveur Bukkit, Paper ou Folia qui dispose de KraftLink. Dans **Extensions → Skins et capes**, vérifiez l’intégration et autorisez l’application automatique pour ce serveur. Les membres enregistrent leur skin dans leur profil, puis rejoignent le serveur avec leur compte Minecraft Java vérifié. [Utiliser les skins et capes](skins.md)
+Installez le [plugin Skins](skins.md) sur le site. Sur un serveur Bukkit, Paper ou Folia qui dispose de KraftLink, installez SkinsRestorer 15.12.6 ou une version compatible de la branche 15. Dans **Extensions → Skins et capes**, vérifiez l’intégration et autorisez l’application automatique pour ce serveur. Les membres enregistrent leur skin dans leur profil, puis rejoignent le serveur avec leur compte Minecraft Java vérifié.
 
 ## Régler les intervalles
 

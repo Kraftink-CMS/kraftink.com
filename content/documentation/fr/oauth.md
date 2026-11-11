@@ -1,10 +1,12 @@
 # Connexions externes et Discord
 
-Pour proposer la connexion avec Google, Discord ou un autre service, créez une application chez ce fournisseur. Dans **Sécurité et accès → Connexion et inscription → Connexions externes**, retrouvez le lien vers sa console et l’adresse de retour à enregistrer. Le mode de connexion et les règles d’inscription se règlent dans l’onglet [Réglages généraux](configuration.md#connexion-et-inscription).
+Pour proposer la connexion avec Google, Discord ou un autre service, ouvrez **Sécurité et accès → Connexion et inscription → Connexions externes**. Pour les services qui demandent une application, le panneau indique l’adresse de retour et donne accès à leur console. Le mode de connexion et les règles d’inscription se règlent dans l’onglet [Réglages généraux](configuration.md#connexion-et-inscription).
 
 Dans cet onglet, la section **Comptes externes** permet d’autoriser un mot de passe KraftInk. Activez **Exiger un mot de passe à l’inscription** pour le rendre obligatoire lors de la création d’un compte avec un fournisseur.
 
 ## Relier une application
+
+Suivez ces étapes pour les services qui demandent un identifiant client et un secret. Pour Steam ou Cfx.re, utilisez les réglages du tableau ci-dessous.
 
 1. Copiez l’adresse de retour affichée dans KraftInk.
 2. Créez une application Web chez le fournisseur et enregistrez exactement cette adresse.
@@ -19,7 +21,8 @@ Dans cet onglet, la section **Comptes externes** permet d’autoriser un mot de 
 | Facebook | Application Meta avec connexion Facebook pour le Web |
 | Twitch | Application dans la console développeur Twitch |
 | X | Application Web OAuth 2.0 |
-| Steam, selon le jeu | Connexion OpenID. La clé Web API facultative sert aux profils publics |
+| Steam | Activez Steam dans les connexions externes. La clé Web API est facultative et sert aux profils publics |
+| Cfx.re, pour FiveM | Activez Cfx.re dans les connexions externes avec un site en HTTPS |
 
 Pour Microsoft, faites correspondre l’annuaire aux comptes autorisés : `common`, `consumers`, `organizations` ou l’identifiant de votre organisation. La [vérification Minecraft](games.md#verifier-les-identites) demande aussi l’association du profil de jeu.
 
@@ -35,11 +38,11 @@ Gardez votre session de propriétaire ouverte pendant les essais et vérifiez vo
 
 Les rôles liés attribuent un rôle Discord selon les critères du compte KraftInk. Ils demandent une autorisation du membre distincte de la connexion au site.
 
-1. Dans **Intégrations → Rôles liés Discord**, sélectionnez l’application Discord et renseignez le jeton de son bot.
+1. Activez d’abord la connexion Discord dans **Connexions externes**. Dans **Intégrations → Rôles liés Discord**, sélectionnez l’application et renseignez le jeton de son bot.
 2. Enregistrez l’adresse de retour dans OAuth2 et l’adresse de vérification dans les paramètres des rôles liés de l’application.
 3. Choisissez les critères, activez le service et cliquez sur **Publier les critères**.
 4. Dans le serveur Discord, créez le rôle lié avec cette application et ses conditions.
 
 Le panneau fournit `role_id` pour le rang principal et `role_power` pour sa priorité. Une valeur plus grande représente un rang supérieur. La date d’inscription et la vérification de l’e-mail peuvent aussi servir de critères, sans transmettre l’adresse. Discord accepte cinq critères au maximum.
 
-Le membre autorise le partage dans **Mon compte → Connexions → Rôles liés Discord**, avec le même compte Discord que celui déjà associé. Les critères sont actualisés par les tâches planifiées. Si les rôles ne suivent pas, vérifiez le cron, les conditions du rôle et l’état de l’autorisation.
+Le membre autorise le partage dans **Mon compte → Connexions → Rôles liés Discord**, avec le même compte Discord que celui déjà associé. Il demande ensuite le rôle dans les **Rôles liés** du serveur Discord. Les tâches planifiées actualisent les critères. Si les rôles ne suivent pas, vérifiez le cron, les conditions du rôle et l’état de l’autorisation.

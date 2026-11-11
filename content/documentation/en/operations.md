@@ -12,6 +12,12 @@ Add this task **every minute**, using your hosting paths:
 
 Use the directory containing `artisan`, not `public/`. Command-line PHP must meet the [CMS requirements](installation.md#hosting-requirements). If the hosting panel separates frequency and command, copy only the command starting with `cd`.
 
+With Docker Compose, add the cron task on the machine hosting the containers. Adjust the path to the directory containing `compose.yaml`.
+
+```cron
+* * * * * cd /var/www/kraftink && /usr/bin/docker compose exec -T --user www-data kraftink php artisan schedule:run >> /dev/null 2>&1
+```
+
 This cron handles scheduled publications, delivery retries, synchronisation, server monitoring and cleanup. The default configuration does not require a permanent worker. Check it with a scheduled publication.
 
 Without cron, regular actions attempt immediate delivery with the default `QUEUE_CONNECTION=sync` setting. Deferred actions and retries after a failure remain pending. A successful SMTP test does not check the scheduler.
@@ -30,7 +36,7 @@ Use **Content → Trash** to restore deleted items. Restore a topic or ticket be
 
 In **Operations → Data retention**, choose retention periods for old versions, temporary data and technical records. Cleanup takes effect at the next hourly run. Defaults are 90 days and 50 versions per content item for history, 2 days for temporary data and 90 days for technical records.
 
-These settings do not delete saved content, including drafts, or manually trashed items. Files still in use and financial data are kept. Audit logs have their own retention setting in **History → Audit log**.
+These settings do not delete saved content, including drafts, or manually trashed items. Files still in use and financial data are kept. Set audit log retention in **Operations → Action log**.
 
 ## Moving to another host
 

@@ -1,6 +1,6 @@
 # Authenticating an application
 
-This API signs a member into a launcher or application. The owner enables **Application connections** in `/admin/settings/api`. Use HTTPS, JSON and `Authorization: Bearer <token>` for authenticated requests.
+This API lets members sign in from a launcher or another application. Enable it under **Security and access → Application sign-in**. Use HTTPS, JSON and `Authorization: Bearer <token>` for authenticated requests.
 
 ## Obtaining a personal token
 

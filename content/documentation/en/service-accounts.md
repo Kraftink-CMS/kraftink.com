@@ -1,6 +1,6 @@
 # Connecting a bot or service
 
-A service account gives an application its own API access without using a member’s personal account. Manage it in **Service accounts** after enabling **Application connections** in settings.
+A service account gives a bot or service its own access to KraftInk. Under **Security and access**, enable **Application sign-in**, then open **Service accounts**.
 
 ## Creating access
 

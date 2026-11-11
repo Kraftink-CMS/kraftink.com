@@ -8,12 +8,14 @@ Choose a preset period or enter custom dates. Comparison overlays the previous p
 
 The charts show page views, daily visitors and new registrations. Open the audience details to see views by guests and signed-in members. A visitor counts once per session per day, so the same session can count again on another day. The most viewed sections group pages by public route, such as all news articles.
 
-Breakdowns show browsers, major browser versions, operating systems and external referral domains. The plugin skips known bots, keeps aggregate counters and uses the existing KraftInk session. It adds no cookies and stores no IP address, member ID, full URL or raw user agent. Counting starts when you enable the plugin and covers requests that reach KraftInk.
+Breakdowns show browsers, major browser versions, operating systems and external referral domains. The plugin skips known bots, keeps aggregate counters and uses the existing KraftInk session. It adds no cookies and stores no IP address, member ID, full URL or raw user agent. Counting starts when you enable the plugin and covers public pages served by KraftInk.
 
 ## Game servers
 
-Enable the [scheduler](operations.md#scheduler) to collect samples every five minutes. Select a server to track player counts and, when the connection provides them, process CPU use, memory use and TPS. A server that responds to a ping can report its player count. With KraftLink, CPU and memory readings depend on the installed connector and Java environment. CPU covers the process and memory covers the Java heap.
+Enable the [scheduler](operations.md#scheduler) to collect samples every five minutes. A ping connection is enough to track player counts when the server reports them. KraftLink is optional and can also report Java heap usage and TPS, depending on the platform.
 
-The charts show peaks for players, CPU and memory, plus average TPS. A one-day period shows hourly figures. A dash marks an unavailable measurement. The sample count helps you interpret partial periods.
+The CPU chart is available with Statistics 1.0.2 and KraftLink 1.5.0 or later compatible versions. It shows how much CPU the Java process running KraftLink uses when the Java runtime provides that measurement.
 
-Periods use UTC. Retention follows the **technical records** setting under **Operations → Data retention**.
+The charts show peaks for players, memory and CPU, plus average TPS. A one-day period shows hourly figures. A dash marks an unavailable measurement. The sample count helps you interpret partial periods.
+
+Periods use UTC. Set the retention period under **Operations → Data retention → Old deliveries and tasks, in days**.

@@ -1,10 +1,12 @@
 # External sign-in and Discord
 
-To offer Google, Discord or another sign-in service, create an application with that provider. Open **Security and access → Sign-in and registration → External connections** for the provider’s console link and the callback address to register. Set sign-in mode and registration rules in the [General settings](configuration.md#sign-in-and-registration) tab.
+To offer Google, Discord or another sign-in service, open **Security and access → Sign-in and registration → External sign-in**. For services that require an application, the panel provides the callback address and a link to the provider’s console. Set sign-in mode and registration rules in the [General settings](configuration.md#sign-in-and-registration) tab.
 
 In that tab, **External accounts** lets you allow a KraftInk password. Turn on **Require a password at registration** to make it mandatory when someone creates an account with a provider.
 
 ## Connecting an application
+
+Follow these steps for services that require a client ID and secret. For Steam or Cfx.re, use the settings in the table below.
 
 1. Copy the callback address shown in KraftInk.
 2. Create a web application with the provider and register that exact address.
@@ -19,7 +21,8 @@ In that tab, **External accounts** lets you allow a KraftInk password. Turn on *
 | Facebook | Meta application with Facebook Login for the Web |
 | Twitch | Application in the Twitch developer console |
 | X | OAuth 2.0 web application |
-| Steam, depending on the game | OpenID sign-in. An optional Web API key provides public profiles |
+| Steam | Enable Steam in **External sign-in**. The Web API key is optional and provides public profiles |
+| Cfx.re, for FiveM | Enable Cfx.re in **External sign-in** on a site using HTTPS |
 
 For Microsoft, match the directory to the allowed accounts: `common`, `consumers`, `organizations` or your organisation identifier. [Minecraft verification](games.md#verifying-identities) also requires linking the game profile.
 
@@ -35,11 +38,11 @@ Keep your owner session open during testing and check your own recovery option b
 
 Linked roles assign a Discord role based on KraftInk account criteria. They require member consent separate from site sign-in.
 
-1. In **Integrations → Discord linked roles**, select the Discord application and enter its bot token.
+1. Enable Discord in **External sign-in** first. In **Integrations → Discord linked roles**, select the application and enter its bot token.
 2. Register the callback address in OAuth2 and the verification address in the application’s linked-role settings.
 3. Choose the criteria, enable the service and click **Publish criteria**.
 4. In your Discord server, create a linked role with this application and its conditions.
 
 The panel provides `role_id` for the main rank and `role_power` for its priority. A larger value means a higher rank. Registration date and email verification can also be criteria without sharing the address. Discord accepts up to five criteria.
 
-Members consent in **My account → Connections → Discord linked roles**, using the same Discord account if already linked. Scheduled tasks refresh the criteria. If roles do not update, check cron, role conditions and consent status.
+Members consent in **My account → Connections → Discord linked roles**, using the same Discord account if already linked. They then claim the role in the Discord server’s **Linked Roles**. Scheduled tasks refresh the criteria. If roles do not update, check cron, role conditions and consent status.

@@ -8,7 +8,7 @@ Select a game in **Games and identities**. Only one game is active at a time. Sw
 | --- | --- |
 | Minecraft Java | Mojang lookup checks profile existence. Ownership verification requires a Microsoft application and linking from the member’s account |
 | Geyser/Floodgate | Enable compatibility and match the server’s `username-prefix`. The public lookup confirms that the profile exists. Verified mode can require in-game confirmation |
-| Steam games | Enable Steam in external connections. OpenID verifies the account, not game ownership |
+| Steam games | Enable Steam in **External sign-in**. OpenID verifies the account, not game ownership |
 | Minecraft Bedrock | Declared gamertag or in-game verification on a Nukkit server with KraftLink and Xbox authentication |
 | FiveM | Cfx.re is the default identity provider. Choose Steam in the game settings if your server identifies players by Steam |
 | Hytale | Declared profile. PlayerDB and Crafthead avatars are optional third-party services |
@@ -33,7 +33,7 @@ Players enter their username on the website, then select the number shown in the
 
 ### Choose a FiveM identity provider
 
-Select **FiveM** in the game settings and choose **Cfx.re** or **Steam** under **Player identity**. Enable the matching connection under **Security and access → Sign-in and registration → External connections**. Cfx.re requires an HTTPS site and does not require a client secret. Connect your own account before requiring a verified game account. To change providers while verification is required, allow open access first, select the new provider, link your account and turn verification back on. Members must link their profile with the new provider.
+Select **FiveM** in the game settings and choose **Cfx.re** or **Steam** under **Player identity**. Enable the matching connection under **Security and access → Sign-in and registration → External sign-in**. Cfx.re requires an HTTPS site and does not require a client secret. Connect your own account before requiring a verified game account. To change providers while verification is required, allow open access first, select the new provider, link your account and turn verification back on. Members must link their profile with the new provider.
 
 ## Connecting a server
 

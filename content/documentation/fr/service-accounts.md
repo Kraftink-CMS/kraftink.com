@@ -1,6 +1,6 @@
 # Connecter un bot ou un service
 
-Un compte technique donne à une application ses propres accès API, sans utiliser le compte personnel d’un membre. Gérez-le dans **Comptes techniques** après avoir activé **Connexion des applications** dans les réglages.
+Un compte technique donne à un bot ou à un service son propre accès à KraftInk. Dans **Sécurité et accès**, activez **Connexion des applications**, puis ouvrez **Comptes techniques**.
 
 ## Créer l’accès
 
