@@ -6,9 +6,10 @@ Sur un site configuré pour Minecraft, installez **Skins** depuis **Plugins**. L
 
 Ouvrez **Extensions → Skins et capes** dans l’administration. Chaque section s’enregistre séparément.
 
-- **Textures du site** contrôle les capes et la publication des nouveaux PNG. Les capes sont autorisées au départ et les nouveaux fichiers sont privés. Activez la publication si un lanceur ou un site tiers doit pouvoir lire les PNG sans connexion. Seuls les fichiers envoyés pendant que l’option est active sont publiés. Désactiver la publication coupe l’accès public à ces fichiers tant que l’option reste désactivée.
-- **Skin par défaut du site** permet d’envoyer un PNG, de choisir son modèle et d’activer le repli. Les requêtes publiques portant sur un skin absent ou privé utilisent alors ce skin par défaut. Pour retirer le PNG enregistré, désactivez le repli et cochez **Retirer le skin enregistré** avant d’enregistrer.
-- **Application en jeu** contrôle la synchronisation séparément. Elle est activée au départ. La désactiver suspend les échanges en jeu. Les membres peuvent toujours gérer leurs fichiers sur le site et les serveurs conservent les textures déjà appliquées.
+- Dans **Textures du site**, **Autoriser les skins personnalisés** et **Autoriser les capes personnalisées** sont activés au départ. Désactivez un type pour suspendre l’envoi, l’aperçu et la lecture des fichiers correspondants sur le site et dans les lanceurs. Les fichiers restent enregistrés et leurs propriétaires peuvent les retirer depuis leur profil.
+- **Publier les nouveaux fichiers** rend les prochains PNG accessibles à toute personne disposant du lien. Les fichiers sont privés par défaut. Activer la publication laisse privés les fichiers déjà enregistrés comme tels. Désactiver cette option suspend aussi l’accès public aux fichiers déjà publiés.
+- **Skin par défaut du site** permet d’envoyer un PNG, de choisir son modèle et d’activer le repli. Ce skin reste disponible quand les skins personnalisés sont désactivés. Il est réservé aux aperçus, aux avatars du site et aux lanceurs compatibles. Pour retirer son PNG, désactivez le repli et cochez **Retirer le skin enregistré** avant d’enregistrer.
+- **Application en jeu** est activée au départ. Désactivez-la pour suspendre les échanges et conserver les skins déjà appliqués sur les serveurs. Lorsque les échanges sont actifs, désactiver les skins personnalisés suspend les nouvelles applications. KraftLink retire alors le skin qu’il gère au prochain échange pendant lequel le joueur est connecté.
 
 L’extension PHP GD est nécessaire pour générer les images du visage et du corps. Avec GD, choisissez **Visage du skin publié** (`skins`) dans **Réglages → Avatars** pour utiliser le visage d’un skin public. Le skin par défaut peut fournir le visage quand aucun skin public n’est disponible.
 
@@ -25,9 +26,9 @@ SkinsRestorer envoie les PNG de skin à MineSkin pour les signer. Dans la config
 
 Dans votre **Profil**, ouvrez la section **Skins et capes**. Importez un skin PNG de 64 × 64 ou 64 × 32 pixels et choisissez le modèle classique ou fin. Pour une cape, importez un PNG de 64 × 32 ou 22 × 17 pixels. Chaque fichier est limité à 32 Kio. Vérifiez les textures dans l’aperçu avant d’enregistrer.
 
-Le formulaire indique si les nouveaux fichiers restent privés ou sont publiés selon les réglages du site. Sous chaque fichier enregistré, le profil affiche son état et donne son lien si le fichier est public. Toute personne disposant de ce lien peut ouvrir l’image. Vous pouvez retirer chaque fichier séparément.
+Sous chaque fichier enregistré et autorisé, le profil affiche son état et propose un lien si le fichier est accessible au public. La note au bas du formulaire indique les règles de confidentialité du site. Vous pouvez retirer le skin et la cape séparément.
 
-Quand vous enregistrez un nouveau skin ou modifiez son modèle, il s’applique automatiquement sur les serveurs autorisés par l’administration. Rejoignez le serveur avec votre profil Java vérifié. Une cape PNG sert sur le site et avec les lanceurs compatibles.
+Quand vous enregistrez un nouveau skin ou modifiez son modèle, il s’applique automatiquement si les skins personnalisés sont autorisés et si le serveur participe à la synchronisation. Rejoignez le serveur avec votre profil Java vérifié. Une cape PNG sert sur le site et avec les lanceurs compatibles.
 
 Pour revenir à l’apparence définie par SkinsRestorer sur le serveur, retirez le skin enregistré. Quand vous êtes présent sur le serveur, KraftLink retire sa propre sélection si elle est toujours active. Les réglages de serveur restent dans l’administration.
 
@@ -41,7 +42,7 @@ Pour `{player}`, utilisez l’UUID Java, le pseudo Minecraft ou `id-<identifiant
 | `GET /api/skins/profiles/{player}/textures/{kind}.png` | Fichier PNG pour `skin` ou `cape`. |
 | `GET /api/skins/profiles/{player}/renders/{view}.png` | Image PNG pour `face`, `body` ou `combo`. Requiert PHP GD. |
 
-Les requêtes publiques utilisent les fichiers partagés. Quand un skin est privé ou absent, l’API peut renvoyer le skin par défaut configuré. L’URL d’une cape absente renvoie une erreur 404. La requête de profil renvoie 404 quand aucune texture n’est disponible.
+Les requêtes publiques utilisent les fichiers partagés des types autorisés. Quand un skin est privé, absent ou désactivé, l’API peut renvoyer le skin par défaut configuré. L’URL d’une cape indisponible renvoie une erreur 404. La requête de profil renvoie 404 quand aucune texture n’est disponible.
 
 ## Connecter un lanceur
 
@@ -54,4 +55,4 @@ Activez **Connexion des applications** dans KraftInk et utilisez un CMS à jour.
 | `POST /api/skins/me/textures/{kind}` | `skins:write` | Enregistre le PNG et renvoie le code 204. |
 | `GET /api/auth/me` | `profile:read` et `skins:read` | Inclut les métadonnées de Skins dans `data.user.extensions.skins` pour les membres avec un profil Java vérifié et la permission d’utiliser Skins. |
 
-Envoyez les fichiers en `multipart/form-data`. Utilisez le champ `skin` pour `/textures/skin` ou `cape` pour `/textures/cape`. Pour un skin, vous pouvez aussi envoyer `variant` avec la valeur `classic` ou `slim`. Les dimensions, la taille maximale et le réglage de publication sont les mêmes que sur le site.
+Envoyez les fichiers en `multipart/form-data`. Utilisez le champ `skin` pour `/textures/skin` ou `cape` pour `/textures/cape`. Pour un skin, vous pouvez aussi envoyer `variant` avec la valeur `classic` ou `slim`. Les dimensions, la taille maximale et le réglage de publication sont les mêmes que sur le site. Pour un type désactivé, l’envoi renvoie 404 et la lecture personnelle masque le fichier du membre. La lecture d’un skin peut renvoyer le skin de repli.
