@@ -1,12 +1,12 @@
 import type { GameCopy } from '../../lib/translations';
 
 export default {
-    highlightsTitle: 'Server integration',
+    highlightsTitle: 'At a glance',
     setupTitle: 'Connect your server',
     guideLink: 'Read the connection guide',
     installationLink: 'Install KraftInk',
     backLink: 'All supported games',
-    pluginsTitle: 'Official plugins',
+    pluginsTitle: 'Add to your site',
     pluginNames: {
         shop: 'Shop',
         vote: 'Vote',
@@ -18,588 +18,691 @@ export default {
     },
     pages: {
         minecraft: {
-            title: 'CMS for Minecraft Java servers',
+            title: 'Build a website for your Minecraft Java server',
             description:
-                'Connect your Minecraft Java website to Paper, Velocity or a modded server. Link Minecraft accounts and deliver in-game rewards through KraftLink.',
-            intro: 'Give your survival group, minigame network or modded server one address where players can find the rules, announcements and connection details.',
-            highlights: ['Microsoft account linking', 'Geyser and Floodgate support', 'KraftLink, ping and RCON'],
+                'Build a Minecraft Java server website and store. Link player accounts and deliver rewards to the right server with KraftLink.',
+            intro: 'Open a store for your Minecraft Java server and offer supporter ranks on the site. When a Skyblock season starts, publish the server address and schedule, then use KraftLink to deliver rewards to the right server.',
+            highlights: [
+                'A store with order tracking',
+                'Account verification for Java and Bedrock players',
+                'Rewards delivered to the server you choose',
+            ],
             features: [
                 {
-                    title: 'Verify Java and Bedrock accounts',
+                    title: 'Get players ready for launch',
                     description:
-                        'Java players link their Microsoft account. Players who join through Geyser can confirm their identity in game on a compatible server with Floodgate and KraftLink.',
+                        'Publish the launch date, required game version and season rules. Show how many players are online so newcomers can see if the server is open before starting the game.',
                 },
                 {
-                    title: 'Connect a proxy and its servers',
+                    title: 'Find the right player account',
                     description:
-                        'Create one connection for Velocity and one for each server that uses KraftLink. A command intended for Paper then reaches the right instance.',
+                        'Java players can prove they own an account by linking it through Microsoft. If your network welcomes Bedrock players through Geyser and Floodgate, let them confirm their identity in game with KraftLink.',
                 },
                 {
-                    title: 'Deliver a reward when a player joins',
+                    title: 'Send rewards to the right server',
                     description:
-                        'With a compatible extension, choose which server gets the reward command. KraftLink can wait for the player to join that server before running it.',
+                        'Choose which server runs each delivery command. On a Velocity network, a Skyblock reward can be delivered on the corresponding Paper server when the player joins it.',
                 },
             ],
-            setup: 'Select Minecraft in Games and identities. Choose the game ping for public status, RCON for console commands or KraftLink for commands and player presence.',
+            setup: 'Choose Minecraft in Games and identities. Add a server in Ping mode to show its status, or connect each compatible instance through KraftLink for commands and player presence. If you use RCON, test a console command first.',
             plugins: [
                 {
                     slug: 'shop',
                     description:
-                        'Sell an in-game rank and deliver it through KraftLink when your server provides the command to grant it.',
+                        'Offer a supporter rank on your site and track orders. For an in-game reward, choose a delivery command that your connected server supports.',
                 },
                 {
                     slug: 'vote',
                     description:
-                        'Verify votes on supported Minecraft server lists and reward players when they reach a milestone.',
+                        'Connect your Minecraft-MP listing or another supported directory. Verify votes and reward players when they reach milestones you set.',
                 },
                 {
                     slug: 'skins',
                     description:
-                        'Players who verify their Java account can customize their skin and cape from their profile.',
+                        'Let members with a verified Java account customize their skin and cape on the site. Sync skins in game on compatible servers running SkinsRestorer and KraftLink.',
                 },
             ],
         },
         minecraftbedrock: {
-            title: 'CMS for Minecraft Bedrock servers',
+            title: 'Build a website for your Minecraft Bedrock server',
             description:
-                'Display your Minecraft Bedrock server status on your site. On Cloudburst Nukkit, KraftLink verifies Xbox gamertags and sends in-game commands.',
-            intro: 'Show players the address and port for your Bedrock world. On a Nukkit server connected with KraftLink, they can also link their Xbox gamertag in game.',
-            highlights: ['Bedrock UDP ping', 'Cloudburst Nukkit connector', 'Xbox gamertag verification'],
+                'Share your Minecraft Bedrock server address, port and status. Verify Xbox gamertags on Cloudburst Nukkit with KraftLink.',
+            intro: 'On Nukkit, members can link the Xbox gamertag they use in game to their profile. Give players a page where they can find the address and port, and add a store if you want to offer supporter ranks on the site.',
+            highlights: [
+                'An address and port that are easy to find',
+                'Public server status and player count',
+                'Xbox gamertag verification on Nukkit',
+            ],
             features: [
                 {
-                    title: 'Show Bedrock Dedicated Server status',
+                    title: 'Help players join your world',
                     description:
-                        'The native UDP ping shows the server status and player count. Enter the game port from your Bedrock Dedicated Server configuration.',
+                        'Show players the server name, address and port to enter in game. Use Bedrock ping to display the server status and player count from Bedrock Dedicated Server.',
                 },
                 {
-                    title: 'Verify a gamertag on Nukkit',
+                    title: 'Link the gamertag used in game',
                     description:
-                        'Enable Xbox authentication on Cloudburst Nukkit and connect it with KraftLink. Players enter a verification code in game and confirm the detected gamertag on your site.',
+                        'On Cloudburst Nukkit with KraftLink and Xbox authentication enabled, a member enters a one-time code in game, then confirms the detected gamertag on the site.',
                 },
                 {
-                    title: 'Send a command to a Nukkit player',
+                    title: 'Deliver a reward when a player returns',
                     description:
-                        'KraftLink can wait for a player to join and use their gamertag in the command, even when it contains spaces.',
+                        'On Nukkit, set up a command to run the next time a player joins. KraftLink can use their gamertag even if it contains spaces.',
                 },
             ],
-            setup: 'Choose Minecraft Bedrock in Games and identities. Use Ping mode for a Bedrock Dedicated Server or create a KraftLink connection for Cloudburst Nukkit.',
+            setup: 'Choose Minecraft Bedrock in Games and identities. For Bedrock Dedicated Server, add the host and UDP game port in Ping mode. For Cloudburst Nukkit, install KraftLink and enable Xbox authentication if you want to verify players in game.',
             plugins: [
+                {
+                    slug: 'forum',
+                    description:
+                        'Let players vote on the next neighborhood theme or map. Keep their suggestions and replies in the poll thread.',
+                },
                 {
                     slug: 'shop',
                     description:
-                        'Offer a supporter rank on the site for members who want to contribute to your Bedrock server.',
-                },
-                {
-                    slug: 'forum',
-                    description: 'Run a poll to decide what your group should build next in your Bedrock world.',
+                        'Let players support your world by buying a rank on the site. On Nukkit, you can also configure a delivery command with KraftLink.',
                 },
             ],
         },
         hytale: {
-            title: 'CMS for Hytale servers',
+            title: 'Bring your Hytale server community together',
             description:
-                'Introduce your Hytale world and display server status through KraftLink. Members can enter their Hytale profile, with optional PlayerDB lookup by username or UUID.',
-            intro: 'Show newcomers what you’re building in Hytale. Publish a page with joining instructions, then use announcements to share the opening date and updates to your world.',
-            highlights: ['Hytale player profiles', 'Optional public profile lookup', 'KraftLink connector'],
+                'Plan your Hytale server launch, publish guides to help players join and show whether the server is online with KraftLink.',
+            intro: 'Keep in touch with players between Hytale playtests. Publish the next dates and collect feedback on your forum. With KraftLink, players can see whether the server is open before they launch the game.',
+            highlights: [
+                'Opening dates and getting started guides',
+                'Server status players can check before joining',
+                'Hytale player profiles on your site',
+            ],
             features: [
                 {
-                    title: 'Find Hytale profiles',
+                    title: 'Prepare for your first sessions',
                     description:
-                        'Members enter their Hytale identity on your site. If you enable PlayerDB, the public lookup can find a profile by username or UUID.',
+                        'Announce play times and anything players need for your world. Keep the instructions for joining on a page you can update whenever the server opens.',
                 },
                 {
-                    title: 'Connect your Hytale server',
+                    title: 'Connect website members with their game profiles',
                     description:
-                        'KraftLink reports server status and player presence. You can also send commands from the panel when your connector configuration allows them.',
+                        'Members can enter their Hytale profile on the site. Enable the optional PlayerDB lookup to find public profiles by username or UUID.',
+                },
+                {
+                    title: 'See who joins your sessions',
+                    description:
+                        'KraftLink reports whether the server is responding and which players are online. Use the admin panel to send commands you allow in the connector settings.',
                 },
             ],
-            setup: 'Select Hytale in Games and identities, then create a KraftLink server connection. Install the compatible connector in your server’s mods directory and configure it with the site URL and connection token.',
+            setup: 'Choose Hytale in Games and identities. Install the compatible KraftLink build in your server’s mods folder, then enter your site URL and connection token.',
             plugins: [
+                {
+                    slug: 'wiki',
+                    description:
+                        'Publish a guide to joining for the first time and rules for your world. New players can find an article without scrolling through announcements.',
+                },
                 {
                     slug: 'vote',
                     description:
-                        'Connect your Hytale Servers listing to verify votes and reward members who support your server.',
+                        'Connect your Hytale Servers listing to verify votes and reward members who help others discover your world.',
                 },
                 {
-                    slug: 'wiki',
-                    description: 'Publish getting-started guides and rules for each world on pages players can search.',
+                    slug: 'forum',
+                    description:
+                        'Open a feedback thread after a playtest. Keep suggestions, screenshots and staff replies together.',
                 },
             ],
         },
         garrysmod: {
-            title: 'CMS for Garry’s Mod (GMod) servers',
+            title: 'A CMS for your Garry’s Mod community',
             description:
-                'Publish your DarkRP rules and Workshop collection on your GMod server website. Link Steam accounts and connect Garry’s Mod through A2S or Source RCON.',
-            intro: 'Show players what to download before they join your GMod server. If you run DarkRP, give them a place to read the rules, see the available jobs and learn how to apply for staff.',
-            highlights: ['Steam OpenID', 'A2S status and player count', 'Source RCON commands'],
+                'Help players join your GMod server. Publish DarkRP rules and your Workshop collection, then link Steam accounts to member profiles.',
+            intro: 'Link Steam accounts so staff can identify the right player when they respond to a request. If you run DarkRP, publish your Workshop collection, job rules and server address to help newcomers get ready to join.',
+            highlights: [
+                'Workshop collection and DarkRP rules',
+                'Steam accounts linked to member profiles',
+                'Available server slots visible on the site',
+            ],
             features: [
                 {
-                    title: 'Prepare players for their first connection',
+                    title: 'Make the first connection easier',
                     description:
-                        'Put the server address, maps and Workshop collection on one page so players know which addons to install before launching Garry’s Mod.',
+                        'Show players which addons to install, which maps you run and where to read the rules for each job. Display player counts and open slots before they launch GMod.',
                 },
                 {
-                    title: 'Identify members by their Steam accounts',
+                    title: 'Find a member after they change their name',
                     description:
-                        'Enable Steam OpenID so players can link a verified Steam account to their KraftInk profile.',
+                        'Players link their Steam accounts through OpenID. Your staff can use the Steam ID linked to a KraftInk profile to follow up on a request or find the right member.',
                 },
                 {
-                    title: 'Show player counts and connect the console',
+                    title: 'Keep track of discussions that need moderation',
                     description:
-                        'A2S reports whether the server responds and how many players are connected. Source RCON sends commands supported by your server and addons.',
+                        'Give players a place to suggest jobs and discuss rules. With Forum, staff can review reports and lock a thread when needed.',
                 },
             ],
-            setup: 'Select Garry’s Mod in Games and identities. Enter the A2S query port to show your server status. For commands, choose RCON and configure its TCP port and password in Manage connection.',
+            setup: 'Choose Garry’s Mod in Games and identities and enable Steam under external logins. Add the A2S query port for public server status. To send commands supported by your addons, configure Source RCON separately under Manage connection.',
             plugins: [
                 {
-                    slug: 'vote',
-                    description: 'Verify votes from Garry’s Mod Servers and reward members with website credit.',
+                    slug: 'forum',
+                    description:
+                        'Run a poll on the next map or proposed job changes. Players can make their case and vote in the same thread.',
                 },
                 {
-                    slug: 'forum',
-                    description: 'Poll players about DarkRP job changes and discuss the proposals in the same thread.',
+                    slug: 'support',
+                    description:
+                        'Handle appeals and missing content reports in private. Assign each ticket to the staff member following it up.',
+                },
+                {
+                    slug: 'vote',
+                    description:
+                        'Connect your Garry’s Mod Servers listing, verify votes and reward the members who support your server.',
                 },
             ],
         },
         rust: {
-            title: 'CMS for Rust servers',
+            title: 'A website to bring players back after Rust wipes',
             description:
-                'Publish your Rust wipe schedule with KraftInk. Members can link their Steam accounts, and the site connects to your server through A2S and WebRCON.',
-            intro: 'Players coming back for wipe want the date, map and team size. Publish those details on your Rust server website so everyone knows what to expect.',
-            highlights: ['Steam OpenID', 'A2S status', 'WebRCON with optional TLS'],
+                'Announce Rust wipes, show player counts and track server activity. Let players link their Steam accounts to profiles on your site.',
+            intro: 'Use Statistics to see how many players are online for each wipe and when activity drops off. Plan the next wipe from those numbers, then announce the date, map and team rules on your site.',
+            highlights: [
+                'Wipe dates and rules for each server',
+                'Server population visible on your site',
+                'Steam accounts linked to member profiles',
+            ],
             features: [
                 {
-                    title: 'Announce the next wipe',
+                    title: 'Tell players when to come back',
                     description:
-                        'Say whether the reset includes blueprints. If you run several servers, post the schedule and rules for each one.',
+                        'Announce whether the wipe also resets blueprints. If you run several servers, publish the address, schedule and team rules for each one.',
                 },
                 {
-                    title: 'Give WebRCON its own address',
+                    title: 'See when your server is busiest',
                     description:
-                        'Your site queries the game server through A2S. If WebRCON runs at a separate address, enter it in the connection settings and enable TLS when the server or its proxy provides an encrypted endpoint.',
+                        'Show the player count reported by the server. With Statistics and the scheduler, compare wipe day activity with the following days to help plan the next one.',
+                },
+                {
+                    title: 'Give regulars a shared voting goal',
+                    description:
+                        'Set a voting goal for the month. With Vote, members who contribute can earn a reward on your site when the community reaches that goal.',
                 },
             ],
-            setup: 'Enable WebRCON with rcon.web 1 on your server. Enter the A2S query port on the server record, then set the RCON port, password and encryption mode in Manage connection.',
+            setup: 'Add the A2S query port for Rust server status. To send commands, enable rcon.web 1 and set up access under Manage connection. You can use a separate host and enable TLS if the console supports encrypted connections.',
             plugins: [
                 {
                     slug: 'stats',
-                    description: 'Compare player counts and peak activity around two successive wipes.',
+                    description:
+                        'Compare peak player counts across wipes and export the daily records for the server you select.',
                 },
                 {
                     slug: 'vote',
-                    description: 'Connect your Rust Servers listing and reward members once their votes are verified.',
+                    description:
+                        'Connect your Rust Servers listing to encourage votes. Give members the reward you set after their vote is confirmed.',
                 },
             ],
         },
         fivem: {
-            title: 'CMS for FiveM servers',
+            title: 'Manage applications for your FiveM RP server',
             description:
-                'Publish the rules and joining process for your FiveM RP server. KraftInk links Cfx.re or Steam accounts and displays FXServer status.',
-            intro: 'New players need to know where to read the rules and how to get whitelisted before they can join your city. Explain those steps on your FiveM server website.',
-            highlights: ['Cfx.re or Steam identity', 'FXServer status', 'FXServer RCON commands'],
+                'Welcome players to your FiveM RP server. Explain how to apply for the whitelist, show server status and link Cfx.re or Steam accounts.',
+            intro: 'Assign whitelist questions to staff through private Support tickets. Players can link their Cfx.re or Steam account, find the application instructions and check whether the city is open.',
+            highlights: [
+                'City rules and application instructions',
+                'Cfx.re or Steam linked to member profiles',
+                'Server status players can check before opening FiveM',
+            ],
             features: [
                 {
-                    title: 'Help newcomers get into the city',
+                    title: 'Explain how to join your city',
                     description:
-                        'Explain the application process, the available roles and the rules for a first session. Share city announcements from the same site.',
+                        'Publish the application requirements, first session instructions and where to get help. Keep city announcements and rule changes in the same place.',
                 },
                 {
-                    title: 'Choose between Cfx.re and Steam',
+                    title: 'Use the identity your server recognizes',
                     description:
-                        'Cfx.re is the default and requires an HTTPS site. Choose Steam in the game settings if your server uses it to identify players.',
+                        'Link player profiles to Cfx.re accounts by default. Choose Steam in the game settings if staff use Steam IDs to look up players.',
                 },
                 {
-                    title: 'Display FXServer activity',
+                    title: 'Show when the server is available',
                     description:
-                        'KraftInk reads status and player count from dynamic.json. Enable RCON on the server to send commands your setup supports.',
+                        'Display the status and player count reported by FXServer. Publish a notice ahead of maintenance or when the city is about to reopen.',
                 },
             ],
-            setup: 'After selecting FiveM in Games and identities, enable the Cfx.re or Steam connection. Enter the FXServer address and configure RCON in Manage connection if you use commands.',
+            setup: 'Choose FiveM in Games and identities, then enable Cfx.re or Steam login. Cfx.re requires HTTPS. Add the FXServer address for status via dynamic.json and configure RCON if your staff use console commands.',
             plugins: [
                 {
                     slug: 'support',
-                    description: 'Handle whitelist questions in private tickets your team can assign to staff.',
+                    description:
+                        'Take whitelist questions in private tickets. Assign each request to a staff member and keep follow-up notes visible only to the team.',
                 },
                 {
-                    slug: 'shop',
-                    description: 'Offer a supporter rank that unlocks a members-only area on your city’s website.',
+                    slug: 'wiki',
+                    description:
+                        'Organize the rules by topic and publish a guide to your first session in the city. Players can search for a rule when they need it.',
+                },
+                {
+                    slug: 'forum',
+                    description: 'Discuss community proposals and ask residents to vote on future city events.',
                 },
             ],
         },
         dayz: {
-            title: 'CMS for DayZ servers',
+            title: 'A CMS for DayZ server communities',
             description:
-                'Publish your DayZ server’s map, required mods and restart schedule. KraftInk links Steam accounts and supports A2S and BattlEye RCON.',
-            intro: 'Before heading out on your DayZ server, players need the right mods, the restart schedule and the rules they’ll play by. Give them one place to check all three.',
-            highlights: ['Steam OpenID', 'A2S status', 'BattlEye RCON'],
+                'Handle reports on your DayZ server with Steam-linked profiles and help new players find your community through verified TrackyServer votes.',
+            intro: 'When you review a ban appeal, find the member’s profile, linked Steam account and ticket history together. Give your DayZ players a way to help others find the server by voting for its listing.',
+            highlights: ['Report and appeal tracking', 'Linked Steam accounts', 'Verified TrackyServer votes'],
             features: [
                 {
-                    title: 'Keep your mod list current',
+                    title: 'Handle reports as a team',
                     description:
-                        'Post the map name and the required collection. When you change mods, share the update date and the steps to take before reconnecting.',
+                        'Use separate ticket categories for reports and ban appeals. Staff can pick up a request, see what the member has already shared and reply in the same ticket.',
                 },
                 {
-                    title: 'Connect the BattlEye console',
+                    title: 'Bring players back after an update',
                     description:
-                        'The site displays server status through A2S. To administer your server from KraftInk, configure the BattlEye RCON console with its UDP port and password.',
+                        'Post the updated Workshop collection and reopening time. Players can check the main server’s status to see if they can already join.',
                 },
             ],
-            setup: 'Choose DayZ in Games and identities, then add the A2S query port to the server record. Enter the BattlEye details in Manage connection.',
+            setup: 'Select DayZ in Games and identities and enable Steam sign-in. Add the A2S query port for status. For console commands, enter the BattlEye RCON UDP port and password in Manage connection.',
             plugins: [
                 {
                     slug: 'wiki',
-                    description:
-                        'Keep a revision history for your mod installation guide so your team can track what changed between updates.',
+                    description: 'Use your mod guide’s revision history to explain what changed after an update.',
+                },
+                {
+                    slug: 'support',
+                    description: 'Assign tickets to staff and keep a record of their replies.',
                 },
                 {
                     slug: 'vote',
-                    description: 'Verify votes from your TrackyServer listing and reward members after confirmation.',
+                    description: 'Reward verified votes for your TrackyServer listing on your website.',
                 },
             ],
         },
         ark: {
-            title: 'CMS for ARK: Survival Evolved servers',
+            title: 'Manage your ARK: Survival Evolved cluster from one site',
             description:
-                'Publish map and transfer rules for your ARK: Survival Evolved cluster. Link Steam accounts and connect your servers through A2S and Source RCON.',
-            intro: 'A new player on your ARK: Survival Evolved cluster has to choose a map and learn what they can transfer. Give them one place to check the rules for each map.',
-            highlights: ['Steam OpenID', 'A2S status', 'Source RCON commands'],
+                'A CMS for your ARK: Survival Evolved cluster. Track transfer requests, link Steam accounts and send console commands to the right server.',
+            intro: 'When a transfer stalls between maps, your team can find the tribe’s request in a ticket and send a command to the right server. KraftInk brings both tools to your ARK: Survival Evolved cluster’s website.',
+            highlights: ['Transfer ticket tracking', 'Console access by map', 'Main server status'],
             features: [
                 {
-                    title: 'Guide players through your cluster',
+                    title: 'Follow up on transfer requests',
                     description:
-                        'List the open maps, required mods and transfer rules. Include harvest or breeding rates to help players decide where to start.',
+                        'Ask for the source map, the destination and details of the transfer in the ticket. If the member has linked their Steam account, staff can find it through their site profile.',
                 },
                 {
                     title: 'Send commands to the right map',
                     description:
-                        'Use A2S to display status for the main server. With a separate Source RCON connection for each server, you can send commands to the map you intend.',
+                        'Connect each server’s console separately. When your team needs to act on one map, it can select that server and send a command from the admin panel.',
                 },
             ],
-            setup: 'Select ARK: Survival Evolved in Games and identities. Enter the A2S query port for status and configure Source RCON with its own TCP port and password for commands.',
+            setup: 'Select ARK: Survival Evolved in Games and identities and enable Steam sign-in. Add the A2S query port to show the main server’s status and player count. Enter the Source RCON TCP port and password for each console you want to connect.',
             plugins: [
                 {
                     slug: 'wiki',
-                    description: 'Give each map in your cluster its own page with rates and transfer rules.',
+                    description: 'Keep a page per map with its rates, required mods and allowed transfers.',
+                },
+                {
+                    slug: 'support',
+                    description:
+                        'Create a transfer category and assign tickets to the people who look after the maps involved.',
                 },
                 {
                     slug: 'vote',
-                    description: 'Verify votes from ARK Servers and reward members who place in the monthly rankings.',
+                    description: 'Connect your ARK Servers listing and set up site rewards for verified votes.',
                 },
             ],
         },
         sevendaystodie: {
-            title: 'CMS for 7 Days to Die servers',
+            title: 'A website and shop for your 7 Days to Die server',
             description:
-                'Publish the rules and mod list for your 7 Days to Die server. KraftInk supports Steam accounts, A2S status and the dedicated server’s Telnet console.',
-            intro: 'Your players are preparing for the next Blood Moon. Give them a place to check the world settings, the rules for bases and the mod pack they’ll need.',
-            highlights: ['Steam OpenID', 'A2S status', 'Telnet console'],
+                'Bring players back after a 7 Days to Die wipe, sell supporter ranks on your site and reward votes verified by your server directory.',
+            intro: 'Give players a site they can return to from one world to the next. With KraftInk they can check if the server is up, vote to help others find it and buy a supporter rank on the site.',
+            highlights: ['Shop for supporter ranks', 'Verified directory votes', 'Server status before joining'],
             features: [
                 {
-                    title: 'Explain how your world plays',
+                    title: 'Bring players back after a wipe',
                     description:
-                        'List the Blood Moon frequency, building rules and loot settings. Post world resets early enough for players to make plans.',
+                        'Post the reopening date, the new map and any mods to reinstall. Regulars keep their website accounts and can check the server status before launching the game again.',
                 },
                 {
-                    title: 'Send commands through Telnet',
+                    title: 'Help more players find your server',
                     description:
-                        'KraftInk can send commands once the dedicated server’s Telnet console is enabled and protected by a password. Use a trusted network or tunnel.',
+                        'Connect your 7 Days to Die Servers listing. Votes from your players can move your server up the directory rankings. In KraftInk, set a shared goal and reward everyone who contributes when you reach it.',
                 },
             ],
-            setup: 'Enter the A2S query port to display status. To send commands, enter the Telnet console’s port and password in Manage connection.',
+            setup: 'Select 7 Days to Die in Games and identities and enable Steam sign-in. Add the A2S query port for status. For commands, connect the password-protected Telnet console over a trusted network or tunnel.',
             plugins: [
                 {
-                    slug: 'forum',
-                    description: 'Poll players about the next challenge or the settings for a new world.',
+                    slug: 'shop',
+                    description: 'Sell a supporter rank granted on the site after payment to help cover hosting costs.',
                 },
                 {
                     slug: 'vote',
                     description:
-                        'Verify votes from 7 Days to Die Servers and set up a reward after members reach a vote milestone.',
+                        'Verify votes from 7 Days to Die Servers and grant a site rank at the milestone you choose.',
+                },
+                {
+                    slug: 'forum',
+                    description:
+                        'Ask regulars to vote on settings for the next world, such as how often Blood Moons occur.',
                 },
             ],
         },
         counterstrike2: {
-            title: 'CMS for Counter-Strike 2 servers',
+            title: 'A website for your Counter-Strike 2 community servers',
             description:
-                'Publish map rotations and community matches for your CS2 server. KraftInk displays player counts through A2S and supports Steam and Source RCON.',
-            intro: 'Retakes, practice and community matches each come with their own rules. Show your Counter-Strike 2 players where to connect and how to take part.',
-            highlights: ['Steam OpenID', 'A2S status and player count', 'Source RCON commands'],
+                'Help players find your CS2 servers and community matches. Show player counts, link Steam accounts and use Stats to pick times for your matches.',
+            intro: 'Give players the right address for retakes or practice. For your main server, KraftInk shows how many people are already playing before they launch Counter-Strike 2.',
+            highlights: ['Player count before joining', 'Linked Steam accounts', 'Player activity to plan matches'],
             features: [
                 {
-                    title: 'Get players the details before a match',
+                    title: 'Send players to the right server',
                     description:
-                        'Publish the map rotation and joining instructions for each mode. For a community match, include the start time and how to sign up.',
+                        'List server addresses by game mode, along with the rules and maps. For a community match, post the chosen server, the time and a link to the sign-up thread.',
                 },
                 {
-                    title: 'Check the player count before joining',
+                    title: 'Recognize players from one match to the next',
                     description:
-                        'A2S displays status and player count. Steam OpenID lets members link the Steam account they use in your community.',
+                        'Members can link their Steam account to their site profile. Ask them to reply to the match thread with that profile so you know who plans to join.',
                 },
             ],
-            setup: 'Select Counter-Strike 2 in Games and identities. Configure the server’s A2S query port and add its Source RCON TCP port and password if you need console commands.',
+            setup: 'Select Counter-Strike 2 in Games and identities and enable Steam sign-in. Add the A2S query port for status. If your team needs console access, enter the Source RCON TCP port and password.',
             plugins: [
                 {
                     slug: 'stats',
-                    description: 'Check hourly player counts to pick a time for a community match.',
+                    description: 'See when the server is busiest to pick a time for a community match.',
+                },
+                {
+                    slug: 'forum',
+                    description: 'Open a thread for each event to take sign-ups and tell participants if plans change.',
                 },
                 {
                     slug: 'vote',
-                    description: 'Connect your Counter-Strike Servers listing to verify votes and reward members.',
+                    description:
+                        'Connect your Counter-Strike Servers listing to verify votes and reward members on the site.',
                 },
             ],
         },
         teamfortress2: {
-            title: 'CMS for Team Fortress 2 servers',
+            title: 'A website for the regulars on your Team Fortress 2 server',
             description:
-                'Build a TF2 server website for custom maps and community nights. KraftInk links Steam accounts and supports A2S status and Source RCON.',
-            intro: 'Share the date of your next Payload night, the custom maps in rotation and the server to join. Give your regulars a place to check the details between rounds of Team Fortress 2.',
-            highlights: ['Steam OpenID', 'A2S status and player count', 'Source RCON commands'],
+                'Plan Team Fortress 2 events with map polls, download links and server status. Let members link their Steam account to their community profile.',
+            intro: 'Plan your next Payload night with the regulars. Let them pick maps, post the final rotation and give them a place to see whether people are already playing.',
+            highlights: ['Polls for map rotations', 'Links to custom maps', 'Current player count'],
             features: [
                 {
-                    title: 'Publish the maps for game night',
+                    title: 'Get players ready for custom maps',
                     description:
-                        'Tell players which modes and maps are scheduled and whether any require a download. Give each event a page with the rules players need before they join.',
+                        'Post the download links, the server address and the start time together. Players can see what they need to install and check the main server’s player count before joining.',
                 },
                 {
-                    title: 'Show how busy your TF2 server is',
+                    title: 'Keep the discussion going between games',
                     description:
-                        'The A2S counter shows how many players are connected. Use Source RCON for commands provided by the server or its plugins.',
+                        'Members can link their Steam account and use their site profile to suggest a map or share feedback after an event. Your team can refer back to the thread when planning the next rotation.',
                 },
             ],
-            setup: 'Select Team Fortress 2 in Games and identities. Enter your A2S query port and configure the Source RCON TCP port and password for server commands.',
+            setup: 'Select Team Fortress 2 in Games and identities and enable Steam sign-in. Enter the A2S query port. To send commands from the admin panel, add the Source RCON TCP port and password.',
             plugins: [
                 {
                     slug: 'forum',
+                    description: 'Run a poll with a shortlist of maps, then post the selection in the thread.',
+                },
+                {
+                    slug: 'wiki',
                     description:
-                        'Let members pick the next Payload map and collect their suggestions in the discussion.',
+                        'Keep installation instructions for the custom maps you put back into rotation regularly.',
                 },
                 {
                     slug: 'vote',
                     description:
-                        'Connect your Team Fortress 2 Servers listing and set a community goal for verified votes.',
+                        'Connect your Team Fortress 2 Servers listing to verify votes and set a shared vote goal on your site.',
                 },
             ],
         },
         unturned: {
-            title: 'CMS for Unturned servers',
+            title: 'A website for your Unturned roleplay or survival server',
             description:
-                'Publish your Unturned server’s address, map and Workshop mods. KraftInk supports Steam accounts, A2S status and compatible RCON components.',
-            intro: 'When your Unturned map or mods change, update one page. Players can find the connection address and the Workshop collection they need there.',
-            highlights: ['Steam OpenID', 'A2S status', 'Compatible Source RCON component'],
+                'A CMS for your Unturned roleplay or survival server. Track tickets and Steam profiles, and offer a site rank for supporters who help pay for hosting.',
+            intro: 'When an incident happens in a roleplay or PvP area, your team can review the ticket history and find the member’s profile. Players can read the rules and support the server on the same site.',
+            highlights: ['Tickets for reports', 'Linked Steam accounts', 'Supporter ranks on the site'],
             features: [
                 {
-                    title: 'Explain the rules for your map',
+                    title: 'Show new players the rules for their map',
                     description:
-                        'List the safe zones, PvP rules and required mods. If your server combines survival and roleplay, say where each set of rules applies.',
+                        'Put the Workshop collection, safe zones and PvP rules on the site. If you change maps, post the date and the new mods players need in the same place.',
                 },
                 {
-                    title: 'Add console access to your setup',
+                    title: 'Keep reports together',
                     description:
-                        'KraftInk reads status through A2S. Sending commands to Unturned requires a server component that implements Source RCON.',
+                        'Members can link their Steam account and open a ticket with the location, time and a screenshot of an incident. Moderators can review the ticket history when they pick it up.',
                 },
             ],
-            setup: 'Select Unturned in Games and identities and enter the A2S query port. For commands, install and configure a compatible Source RCON component on the game server first.',
+            setup: 'Select Unturned in Games and identities and enable Steam sign-in. Add the A2S query port for status. To send commands, first install a component on the game server that supports Source RCON.',
             plugins: [
                 {
-                    slug: 'wiki',
-                    description: 'Document safe zones and PvP rules by map so new players can find them easily.',
+                    slug: 'support',
+                    description:
+                        'Use separate ticket categories for roleplay reports, PvP disputes and connection problems.',
+                },
+                {
+                    slug: 'shop',
+                    description: 'Offer a site rank to members who want to help cover the cost of hosting.',
                 },
                 {
                     slug: 'vote',
-                    description:
-                        'Connect your Unturned Servers listing to verify votes and grant a website rank when members reach a milestone.',
+                    description: 'Send members to your Unturned Servers listing and reward verified votes on the site.',
                 },
             ],
         },
         projectzomboid: {
-            title: 'CMS for Project Zomboid servers',
+            title: 'Build a website for your Project Zomboid server',
             description:
-                'Publish sandbox settings and your Workshop collection for Project Zomboid. KraftInk supports Steam accounts, A2S status and Source RCON.',
-            intro: 'Returning survivors need the right Workshop collection and a heads-up about what’s changing at the next restart. Keep both on your Project Zomboid server website.',
-            highlights: ['Steam OpenID', 'A2S status', 'Source RCON commands'],
+                'Create a Project Zomboid server website with a recruitment forum, support tickets for mod issues and Steam account linking.',
+            intro: 'Recruit new survivors between seasons and keep groups in touch when the world resets. Players can find their crew on the forum and ask for help if the new mod collection keeps them from joining.',
+            highlights: ['Survivor group recruitment', 'Linked Steam accounts', 'Private tickets for mod issues'],
             features: [
                 {
-                    title: 'Keep the survivor handbook current',
+                    title: 'Bring survivor groups back after a reset',
                     description:
-                        'Explain character creation rules and sandbox settings such as PvP or safehouse protection. When a new season starts, tell players what carries over.',
+                        'Open recruitment on the forum before the map changes. In the season announcement, give players the restart date, tell them what carries over and link the Workshop collection to install.',
                 },
                 {
-                    title: 'Show when your server is ready',
+                    title: 'Tell downtime from a mod problem',
                     description:
-                        'A2S lets players check whether the server is responding after a restart. Members can link their Steam account through OpenID.',
+                        'Players can check whether the server responds after a restart. If the game still won’t load, they can send the mod name and game version in a private ticket.',
                 },
             ],
-            setup: 'Select Project Zomboid in Games and identities. Configure its A2S query port for status and its Source RCON TCP port and password for console commands.',
+            setup: 'Select Project Zomboid in Games and identities. Enable Steam under external sign-in and add the A2S query port for status. Configure Source RCON if you want to send console commands.',
             plugins: [
                 {
                     slug: 'forum',
-                    description:
-                        'Organize survivor groups and plan the next season in discussions reserved for members.',
+                    description: 'Reserve categories for members and pin the season’s recruitment thread.',
                 },
                 {
                     slug: 'support',
-                    description: 'Help players who get stuck loading a Workshop mod through a private ticket.',
+                    description:
+                        'Create a category for connection problems and ask players to attach a screenshot to their ticket.',
+                },
+                {
+                    slug: 'vote',
+                    description:
+                        'Connect a supported server listing and award a website rank when members reach a verified vote milestone.',
                 },
             ],
         },
         redm: {
-            title: 'CMS for RedM servers',
+            title: 'Build a recruitment website for your RedM roleplay server',
             description:
-                'Introduce your RedM roleplay server and explain character applications. Members enter their Rockstar or Cfx ID, and KraftInk displays FXServer status.',
-            intro: 'Introduce your setting before players create a character. Describe your RedM world, the roles open to newcomers and how to join a first session.',
-            highlights: ['Declared Rockstar or Cfx identity', 'FXServer status', 'FXServer RCON commands'],
+                'Introduce your RedM roleplay server, publish its rules and handle character applications privately with KraftInk.',
+            intro: 'Handle RedM applications privately. Players submit their character profiles, staff divide up the applications and new recruits can find the instructions for their first session.',
+            highlights: [
+                'Private application tickets',
+                'Roleplay rules before joining',
+                'FXServer status on your site',
+            ],
             features: [
                 {
-                    title: 'Guide new character applications',
+                    title: 'Collect complete character applications',
                     description:
-                        'Explain your roleplay rules and what a character application needs to cover. Give newcomers a starting point for exploring your towns and groups.',
+                        'With Support, add questions for character applications. Ask for the character’s name and motivation, then assign the ticket to a staff member.',
                 },
                 {
-                    title: 'Record the IDs your server uses',
+                    title: 'Keep joining instructions within reach',
                     description:
-                        'Members enter the Rockstar license or Cfx ID your server uses. KraftInk stores it with their site profile.',
-                },
-                {
-                    title: 'Send commands from your roleplay framework',
-                    description:
-                        'FXServer provides the server status. Character rewards can go through RCON when your roleplay framework supplies the right command.',
+                        'Explain how to join after acceptance and display the status from FXServer. Members can enter the Rockstar license or Cfx ID your server uses in their profiles.',
                 },
             ],
-            setup: 'Choose RedM in Games and identities, then enter the FXServer address for the dynamic.json status endpoint. Configure RCON if you use commands.',
+            setup: 'Select RedM in Games and identities. Enter the FXServer address to show status through dynamic.json. Configure RCON if you want to run supported server commands from KraftInk.',
             plugins: [
+                {
+                    slug: 'support',
+                    description:
+                        'Give applications and roleplay reports separate private categories with their own questions.',
+                },
                 {
                     slug: 'wiki',
                     description:
-                        'Document character creation rules and available roles so applicants can prepare before they join.',
-                },
-                {
-                    slug: 'support',
-                    description: 'Let players ask about their character application in a private ticket.',
+                        'Publish character creation rules and available roles. Keep moderation procedures in a section reserved for staff.',
                 },
             ],
         },
         arkascended: {
-            title: 'CMS for ARK: Survival Ascended servers',
+            title: 'One website for your ARK: Survival Ascended cluster',
             description:
-                'Publish map and crossplay details for your ARK: Survival Ascended cluster. KraftInk uses RCON for status and can check player presence by EOS ID.',
-            intro: 'Which maps can players join from each platform? Where can they transfer a character? Put your ARK: Survival Ascended cluster rules in one place.',
-            highlights: ['Declared EOS identity', 'Authenticated RCON status', 'Player presence through ListPlayers'],
+                'Manage your ARK: Survival Ascended cluster in KraftInk. Publish transfer rules and compare player counts across maps in the admin panel.',
+            intro: 'Give tribes one place to plan transfers between maps. Your staff can track player counts across the cluster and queue a reward until its recipient joins the chosen map.',
+            highlights: [
+                'Maps and transfer rules',
+                'Player counts by map in the admin panel',
+                'Player presence by EOS ID',
+            ],
             features: [
                 {
-                    title: 'Count players with ListPlayers',
+                    title: 'Help players find the right map',
                     description:
-                        'KraftInk uses authenticated RCON to check presence and get the player count. The public status keeps player names and identifiers private.',
+                        'Explain which maps support crossplay and what can transfer. Choose the main server whose status and player count you want to show on the site.',
                 },
                 {
-                    title: 'Wait for the right player before delivery',
+                    title: 'Wait for the player before delivering a reward',
                     description:
-                        'Members enter their EOS ID. With a compatible command, a reward can wait until KraftInk detects that ID on the server.',
+                        'Members enter their EOS ID on the site. With a compatible command, delivery can wait until KraftInk detects that ID on the destination server.',
                 },
             ],
-            setup: 'Set RCONEnabled, RCONPort and ServerAdminPassword in GameUserSettings.ini. Select ARK: Survival Ascended in KraftInk and enter the RCON connection details.',
+            setup: 'Enable RCON in GameUserSettings.ini with RCONEnabled, RCONPort and ServerAdminPassword. Select ARK: Survival Ascended in KraftInk, add each server and configure its RCON connection.',
             plugins: [
                 {
                     slug: 'stats',
-                    description:
-                        'Track peak player counts for each cluster server using the counts reported through RCON.',
+                    description: 'Check when the selected map is busiest before scheduling an event or maintenance.',
                 },
                 {
                     slug: 'shop',
                     description:
-                        'Offer a supporter rank on the cluster website that grants access to restricted pages.',
+                        'Offer a supporter rank to help cover cluster costs and give supporters access to a members-only section on the site.',
                 },
             ],
         },
         palworld: {
-            title: 'CMS for Palworld servers',
+            title: 'Build a website for your Palworld server',
             description:
-                'Publish the rules for your Palworld server. KraftInk uses the dedicated server’s REST API to read status, check player presence and send announcements.',
-            intro: 'Tell members of your Palworld server where they can build a base and how to join a guild. Put the rules and dates for upcoming expeditions on your site.',
-            highlights: ['Declared Palworld user ID', 'Official REST API', 'Authenticated player presence'],
+                'Show your Palworld server status, help guilds recruit and announce maintenance in game from KraftInk.',
+            intro: 'Warn players in game and save the world from the admin panel before maintenance. On your site, new players can find a guild and see when the server is responding again.',
+            highlights: [
+                'Server status and player count',
+                'In-game announcements and world saves',
+                'Discussion space for guilds',
+            ],
             features: [
                 {
-                    title: 'Check your dedicated server status',
+                    title: 'Warn players before maintenance',
                     description:
-                        'The REST API provides the player count and can check presence by Palworld user ID. Enable TLS if your API is available over HTTPS.',
+                        'Connect the dedicated server to send an in-game announcement and save the world from the admin panel. Players can check the server status on your site afterward.',
                 },
                 {
-                    title: 'Announce maintenance from KraftInk',
+                    title: 'Moderate by Palworld user ID',
                     description:
-                        'Use the REST integration to send an in-game announcement, save the world or run supported moderation actions. Item rewards require a separate integration.',
+                        'Members can enter their Palworld user ID in their profiles. With the right permissions, staff can use that ID to kick, ban or unban a player from the admin panel.',
                 },
             ],
-            setup: 'Enable RESTAPIEnabled on the dedicated server and set the REST port and admin password. Select Palworld in KraftInk, then enter the API credentials and choose the encryption mode.',
+            setup: 'Turn on RESTAPIEnabled on the dedicated server. Select Palworld in KraftInk, then enter the REST port and administrator password. Enable TLS if your API is available over HTTPS.',
             plugins: [
                 {
-                    slug: 'wiki',
+                    slug: 'forum',
                     description:
-                        'Publish a searchable guide for each guild with its building rules and plans for upcoming expeditions.',
+                        'Open a recruitment board and let each guild start a thread for its upcoming expeditions.',
                 },
                 {
                     slug: 'stats',
-                    description: 'Track when your world is busiest with player counts from the REST API.',
+                    description: 'Check the player count history to find a quieter time for a restart.',
                 },
             ],
         },
         satisfactory: {
-            title: 'CMS for Satisfactory servers',
+            title: 'A website for your Satisfactory server and its builds',
             description:
-                'Share factory plans and announcements on your Satisfactory server website. KraftInk connects to the dedicated server’s HTTPS API with a token.',
-            intro: 'Building a new railway or taking over an unfinished factory? Give your Satisfactory group a place to check the plans and priorities before the next session.',
-            highlights: ['Declared Steam or Epic ID', 'Dedicated server HTTPS API', 'API token authentication'],
+                'Keep factory plans, team decisions and the status of your dedicated Satisfactory server together with KraftInk.',
+            intro: 'Hand off a build even when you play at different times. Teammates can find the plan you agreed on, see which production line needs work and check the server before launching the game.',
+            highlights: [
+                'Plans and notes for the next session',
+                'Polls for upcoming builds',
+                'Dedicated server status',
+            ],
             features: [
                 {
-                    title: 'Share progress on your factory',
+                    title: 'Pick up a build with clear instructions',
                     description:
-                        'Post build locations, naming conventions and jobs players can pick up next time. Keep the connection details on the same page.',
+                        'Give the team a private planning space. For each factory, record what’s already done, which plan to follow and what to build next.',
                 },
                 {
-                    title: 'Read server status through HTTPS',
+                    title: 'Check the server before maintenance',
                     description:
-                        'The dedicated server API provides player counts and accepts commands the server supports. If your API uses a private certificate authority, configure its certificate in KraftInk.',
+                        'The admin panel shows dedicated server status and player counts through the HTTPS API. Administrators can also run the commands the server supports.',
                 },
             ],
-            setup: 'Generate a token with server.GenerateAPIToken in the dedicated server console. Select Satisfactory in KraftInk and add the HTTPS API address, port and token.',
+            setup: 'Select Satisfactory in Games and identities. Generate a token with server.GenerateAPIToken in the dedicated console, then add the HTTPS address, port and token in KraftInk. Members can enter their Steam or Epic ID.',
             plugins: [
                 {
                     slug: 'wiki',
                     description:
-                        'Document your rail network and naming conventions, then check the revision history when plans change.',
+                        'Publish rail plans and naming conventions. Use the revision history if the team needs to check the previous route.',
                 },
                 {
                     slug: 'forum',
                     description:
-                        'Poll the group on the next build and collect suggestions for its location in the thread.',
+                        'Poll the group on two factory locations and keep the reasons for the decision in the thread.',
                 },
             ],
         },
         conanexiles: {
-            title: 'CMS for Conan Exiles servers',
+            title: 'A website for the clans on your Conan Exiles server',
             description:
-                'Publish raid hours and clan rules for your Conan Exiles server. Connect the query port and RCON console to KraftInk for status and commands.',
-            intro: 'Your clans need to know when raids are open and where they can build. Post those rules alongside your Conan Exiles server map and mod list.',
-            highlights: ['Declared platform ID', 'Server query and status', 'Source RCON commands'],
+                'Publish raid hours and rules for your Conan Exiles server. Handle clan reports and show server status with KraftInk.',
+            intro: 'Give clans a place to check the rules before a raid and report incidents afterward. Staff can review each dispute privately with the time and screenshots attached to the ticket.',
+            highlights: [
+                'Raid calendar and rules',
+                'Private reports with attachments',
+                'Server status and console access',
+            ],
             features: [
                 {
-                    title: 'Give clans time to prepare for rule changes',
+                    title: 'Announce rule changes before the next raid',
                     description:
-                        'List raid hours, protected zones and server rates. Announce changes before they take effect.',
+                        'Post new raid hours and the date they take effect. Keep the rules and mod list at the same address so recruits can find them.',
                 },
                 {
-                    title: 'Connect the Conan Exiles console',
+                    title: 'Give moderators what they need to act',
                     description:
-                        'The query port provides the server status. Source RCON sends supported commands, including ones provided by your mods. For rewards, use a command that accepts the player’s declared platform ID.',
+                        'Assign the ticket to a moderator so the team keeps the conversation together. If staff need to act in game, they can send commands that the server and its mods support from the admin panel.',
                 },
             ],
-            setup: 'In the RconPlugin section of Game.ini, enable RconEnabled and set RconPort and RconPassword. Enter the query and console ports in KraftInk.',
+            setup: 'Select Conan Exiles in Games and identities and enter its query port for status. Turn on RconEnabled in the RconPlugin section of Game.ini for commands and set RconPort and RconPassword. Members can enter their platform ID.',
             plugins: [
                 {
                     slug: 'support',
-                    description: 'Handle raid reports in private tickets where players can attach screenshots.',
+                    description:
+                        'Create a raid reporting category with its own questions and add notes that only moderators can see.',
                 },
                 {
                     slug: 'shop',
-                    description: 'Sell a supporter rank on the site for players who want to help cover server costs.',
+                    description: 'Offer a website supporter rank for members who want to help cover server costs.',
                 },
             ],
         },
