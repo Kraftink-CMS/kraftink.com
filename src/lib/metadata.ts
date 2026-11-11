@@ -1,8 +1,10 @@
 import { fallbackLocale, localeRegistry } from '../../shared/locales';
+import { gamePagePath, matchGamePage } from '../../shared/games';
 import { localized } from './i18n';
 import {
     accountCopy,
     commonMessages,
+    gameMessages,
     legalMessages,
     publicMessages,
     siteMessages,
@@ -61,7 +63,11 @@ export function pageMetadata(pathname: string, locale: string, data: PublicPageD
     };
     const protectedPage = matchProtectedPage(relative);
     const resourceRoute = matchMarketResourceRoute(relative);
-    const page = pages[protectedPage?.page ?? relative];
+    const game = matchGamePage(pathname);
+    const gamePage = game ? gameMessages[locale].pages[game] : undefined;
+    const page = gamePage
+        ? { title: gamePage.title, description: gamePage.description, public: true }
+        : pages[protectedPage?.page ?? relative];
     let title = page?.title ?? text.notFound;
     let description = page?.description ?? text.notFoundText;
     let indexable = page?.public ?? false;
@@ -112,7 +118,8 @@ export function pageMetadata(pathname: string, locale: string, data: PublicPageD
     ) {
         status = 503;
     }
-    const canonical = new URL(localizedPagePath(canonicalLocale, canonicalRelative), origin).href;
+    const pagePath = (code: string) => (game ? gamePagePath(code, game) : localizedPagePath(code, canonicalRelative));
+    const canonical = new URL(pagePath(canonicalLocale), origin).href;
     return {
         title: `${readable(title)} - ${site.siteName}`,
         description: [...readable(description)].slice(0, 200).join(''),
@@ -120,7 +127,7 @@ export function pageMetadata(pathname: string, locale: string, data: PublicPageD
         alternates: indexable
             ? languages.map((code) => ({
                   locale: code,
-                  href: new URL(localizedPagePath(code, canonicalRelative), origin).href,
+                  href: new URL(pagePath(code), origin).href,
               }))
             : [],
         indexable,

@@ -57,7 +57,7 @@ export function HomePage() {
             <header className="home-intro">
                 <h1>{copy.landing.title}</h1>
                 <p>{copy.landing.description}</p>
-                <div className="home-start">
+                <div className="landing-actions">
                     <Link className="btn btn-primary" to={path('/downloads')}>
                         {copy.landing.primary}
                     </Link>

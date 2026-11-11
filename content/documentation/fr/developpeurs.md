@@ -6,13 +6,14 @@ KraftInk propose trois types de paquets : les plugins pour ajouter des fonctionn
 
 Installez une copie de KraftInk dédiée au développement avec les [prérequis habituels](installation.md). Le développement PHP utilise Laravel et Blade. Les commandes `kraft:*` se lancent depuis le dossier contenant `artisan`.
 
-L’archive d’installation suffit pour commencer. Si vous partez des sources du CMS, préparez-les avec Composer et Node.js 22.12 ou supérieur :
+L’archive d’installation suffit pour commencer. Si vous partez des sources du CMS, placez une copie du dépôt [KraftInk automation](https://github.com/Kraftink-CMS/automation) dans le dossier voisin `automation/`. Lancez ces commandes depuis la racine du CMS avec Composer 2 et Node.js 24 ou supérieur.
 
 ```shell
-composer install
-npm ci
-npm run build
+composer install --working-dir=../automation/scripts/releases/php-scoper --no-interaction --prefer-dist --no-scripts --no-plugins
+composer setup
 ```
+
+`composer setup` prépare les paquets intégrés qui utilisent des bibliothèques PHP privées, installe les dépendances du CMS et compile les ressources web. Sous Windows, renseignez `COMPOSER_BINARY` avec le chemin absolu de `composer.phar` avant de lancer la commande.
 
 Faites servir `public/` par votre serveur local puis terminez l’assistant. Utilisez cette adresse dans `APP_URL` et dans les réglages du site. Après une modification de `.env`, lancez `php artisan config:clear`.
 

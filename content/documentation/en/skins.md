@@ -6,9 +6,10 @@ On a site configured for Minecraft, install **Skins** from **Plugins**. Members 
 
 Open **Extensions → Skins and capes** in the admin panel. Each section saves separately.
 
-- **Website textures** controls capes and publication of new PNGs. Capes start enabled and new files start private. Enable publication when a launcher or external website needs to read PNGs without signing in. Only files uploaded while the option is active are published. Turning publication off blocks public access to those files while the option remains off.
-- **Default website skin** lets you upload a PNG, choose its model and turn on the fallback. Public requests for a missing or private skin then use this default. To remove the stored PNG, turn off the fallback and select **Remove the stored skin** before saving.
-- **In-game application** controls synchronization separately. It starts enabled. Turning it off pauses synchronization while members can still manage their website files. Servers retain textures already applied.
+- In **Website textures**, **Allow custom skins** and **Allow custom capes** start enabled. Turn off a type to suspend uploads, previews and access to those files on the website and in launchers. Existing files stay saved, and their owners can remove them from their profile.
+- **Publish new uploads** makes future PNGs available to anyone with the link. Files are private by default. Turning publication on keeps existing private files private. Turning it off also pauses public access to previously published files.
+- **Default website skin** lets you upload a PNG, choose its model and turn on the fallback. This skin stays available when custom skins are disabled. It is reserved for previews, website avatars and compatible launchers. To remove its PNG, turn off the fallback and select **Remove the stored skin** before saving.
+- **In-game application** starts enabled. Turn it off to pause synchronization and retain skins already applied on the servers. While synchronization is active, turning off custom skins suspends new applications. KraftLink then clears the skin it manages the next time it checks in while the player is online.
 
 PHP GD is required to generate face and body images. With GD available, choose **Published skin face** (`skins`) under **Settings → Avatars** to use the face of a public skin. The configured default can supply the face when no public skin is available.
 
@@ -25,9 +26,9 @@ SkinsRestorer sends skin PNGs to MineSkin for signing. Set `api.mineskinSecretSk
 
 Open the **Skins and capes** section of your **Profile**. Upload a PNG skin of 64 × 64 or 64 × 32 pixels and choose the classic or slim model. For a cape, upload a PNG of 64 × 32 or 22 × 17 pixels. Each file can be up to 32 KiB. Use the preview to check the texture before saving.
 
-The form explains whether new files stay private or are published under the site's settings. Under each saved file, the profile shows its status and gives you its link if the file is public. Anyone with that link can open the image. Each file can be removed separately.
+Under each saved file of an allowed type, the profile shows its status and provides a link if the file is publicly accessible. The note at the bottom of the form explains the site's privacy settings. You can remove the skin and cape separately.
 
-When you save a new skin or change its model, it applies automatically on servers allowed by an administrator. Join with your verified Java profile. Cape PNGs are for the website and compatible launchers.
+When you save a new skin or change its model, it applies automatically if custom skins are allowed and the server participates in synchronization. Join with your verified Java profile. Cape PNGs are for the website and compatible launchers.
 
 Remove the saved skin to return to the appearance SkinsRestorer provides on the server. When you are online, KraftLink clears its own skin selection if it is still active. Server settings are managed in the admin panel.
 
@@ -41,7 +42,7 @@ Use the player’s Java UUID, Minecraft username or `id-<CMS user ID>` as `{play
 | `GET /api/skins/profiles/{player}/textures/{kind}.png` | PNG for `skin` or `cape`. |
 | `GET /api/skins/profiles/{player}/renders/{view}.png` | Rendered PNG for `face`, `body` or `combo`. Requires PHP GD. |
 
-Public requests use shared files. When a skin is private or absent, the API can return the configured default skin. A missing cape returns 404 at its image URL. The profile request returns 404 when neither texture is available.
+Public requests use shared files of allowed types. When a skin is private, missing or disabled, the API can return the configured default skin. The image URL for an unavailable cape returns 404. The profile request returns 404 when neither texture is available.
 
 ## Connect a launcher
 
@@ -54,4 +55,4 @@ Enable **Application connections** in KraftInk and use an up-to-date CMS. Send a
 | `POST /api/skins/me/textures/{kind}` | `skins:write` | Stores the PNG and returns 204. |
 | `GET /api/auth/me` | `profile:read` and `skins:read` | Includes Skins metadata in `data.user.extensions.skins` for members with a verified Java profile and permission to use Skins. |
 
-Send uploads as `multipart/form-data`. Use the `skin` field for `/textures/skin` or `cape` for `/textures/cape`. When uploading a skin, you can also send `variant` as `classic` or `slim`. The same dimensions, file limits and publication setting apply as on the website.
+Send uploads as `multipart/form-data`. Use the `skin` field for `/textures/skin` or `cape` for `/textures/cape`. When uploading a skin, you can also send `variant` as `classic` or `slim`. The same dimensions, file limits and publication setting apply as on the website. For a disabled type, uploads return 404 and personal reads hide the member's file. A skin request can return the fallback skin.
