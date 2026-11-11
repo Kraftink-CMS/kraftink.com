@@ -35,9 +35,15 @@ export function findMarketResource(resources: CatalogueResource[] | undefined, r
     return resources?.find((resource) => resource.type === route.type && resource.id === route.id);
 }
 
-export function marketResourcePath(resource: Pick<CatalogueResource, 'author' | 'slug' | 'type'>): string {
+export function marketResourcePath(
+    resource: Pick<CatalogueResource, 'slug' | 'type'> & { author: Pick<CatalogueResource['author'], 'id'> },
+): string {
     const author = resource.author.id === officialMarketAuthor ? '' : `${resource.author.id}/`;
     return `/market/${resource.type}s/${author}${resource.slug}`;
+}
+
+export function officialPluginPath(slug: string): string {
+    return marketResourcePath({ author: { id: officialMarketAuthor }, slug, type: 'plugin' });
 }
 
 export const accountTabs = ['purchases', 'orders', 'site', 'profile'] as const;

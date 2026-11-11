@@ -6,6 +6,7 @@ import { HomePage } from './pages/landing/HomePage';
 import { FeaturesPage } from './pages/landing/FeaturesPage';
 import { AboutPage } from './pages/landing/AboutPage';
 import { DownloadsPage } from './pages/landing/DownloadsPage';
+import { GamePage } from './pages/landing/GamePage';
 import { MarketPage } from './pages/market/MarketPage';
 import { ResourcePage } from './pages/market/ResourcePage';
 import { CheckoutReturnPage } from './pages/market/CheckoutReturnPage';
@@ -19,8 +20,11 @@ import { ModerationPage } from './pages/moderation/ModerationPage';
 import { AnnouncementsPage } from './pages/admin/AnnouncementsPage';
 import { StatisticsPage } from './pages/admin/StatisticsPage';
 import { LegalPage } from './pages/legal/LegalPage';
+import { gamePageRoutes } from '../shared/games';
 import { marketResourceRoutes, matchProtectedPage, protectedPages, type PrivatePage } from '../shared/routes';
 import type { ReactNode } from 'react';
+
+const gamePageSlugs = [...new Set(gamePageRoutes.map(({ slug }) => slug))];
 
 const privatePages = {
     'account': <AccountPage />,
@@ -63,6 +67,9 @@ export function App() {
                 <Route path="verify-email" element={<AuthPage mode="verify" />} />
                 {protectedPages.map(({ path }) => (
                     <Route key={path} path={path} element={<PrivateRoute />} />
+                ))}
+                {gamePageSlugs.map((slug) => (
+                    <Route key={slug} path={slug} caseSensitive element={<GamePage />} />
                 ))}
                 <Route path="*" element={<NotFoundPage />} />
             </Route>

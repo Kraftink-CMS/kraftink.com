@@ -6,6 +6,7 @@ import { pageMetadata, localizedPagePath } from '../src/lib/metadata';
 import type { PageData, PublicPageData } from '../src/lib/rendering';
 import type { Guide } from '../src/lib/documentation';
 import { isLocale, localeRegistry, localizedPathname } from '../shared/locales';
+import { gamePageRoutes, unprefixedGamePagePath } from '../shared/games';
 import { fail, sessionCookieName, type AppContext } from './http';
 import { getCookie } from 'hono/cookie';
 import { resolveSession, sessionData } from './middleware/authentication';
@@ -157,6 +158,10 @@ function responseHeaders(indexable: boolean, status: number, personalized: boole
 
 export async function renderPage(c: AppContext): Promise<Response> {
     const url = new URL(c.req.url);
+    const gamePath = unprefixedGamePagePath(url.pathname);
+    if (gamePath) {
+        return c.redirect(new URL(`${gamePath}${url.search}`, c.env.APP_ORIGIN).href, 301);
+    }
     await resolveSession(c);
     const session = sessionData(c);
     const localePath = localizedPathname(url.pathname === '/index.html' ? '/' : url.pathname, session.preferredLocale)
@@ -304,9 +309,12 @@ export function robots(env: Env): Response {
 export async function sitemap(env: Env): Promise<Response> {
     const origin = new URL(env.APP_ORIGIN).origin;
     const locales = Object.keys(localeRegistry);
-    const urls = new Set(
-        locales.flatMap((locale) => publicPaths.map((path) => new URL(localizedPagePath(locale, path), origin).href)),
-    );
+    const urls = new Set([
+        ...locales.flatMap((locale) =>
+            publicPaths.map((path) => new URL(localizedPagePath(locale, path), origin).href),
+        ),
+        ...gamePageRoutes.map(({ pathname }) => new URL(pathname, origin).href),
+    ]);
     const [documents, catalogue] = await Promise.all([
         bounded((signal) =>
             Promise.all(

@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
-import { bundledGames } from '../../../shared/games';
+import { bundledGameIds, bundledGames, gamePagePath } from '../../../shared/games';
 import { useLocale, useSiteCopy } from '../../lib/i18n';
 
 export function Compatibility() {
     const copy = useSiteCopy();
-    const { path } = useLocale();
+    const { locale, path } = useLocale();
     return (
         <>
             <section className="product-compatibility" aria-labelledby="games-title">
@@ -14,8 +14,10 @@ export function Compatibility() {
                     <Link to={path('/documentation/games')}>{copy.landing.gamesLink}</Link>
                 </div>
                 <ul className="supported-games">
-                    {bundledGames.map((game) => (
-                        <li key={game}>{game}</li>
+                    {bundledGameIds.map((game) => (
+                        <li key={game}>
+                            <Link to={gamePagePath(locale, game)}>{bundledGames[game].name}</Link>
+                        </li>
                     ))}
                 </ul>
             </section>

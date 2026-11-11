@@ -11,7 +11,7 @@ import { useSession } from '../../lib/session';
 import { commonMessages, publicMessages } from '../../lib/translations';
 import { resourcePrice } from '../../lib/catalogue';
 import { LegalNotice } from '../../components/legal/LegalNotice';
-import { bundledGameNames } from '../../../shared/games';
+import { bundledGames, isBundledGame } from '../../../shared/games';
 import { discordUrl, externalLinkRel } from '../../../shared/links';
 import { findMarketResource, marketResourcePath, matchMarketResourceRoute } from '../../../shared/routes';
 import { NotFoundPage } from '../NotFoundPage';
@@ -21,8 +21,8 @@ function GameBadges({ games }: { games: string[] }) {
         <span className="d-inline-flex flex-wrap gap-2">
             {games.map((game) => (
                 <span className="badge text-bg-light" key={game}>
-                    {Object.hasOwn(bundledGameNames, game)
-                        ? bundledGameNames[game]
+                    {isBundledGame(game)
+                        ? bundledGames[game].name
                         : game[0].toUpperCase() + game.slice(1).replaceAll('-', ' ')}
                 </span>
             ))}

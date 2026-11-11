@@ -1,4 +1,4 @@
-import { bundledGames } from '../../../shared/games';
+import { bundledGameIds } from '../../../shared/games';
 
 export default {
     'siteName': 'KraftInk',
@@ -33,7 +33,7 @@ export default {
             'Optional plugins',
             'Themes and a built-in layout',
             'Game server connections with KraftLink',
-            `${bundledGames.length} supported games`,
+            `${bundledGameIds.length} supported games`,
             '5 languages for the website and panel',
         ],
         'guidesTitle': 'Getting started',
@@ -312,7 +312,7 @@ export default {
                     'Optional plugins',
                     'Customisable themes',
                     'KraftLink connector',
-                    `${bundledGames.length} built-in game modules`,
+                    `${bundledGameIds.length} built-in game modules`,
                 ],
                 'admin-plugins.png',
                 'extensions-catalogue',
@@ -343,7 +343,7 @@ export default {
     },
     'about': {
         'title': 'About KraftInk',
-        'description': `KraftInk is an open-source CMS for creating and managing a game server website on your own hosting. It supports ${bundledGames.length} games, with the website and panel available in French, English, Spanish, German and Portuguese.`,
+        'description': `KraftInk is an open-source CMS for creating and managing a game server website on your own hosting. It supports ${bundledGameIds.length} games, with the website and panel available in French, English, Spanish, German and Portuguese.`,
         'statusTitle': 'The KraftInk CMS',
         'status':
             'The core manages accounts, permissions and content. Plugins add community features, while themes define the presentation.',

@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'reac
 import { Select } from '../components/Select';
 import { useLocale, useSiteCopy } from '../lib/i18n';
 import { isLocale, localeRegistry } from '../../shared/locales';
+import { gamePagePath, matchGamePage } from '../../shared/games';
 import { useSession } from '../lib/session';
 import { commonMessages, legalMessages, statisticsMessages } from '../lib/translations';
 import { LocaleRedirect } from '../routing/LocaleRedirect';
@@ -113,14 +114,14 @@ export function SiteLayout() {
                                     onChange={(event) => {
                                         const next = event.target.value;
                                         if (isLocale(next) && next !== locale) {
+                                            const game = matchGamePage(location.pathname);
+                                            const target = game
+                                                ? gamePagePath(next, game)
+                                                : `/${next}${relative ? '/' + relative : ''}`;
                                             setLocaleSaving(true);
                                             setLocaleError(null);
                                             void changeLocale(next)
-                                                .then(() =>
-                                                    navigate(
-                                                        `/${next}${relative ? '/' + relative : ''}${location.search}${location.hash}`,
-                                                    ),
-                                                )
+                                                .then(() => navigate(`${target}${location.search}${location.hash}`))
                                                 .catch(setLocaleError)
                                                 .finally(() => setLocaleSaving(false));
                                         }

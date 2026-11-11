@@ -1,4 +1,5 @@
 import { fallbackLocale, localeRegistry } from '../../shared/locales';
+import type { BundledGameId } from '../../shared/games';
 
 const modules = import.meta.glob('../lang/*/*.ts', { eager: true }) as Record<string, { default: unknown }>;
 
@@ -34,16 +35,16 @@ function merge(fallback: unknown, translation: unknown): unknown {
     return translation;
 }
 
-export function loadNamespace<T>(namespace: string): Record<string, T> {
+export function loadNamespace<T>(namespace: string, { inheritMissingKeys = true } = {}): Record<string, T> {
     const fallback = modules[`../lang/${fallbackLocale}/${namespace}.ts`]?.default;
     if (!fallback) {
         throw new Error(`Missing fallback translation namespace: ${namespace}`);
     }
     return Object.fromEntries(
-        Object.keys(localeRegistry).map((locale) => [
-            locale,
-            merge(fallback, modules[`../lang/${locale}/${namespace}.ts`]?.default) as T,
-        ]),
+        Object.keys(localeRegistry).map((locale) => {
+            const translation = modules[`../lang/${locale}/${namespace}.ts`]?.default;
+            return [locale, (inheritMissingKeys ? merge(fallback, translation) : (translation ?? fallback)) as T];
+        }),
     );
 }
 
@@ -58,6 +59,29 @@ type LegalCopy = typeof import('../lang/en/legal').default;
 type TwoFactorCopy = typeof import('../lang/en/two-factor').default;
 type StatisticsCopy = typeof import('../lang/en/statistics').default;
 
+type OfficialPluginSlug = 'shop' | 'vote' | 'forum' | 'wiki' | 'support' | 'stats' | 'skins';
+
+interface GamePageCopy {
+    title: string;
+    description: string;
+    intro: string;
+    highlights: string[];
+    features: { title: string; description: string }[];
+    plugins: { slug: OfficialPluginSlug; description: string }[];
+    setup: string;
+}
+
+export interface GameCopy {
+    highlightsTitle: string;
+    pluginsTitle: string;
+    pluginNames: Record<OfficialPluginSlug, string>;
+    setupTitle: string;
+    guideLink: string;
+    installationLink: string;
+    backLink: string;
+    pages: Record<BundledGameId, GamePageCopy>;
+}
+
 export const commonMessages = loadNamespace<CommonCopy>('common');
 export const accountCopy = loadNamespace<AccountCopy>('account');
 export const publicMessages = loadNamespace<PublicCopy>('public');
@@ -67,3 +91,4 @@ export const siteMessages = loadNamespace<SiteCopy>('site');
 export const legalMessages = loadNamespace<LegalCopy>('legal');
 export const twoFactorMessages = loadNamespace<TwoFactorCopy>('two-factor');
 export const statisticsMessages = loadNamespace<StatisticsCopy>('statistics');
+export const gameMessages = loadNamespace<GameCopy>('games', { inheritMissingKeys: false });
