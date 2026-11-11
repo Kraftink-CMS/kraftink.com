@@ -4,7 +4,7 @@ Cette API permet à un connecteur de gérer les comptes et soldes depuis le jeu.
 
 ## Obtenir un accès dédié
 
-Le responsable crée une clé dans **Serveurs → Gérer la liaison → Accès aux comptes et soldes**, avec les seules opérations nécessaires. Le serveur doit utiliser KraftLink, être activé et appartenir au jeu actif. La clé complète apparaît une fois. Gardez-la dans la configuration privée du connecteur. Elle est distincte des jetons de livraison et des sessions [launcher](auth-api.md).
+Dans **Serveurs et jeux → Serveurs de jeux**, cliquez sur **Gérer la liaison** pour le serveur, puis ouvrez **Accès aux comptes et soldes**. Créez une clé avec les seules opérations nécessaires. Le serveur doit utiliser KraftLink, être activé et appartenir au jeu actif. La clé complète apparaît une fois. Gardez-la dans la configuration privée du connecteur. Elle est distincte des jetons de livraison et des sessions [launcher](auth-api.md).
 
 Les droits de son créateur sont revérifiés à chaque appel. Une révocation, une expiration, un changement de sécurité du créateur ou la perte des permissions nécessaires invalide l’accès. Les comptes propriétaires, administrateurs, bannis, anonymisés, verrouillés à l’import ou soumis au renouvellement du mot de passe ne sont pas des cibles de cette API.
 

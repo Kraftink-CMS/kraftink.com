@@ -1,6 +1,6 @@
 # Authentifier une application
 
-Cette API connecte un membre depuis un launcher ou une application. Le propriétaire active **Connexion des applications** dans `/admin/settings/api`. Utilisez HTTPS, JSON et `Authorization: Bearer <jeton>` pour les requêtes authentifiées.
+Cette API permet aux membres de se connecter depuis un lanceur ou une autre application. Activez-la dans **Sécurité et accès → Connexion des applications**. Utilisez HTTPS, JSON et `Authorization: Bearer <jeton>` pour les requêtes authentifiées.
 
 ## Obtenir un jeton personnel
 

@@ -4,8 +4,8 @@ KraftLink sends a server’s status and online players to KraftInk, then retriev
 
 ## Creating the connection in the CMS
 
-1. Enable the matching game in **Games and identities**.
-2. In **Servers → Game servers**, add a server using **KraftLink**.
+1. Enable the matching game in **Servers and games → Games and identities**.
+2. In **Servers and games → Game servers**, add a server using **KraftLink**.
 3. Enter the address and port of the server to connect, without `https://`.
 4. In **Manage connection → Connection token**, create and copy a token. It is shown once.
 
@@ -23,7 +23,7 @@ In-game sign-in and AuthMe each use the connection selected in their settings. W
 
 ## Installing the connector
 
-Download the universal `KraftLink.jar` or your platform's variant from [KraftLink releases](https://github.com/kraftink-cms/KraftLink/releases). Starting with KraftLink 1.4.1, the universal JAR covers every platform in the table.
+Download the universal `KraftLink.jar` or your platform's variant from [KraftLink releases](https://github.com/kraftink-cms/KraftLink/releases). Starting with KraftLink 1.5.0, the universal JAR covers every platform in the table.
 
 | Platform | Variant | Installation directory |
 | --- | --- | --- |
@@ -81,7 +81,7 @@ Update KraftLink on every Nukkit server that should receive commands for a verif
 
 ## Sync Minecraft Java skins
 
-Install SkinsRestorer 15.12.6 or a compatible version from the 15 series on a Bukkit, Paper or Folia server running KraftLink. In **Extensions → Skins and capes**, check the integration and allow automatic application for that server. Members save their skin in their profile, then join with their verified Minecraft Java account. [Use skins and capes](skins.md)
+Install the [Skins plugin](skins.md) on the site. On a Bukkit, Paper or Folia server running KraftLink, install SkinsRestorer 15.12.6 or a compatible version from the 15 series. In **Extensions → Skins and capes**, check the integration and allow automatic application for that server. Members save their skin in their profile, then join with their verified Minecraft Java account.
 
 ## Set polling intervals
 
@@ -97,7 +97,7 @@ Use `operation_poll_seconds` to override the interval of an operation added by a
 
 ## Testing a command
 
-On a Minecraft server connected through KraftLink, allow `say`, then send `say KraftLink is connected` from **Manage connection → Deferred console**, without a player or online requirement. Check the result in the game and panel history.
+On a Minecraft server connected through KraftLink, allow `say`, then send `say KraftLink is connected` from **Manage connection → Queued console**, without a player or online requirement. Check the result in the game and panel history.
 
 For a reward, select the destination server and a test player. `{player}` and `{uuid}` use their game identity. The online requirement keeps the command pending until the player joins that server.
 

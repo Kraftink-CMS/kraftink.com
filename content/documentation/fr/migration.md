@@ -1,6 +1,6 @@
 # Importer un ancien site
 
-**Administration → Imports** reprend les données reconnues d’une source KraftInk, Azuriom ou MineWeb historique. Le rapport de l’assistant indique les conversions disponibles et ce qui restera seulement archivé.
+Ouvrez **Administration → Mises à jour et imports → Importer un site** pour transférer les données d’un site KraftInk, Azuriom ou MineWeb historique. Le rapport de l’assistant indique les conversions disponibles et les données conservées dans l’archive privée.
 
 ## Préparer et lancer l’import
 
@@ -46,4 +46,4 @@ Les secrets SMTP, OAuth, paiements et connexions de jeu sont à reconfigurer. Ce
 
 Ouvrez **Consulter le rapport** pour retrouver les éléments à reprendre et télécharger le bilan JSON. Contrôlez les comptes, permissions, montants, liens et images avant de publier les contenus. Les anciennes commandes, récompenses et paiements ne sont pas rejoués.
 
-Un import interrompu se reprend depuis le panneau. Conservez `.env` et les archives privées de `storage/app/private/imports/` jusqu’à validation du transfert.
+Si l’import s’interrompt, ouvrez **Reprendre cet import** dans le panneau. Conservez `.env` et les archives privées de `storage/app/private/imports/` jusqu’à validation du transfert.

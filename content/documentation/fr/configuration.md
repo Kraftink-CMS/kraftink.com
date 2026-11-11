@@ -46,7 +46,7 @@ Décochez **Afficher le nombre de joueurs en ligne** pour conserver l’adresse 
 
 ## E-mails
 
-Dans **E-mails et fonctionnement**, renseignez les paramètres SMTP de votre prestataire et une adresse d’expéditeur autorisée. Sendmail est également disponible si l’hébergement le fournit.
+Dans **Réglages → E-mails et fonctionnement**, renseignez les paramètres SMTP de votre prestataire et une adresse d’expéditeur autorisée. Sendmail est également disponible si l’hébergement le fournit.
 
 Enregistrez, envoyez un e-mail de test et vérifiez sa réception, y compris dans les indésirables. Ajoutez les entrées DNS SPF ou DKIM demandées par le prestataire. Un mot de passe laissé vide conserve sa valeur enregistrée.
 

@@ -1,6 +1,6 @@
 # Référencement et partage
 
-KraftInk prépare les métadonnées des pages à partir de leur titre, résumé et couverture. **Présentation → Référencement SEO** permet d’adapter ce résultat pour l’accueil, les listes et les pages de détail.
+Dans l’administration, ouvrez **Apparence → Référencement SEO** pour personnaliser les titres, les descriptions et les images utilisés quand vos pages apparaissent dans les résultats de recherche ou sont partagées.
 
 ## Valeurs automatiques
 
@@ -10,7 +10,7 @@ Pour les pages et actualités, l’aperçu de l’éditeur suit la saisie sans e
 
 ## Personnaliser les modèles
 
-Les réglages généraux définissent la structure des titres, le modèle de description et l’image de partage. Dans l’onglet des pages, choisissez une destination pour remplacer ses valeurs.
+Dans **Général**, réglez la structure des titres, le modèle des descriptions et l’image de partage par défaut. Pour personnaliser l’accueil, une liste ou une page en particulier, ouvrez **Pages**, choisissez une page du site et cliquez sur **Afficher**.
 
 | Réglage | Exemple avec le site « Eden » |
 | --- | --- |

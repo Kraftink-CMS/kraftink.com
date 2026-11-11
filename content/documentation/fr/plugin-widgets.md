@@ -1,6 +1,6 @@
 # Widgets configurables
 
-Un widget est un bloc que le propriétaire place et configure dans **Présentation → Widgets**. L’accueil natif propose la zone `home`. Plusieurs instances du même widget peuvent avoir des réglages différents.
+Un widget est un bloc que le propriétaire place et configure dans **Apparence → Widgets**. L’accueil natif propose la zone `home`. Plusieurs instances du même widget peuvent avoir des réglages différents.
 
 ## Définir le widget
 

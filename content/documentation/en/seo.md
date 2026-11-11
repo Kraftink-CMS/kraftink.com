@@ -1,6 +1,6 @@
 # SEO and sharing
 
-KraftInk builds page metadata from titles, summaries and covers. **Presentation → SEO** lets you adjust this for the home page, lists and detail pages.
+In the admin panel, open **Appearance → Search engine optimisation** to customise the titles, descriptions and images used when your pages appear in search results or are shared.
 
 ## Automatic values
 
@@ -10,7 +10,7 @@ For pages and news, the editor preview follows your input without saving the dra
 
 ## Customising patterns
 
-General settings define title structure, description pattern and sharing image. In the pages tab, select a destination to override its values.
+Under **General**, set the default title structure, description pattern and sharing image. To customise the home page, a listing or a specific page, open **Pages**, choose a site page and click **Show**.
 
 | Setting | Example for a site named “Eden” |
 | --- | --- |
