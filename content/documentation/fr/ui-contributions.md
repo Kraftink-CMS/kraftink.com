@@ -52,6 +52,17 @@ Un thème peut définir un emplacement avec `<x-extensions.slot name="example.ar
 
 Les [widgets](plugin-widgets.md) permettent au propriétaire de placer, configurer et réordonner des blocs depuis le panneau. Utilisez les slots pour les contributions fixes.
 
+## Icônes configurables
+
+Sur les versions de KraftInk qui prennent en charge les [bibliothèques d’icônes des thèmes](developpement-themes.md#bibliotheque-d-icones), utilisez le sélecteur du panneau dans vos formulaires.
+
+```blade
+<x-admin::icon-picker id="category-icon" name="icon"
+    :label="__('example::messages.icon')" :value="old('icon', $category?->icon)" />
+```
+
+Validez la clé avec `App\Kraft\ContentIcons::validName()`. Elle commence par une lettre minuscule ou un chiffre et accepte les lettres minuscules, les chiffres et les tirets, jusqu’à 60 caractères. Gardez les clés déjà enregistrées lorsque le catalogue du thème actif change. Affichez l’icône avec `<x-content-icon :name="$category->icon" />` pour utiliser le même catalogue et le repli Bootstrap Icons.
+
 ## Formulaires AJAX
 
 Ajoutez `data-ajax="true"` à un formulaire POST conservant son action Laravel et son jeton CSRF :

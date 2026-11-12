@@ -202,3 +202,28 @@ A public theme can add menu locations:
 ```
 
 Filtered trees are available in `$themeMenus['mobile']`, using the same format as `$headerLinks`. Links survive theme changes. For blocks the owner can move, use [widgets](plugin-widgets.md).
+
+## Icon library
+
+On a version of KraftInk with an icon picker, a `site` theme can supply its own catalogue. Add the optional `icons` block to `manifest.json`.
+
+```json
+"icons": {
+    "id": "font-awesome",
+    "name": "Font Awesome",
+    "catalog": "icons.json"
+}
+```
+
+Place `icons.json` in the theme root. The catalogue maps each key stored by KraftInk to the name shown in the picker and the path to an SVG relative to `public/`.
+
+```json
+{
+    "house": {"name": "house", "asset": "icons/house.svg"},
+    "people": {"name": "users", "asset": "icons/users.svg"}
+}
+```
+
+Place the matching SVGs in `public/icons/` and distribute their licence with the theme. KraftInk applies the surrounding text colour to the SVG shapes. The admin picker shows the library name and icon previews. Reuse existing keys where the meaning matches. For example, KraftInk keeps `people` as the stored value and displays the `users` icon while this theme is active.
+
+Use `<x-content-icon :name="$link['icon']" />` in your views for configurable icons. When the catalogue has no entry for a key, the component tries Bootstrap Icons. The stored value is kept when the active theme changes.

@@ -60,6 +60,14 @@ Lorsque le choix de langue des visiteurs est activé, les formulaires proposent 
 
 Le [guide du référencement](seo.md) explique les titres et descriptions produits automatiquement et leurs personnalisations.
 
+## Icônes du site
+
+Si votre version de KraftInk propose un sélecteur d’icônes, ouvrez **Apparence → Navigation**, ajoutez ou modifiez un lien, puis dépliez **Options du lien**. Cherchez une icône par nom et sélectionnez son aperçu. Les formulaires des rangs et des réseaux sociaux utilisent le même sélecteur.
+
+Les choix suivent la bibliothèque du thème public actif. KraftInk utilise Bootstrap Icons si le thème ne fournit pas de catalogue. En changeant de thème, vous gardez vos choix enregistrés. Si une icône manque dans le nouveau catalogue, KraftInk recherche la même clé dans Bootstrap Icons. Le sélecteur signale les icônes indisponibles.
+
+Sur une version qui affiche encore un champ Bootstrap Icons, saisissez le nom de l’icône sans `bi-`, par exemple `house`.
+
 ## Images et médiathèque
 
 Dans **Contenus → Médiathèque**, choisissez **Ajouter l’image** pour la réutiliser dans vos pages et actualités. La médiathèque accepte les fichiers JPEG, PNG, WebP, GIF et AVIF de 8 Mo maximum par défaut. Ajoutez un texte alternatif qui décrit l’image pour les personnes qui ne peuvent pas la voir.

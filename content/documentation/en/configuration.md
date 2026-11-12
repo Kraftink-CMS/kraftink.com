@@ -60,6 +60,14 @@ When visitors can choose a language, forms offer optional translations for your 
 
 The [SEO guide](seo.md) explains automatic page titles and descriptions and how to customise them.
 
+## Site icons
+
+If your version of KraftInk has an icon picker, open **Appearance → Navigation**, add or edit a link, then expand **Link options**. Search by icon name and select its preview. The forms for roles and social links use the same picker.
+
+The choices follow the active public theme’s icon library. KraftInk uses Bootstrap Icons if the theme supplies no catalogue. Switching themes keeps your saved choices. If an icon is missing from the new catalogue, KraftInk looks for the same key in Bootstrap Icons. The picker indicates unavailable icons.
+
+On a version that still displays a Bootstrap Icons field, enter the icon name without `bi-`, such as `house`.
+
 ## Images and media library
 
 In **Content → Media library**, choose **Upload image** to reuse it in pages and news posts. The media library accepts JPEG, PNG, WebP, GIF and AVIF files up to 8 MB by default. Add alternative text describing the image for people who cannot see it.
