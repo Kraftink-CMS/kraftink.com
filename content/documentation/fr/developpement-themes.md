@@ -202,3 +202,28 @@ Un thème public peut ajouter des emplacements de menus :
 ```
 
 Leurs arbres filtrés sont accessibles dans `$themeMenus['mobile']`, au même format que `$headerLinks`. Les liens sont conservés lors d’un changement de thème. Pour des blocs déplaçables par le propriétaire, utilisez les [widgets](plugin-widgets.md).
+
+## Bibliothèque d’icônes
+
+Sur une version de KraftInk qui propose un sélecteur d’icônes, un thème `site` peut fournir son catalogue. Dans `manifest.json`, ajoutez le bloc facultatif `icons`.
+
+```json
+"icons": {
+    "id": "font-awesome",
+    "name": "Font Awesome",
+    "catalog": "icons.json"
+}
+```
+
+Placez `icons.json` à la racine du thème. Le catalogue associe chaque clé enregistrée par KraftInk au nom affiché dans le sélecteur et au chemin d’un SVG relatif à `public/`.
+
+```json
+{
+    "house": {"name": "house", "asset": "icons/house.svg"},
+    "people": {"name": "users", "asset": "icons/users.svg"}
+}
+```
+
+Placez les SVG correspondants dans `public/icons/` et distribuez leur licence avec le thème. KraftInk applique la couleur du texte aux formes du SVG. Le sélecteur de l’administration affiche le nom de la bibliothèque et les aperçus. Réutilisez les clés existantes quand leur sens correspond. Par exemple, `people` continue d’être la valeur enregistrée et prend le visuel `users` lorsque ce thème est actif.
+
+Dans vos vues, utilisez `<x-content-icon :name="$link['icon']" />` pour les icônes configurables. Si le catalogue ne contient pas la clé, le composant essaie de la résoudre dans Bootstrap Icons. La valeur enregistrée reste disponible lors d’un changement de thème.

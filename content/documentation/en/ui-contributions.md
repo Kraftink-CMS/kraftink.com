@@ -52,6 +52,17 @@ A theme can define a slot with `<x-extensions.slot name="example.area" :context=
 
 Use [widgets](plugin-widgets.md) for blocks the owner can place, configure and reorder in the panel. Use slots for fixed contributions.
 
+## Configurable icons
+
+On versions of KraftInk that support [theme icon libraries](developpement-themes.md#icon-library), use the panel picker in your forms.
+
+```blade
+<x-admin::icon-picker id="category-icon" name="icon"
+    :label="__('example::messages.icon')" :value="old('icon', $category?->icon)" />
+```
+
+Validate the key with `App\Kraft\ContentIcons::validName()`. It starts with a lowercase letter or digit and accepts lowercase letters, digits and hyphens, up to 60 characters. Keep saved keys when the active theme’s catalogue changes. Render the icon with `<x-content-icon :name="$category->icon" />` to use the same catalogue and Bootstrap Icons fallback.
+
 ## AJAX forms
 
 Add `data-ajax="true"` to a POST form while retaining its Laravel action and CSRF token:
